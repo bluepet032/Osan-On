@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from pipeline.config import load_taxonomy
 from pipeline.history import reconcile_history
 from pipeline.models import RawOpportunity, SourceRecord
 from pipeline.normalize import normalize
@@ -24,7 +23,7 @@ def make(now: datetime, *, end: str = "2026-08-31"):
         recruit_end=end,
         date_kind="exact",
         collected_at=now.isoformat(timespec="seconds"),
-    ), load_taxonomy(), now)
+    ), now)
 
 
 def test_same_item_keeps_first_seen_and_is_not_marked_changed():

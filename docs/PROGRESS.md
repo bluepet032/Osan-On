@@ -102,9 +102,9 @@
   - 분야 탭과 겹치던 "모든 세부 분야" 선택 상자를 없앴습니다. `field` URL 파라미터와 필터 상태도 함께 지웠습니다(예전 링크의 `field=`는 무시됩니다).
 
 ### 정리하면 좋은 것
-- [ ] `config/taxonomy.yml`과 `load_taxonomy()`는 사실상 쓰지 않습니다(공모전 분류용 잔재). `normalize()`의 `taxonomy` 인자도 함께 정리할 수 있습니다.
-- [ ] `pipeline/collectors/html.py`(범용 HTML 수집기)는 지금 쓰는 출처가 없습니다. 크롤링 출처를 추가하지 않을 거면 삭제할 수 있습니다.
-- [ ] 브라우저 저장 키(`questboard.personal.v1`, `questboard.theme`)와 캘린더 UID(`@questboard`), e2e 파일명 `e2e/questboard.spec.ts`에 옛 이름이 남아 있습니다. 저장 키를 바꾸면 기존 사용자의 브라우저 상태가 사라지므로 바꿀 때는 옮겨 주는 코드가 필요합니다.
+- [x] `config/taxonomy.yml`과 `load_taxonomy()`, `normalize()`·`manual_items()`의 `taxonomy` 인자 삭제 (2026-10-17)
+- [x] 범용 HTML 수집기 `pipeline/collectors/html.py` 삭제 (2026-10-17). gov24·복지로가 쓰던 `with_query`·`dates_from_text`는 `collectors/base.py`로 옮겼고, 수집기가 등록되지 않은 출처는 오류로 처리합니다.
+- [x] 브라우저 저장 키를 `osanon.personal.v1`·`osanon.theme`·`osanon.favorite-import.v1.<uid>`로, 캘린더 UID를 `@osan-on`으로, e2e 파일을 `e2e/osan-on.spec.ts`로 바꿈 (2026-10-17). QuestBoard와 같은 출처(bluepet032.github.io)라 저장 키가 겹쳐서 osanon.*으로 분리함. 옛 값은 대부분 QuestBoard 것이라 옮기지 않음.
 - [ ] Dependabot PR 4개 검토(그중 vite 8 업그레이드는 CI 실패)
 
 ### 데이터 품질

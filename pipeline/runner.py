@@ -6,7 +6,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from pipeline.collectors.registry import create_collector
-from pipeline.config import ROOT, SourceConfig, load_local_env, load_sources, load_taxonomy
+from pipeline.config import ROOT, SourceConfig, load_local_env, load_sources
 from pipeline.dedupe import deduplicate
 from pipeline.dates import months_ago, parse_iso_date, status_for
 from pipeline.facets import FACET_KEYS, facet_coverage
@@ -57,7 +57,6 @@ def run_pipeline(
     load_local_env()
     sources, _ = load_sources()
     enabled_ids = {source.id for source in sources if source.enabled}
-    taxonomy = load_taxonomy()
     old_statuses = previous_statuses(output)
     old_opportunities = previous_opportunities(output)
     opportunities: list[Opportunity] = []
@@ -83,7 +82,7 @@ def run_pipeline(
         coverage_baseline = {key: value for key, value in (coverage_baseline or {}).items() if key in FACET_KEYS} or None
         try:
             raw_items = create_collector(source).collect(current, limit=limits[source.id])
-            normalized_items = [normalize(item, taxonomy, current) for item in raw_items]
+            normalized_items = [normalize(item, current) for item in raw_items]
             opportunities.extend(normalized_items)
             published = sum(item.relevance.decision == "publish" for item in normalized_items)
             review = sum(item.relevance.decision == "review" for item in normalized_items)
@@ -141,7 +140,7 @@ def run_pipeline(
         if source_id in enabled_ids and source_id not in selected_ids:
             statuses.append(CrawlStatus(**{key: value for key, value in item.items() if key in CrawlStatus.__dataclass_fields__}))
 
-    opportunities.extend(manual_items(taxonomy, current))
+    opportunities.extend(manual_items(current))
     items = reconcile_history(apply_overrides(deduplicate(opportunities), now=current), old_opportunities, current)
     current_stamp = current.isoformat(timespec="seconds")
     for status in statuses:

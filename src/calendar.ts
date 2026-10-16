@@ -42,7 +42,7 @@ export function favoritesCalendar(favorites: SavedOpportunity[], now = new Date(
       if (!start || !DATE.test(start) || !end || !DATE.test(end) || end < start) continue
       lines.push(
         'BEGIN:VEVENT',
-        `UID:${id}-${label}@questboard`,
+        `UID:${id}-${label}@osan-on`,
         `DTSTAMP:${stamp}`,
         `DTSTART;VALUE=DATE:${compact(start)}`,
         `DTEND;VALUE=DATE:${compact(nextDay(end))}`,

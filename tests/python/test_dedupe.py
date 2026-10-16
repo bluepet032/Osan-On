@@ -1,7 +1,6 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from pipeline.config import load_taxonomy
 from pipeline.dedupe import deduplicate
 from pipeline.models import RawOpportunity
 from pipeline.normalize import normalize
@@ -23,7 +22,7 @@ def make(source_id: str, url: str, priority: int, *, title: str = "2026 인디�
         recruit_end="2026-08-31",
         date_kind="exact",
         collected_at=NOW.isoformat(),
-    ), load_taxonomy(), NOW)
+    ), NOW)
 
 
 def test_duplicate_sources_merge_and_official_wins():
@@ -85,7 +84,7 @@ def test_similar_tracks_from_one_source_with_distinct_post_ids_stay_separate():
             source_id="dacon", source_name="DACON", source_url=f"https://dacon.io/competitions/official/{post_id}/overview/description",
             source_post_id=post_id, title=title, organizer="DACON", source_kind="specialist", source_priority=60,
             recruit_end="2026-07-15", date_kind="exact", collected_at=NOW.isoformat(),
-        ), load_taxonomy(), NOW)
+        ), NOW)
 
     merged = deduplicate([
         track("236693", "2026 AI·SW중심대학 디지털 경진대회 : SW부문"),
@@ -101,7 +100,7 @@ def test_identically_titled_reposts_on_one_source_still_merge():
             source_id="linkareer", source_name="링커리어", source_url=f"https://linkareer.com/activity/{post_id}",
             source_post_id=post_id, title="2026 SNU X Croche AI 앱 해커톤", organizer="SNU", source_kind="aggregate",
             source_priority=40, recruit_end=end, date_kind="exact", collected_at=NOW.isoformat(),
-        ), load_taxonomy(), NOW)
+        ), NOW)
 
     assert len(deduplicate([post("353364", "2026-10-20"), post("353594", "2026-10-21")])) == 1
 

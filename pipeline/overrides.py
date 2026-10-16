@@ -20,7 +20,7 @@ ALLOWED_FIELDS = {
 KST = ZoneInfo("Asia/Seoul")
 
 
-def manual_items(taxonomy: dict, now: datetime, manual_dir: Path | None = None) -> list[Opportunity]:
+def manual_items(now: datetime, manual_dir: Path | None = None) -> list[Opportunity]:
     directory = manual_dir or ROOT / "manual"
     document = load_yaml(directory / "opportunities.yml")
     results: list[Opportunity] = []
@@ -46,7 +46,7 @@ def manual_items(taxonomy: dict, now: datetime, manual_dir: Path | None = None) 
             location=item.get("location", ""),
             collected_at=now.isoformat(timespec="seconds"),
         )
-        opportunity = normalize(raw, taxonomy, now)
+        opportunity = normalize(raw, now)
         for key in ALLOWED_FIELDS:
             if key in item:
                 setattr(opportunity, key, item[key])
