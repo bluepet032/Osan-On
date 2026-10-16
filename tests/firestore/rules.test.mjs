@@ -5,7 +5,7 @@ import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebas
 import { addDoc, collection, deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
 
 const env = await initializeTestEnvironment({
-  projectId: 'demo-questboard',
+  projectId: 'demo-osan-on',
   firestore: { rules: readFileSync(process.env.RULES_PATH || new URL('../../firestore.rules', import.meta.url), 'utf8'), host: '127.0.0.1', port: 8080 },
 })
 

@@ -29,7 +29,7 @@ npm init -y
 npm install --legacy-peer-deps firebase-tools @firebase/rules-unit-testing firebase@12
 Copy-Item D:\Projects\QuestBoard\tests\firestore\rules.test.mjs .
 $env:RULES_PATH = 'D:\Projects\QuestBoard\firestore.rules'
-npx firebase emulators:exec --only firestore --project demo-questboard "node rules.test.mjs"
+npx firebase emulators:exec --only firestore --project demo-osan-on "node rules.test.mjs"
 ```
 
 마지막 줄에 `20/20 passed`가 나오면 사이트의 저장·수정·삭제는 모두 허용되고, 다른 사용자 접근·알 수 없는 필드·길이 초과는 거부되는 것입니다. 확인 후 폴더는 지워도 됩니다. 같은 검사는 CI(`ci.yml`의 `firestore-rules` job)가 푸시와 PR마다 자동으로 실행합니다.

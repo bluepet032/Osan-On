@@ -66,5 +66,5 @@ jobs:
           npm init -y > /dev/null
           npm install --legacy-peer-deps firebase-tools @firebase/rules-unit-testing firebase@12
           cp "$GITHUB_WORKSPACE/tests/firestore/rules.test.mjs" .
-          RULES_PATH="$GITHUB_WORKSPACE/firestore.rules" npx firebase emulators:exec --only firestore --project demo-questboard "node rules.test.mjs"
+          RULES_PATH="$GITHUB_WORKSPACE/firestore.rules" npx firebase emulators:exec --only firestore --project demo-osan-on "node rules.test.mjs"
 

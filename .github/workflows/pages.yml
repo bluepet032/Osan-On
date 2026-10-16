@@ -13,7 +13,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: questboard-pages
+  group: osan-on-pages
   cancel-in-progress: false
 
 jobs:

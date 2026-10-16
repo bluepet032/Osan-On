@@ -28,7 +28,7 @@ function loadPayload<T>(name: string, now = Date.now()): Promise<DataPayload<T>>
 
 export const clearDataCache = () => {
   cache.clear()
-  window.dispatchEvent(new Event('questboard-data-refresh'))
+  window.dispatchEvent(new Event('osanon-data-refresh'))
 }
 // Status and D-day are recomputed for today on every load; the cached payload stays untouched.
 export const loadOpportunities = async (name: 'active' | 'undated' | 'closed' | 'review'): Promise<DataPayload<Opportunity>> => {

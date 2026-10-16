@@ -63,7 +63,7 @@ def run_pipeline(
     statuses: list[CrawlStatus] = []
     limits: dict[str, int] = {}
 
-    env_names = {name.strip() for name in os.environ.get("QUESTBOARD_SOURCES", "").split(",") if name.strip()}
+    env_names = {name.strip() for name in os.environ.get("OSANON_SOURCES", "").split(",") if name.strip()}
     effective_names = names or env_names or None
     for source in selected_sources(sources, schedule, effective_names):
         started = datetime.now(KST)
