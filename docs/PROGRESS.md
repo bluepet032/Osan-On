@@ -14,9 +14,9 @@
 |---|---|
 | 코드 | P0·P1·P2와 리뷰 반영까지 main에 머지됨 |
 | 사이트 배포 | GitHub Pages(Actions 방식) 배포 성공 |
-| 데이터 | 2026-10-16 로컬에서 수집해 커밋한 1,330건(오산시 38 · 경기도 189 · 중앙 1,103) |
-| 자동 수집 | **아직 GitHub에서 한 번도 실행하지 않음.** Secret이 동작하는지 미확인 |
-| `GOV24_API_KEY` Secret | 등록됨 |
+| 데이터 | 공개 중인 혜택 1,330건(오산시 38 · 경기도 189 · 중앙 1,103), 매일 자동 갱신 |
+| 자동 수집 | 워크플로 활성화, 매일 03:11(KST) 실행. 2026-10-16 첫 GitHub 실행에서 정부24(1,279건)·복지로(103건) 모두 성공 |
+| `GOV24_API_KEY` Secret | 등록됨, 정부24·복지로 수집으로 동작 확인 |
 | Firebase(로그인) | **미설정.** 로그인·찜·알림은 비활성, 검색과 맞춤 판정은 동작 |
 | 테스트 | Python 전체, vitest 95개, Playwright e2e 24개(데스크톱·모바일), PR CI 2개 통과 |
 
@@ -79,11 +79,7 @@
 
 ## 4. 바로 해야 할 일
 
-1. **수집 워크플로를 한 번 실행해 Secret을 확인합니다.**
-   ```bash
-   gh workflow run collect.yml -R bluepet032/Osan-On
-   ```
-   Actions 탭에서 "Collect opportunities" 단계가 성공하고 수집 상태에 정부24와 복지로가 모두 성공으로 나오면 됩니다. 실패하면 Secret 값의 앞뒤 공백과, `GOV24_API_KEY=` 접두어 없이 키만 넣었는지 확인하세요.
+1. ~~수집 워크플로를 한 번 실행해 Secret 확인~~ → 2026-10-16 완료. 이후 수동 수집은 `gh workflow run collect.yml -R bluepet032/Osan-On`
 2. **(선택) Firebase 설정.** 로그인·찜·알림을 데모에서 보여 주려면 필요합니다.
    1. Firebase 프로젝트와 웹 앱을 만듭니다.
    2. Authentication에서 Google 로그인을 켜고, 승인 도메인에 `bluepet032.github.io`를 추가합니다.
