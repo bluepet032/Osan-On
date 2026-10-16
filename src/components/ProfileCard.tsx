@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react'
+import { IconGenderFemale, IconGenderMale } from '@tabler/icons-react'
 import { hasBasics, HOUSEHOLD_OPTIONS, INCOME_OPTIONS, TRAIT_OPTIONS, type IncomeCode, type Profile } from '../eligibility'
 
-interface Props { profile: Profile; onChange: (profile: Profile) => void; synced?: boolean; error?: string }
+interface Props { profile: Profile; onChange: (profile: Profile) => void; synced?: boolean; error?: string; matchCount?: number }
 
 const TRAIT_GROUPS: [string, string[]][] = [
   ['임신·출산', ['JA0301', 'JA0302', 'JA0303']],
@@ -11,7 +12,7 @@ const TRAIT_GROUPS: [string, string[]][] = [
 
 const toggle = (list: string[], code: string) => list.includes(code) ? list.filter(value => value !== code) : [...list, code]
 
-export function ProfileCard({ profile, onChange, synced = false, error = '' }: Props) {
+export function ProfileCard({ profile, onChange, synced = false, error = '', matchCount }: Props) {
   const [editing, setEditing] = useState(!hasBasics(profile))
   const [details, setDetails] = useState(false)
   const [gender, setGender] = useState(profile.gender)
@@ -45,11 +46,11 @@ export function ProfileCard({ profile, onChange, synced = false, error = '' }: P
   if (editing) {
     return (
       <form className="profile-card" onSubmit={submitBasics} aria-label="맞춤 혜택 설문">
-        <div><strong>나에게 맞는 혜택 찾기</strong><p>성별과 나이만 알려 주시면 오산시·경기도·중앙정부 혜택 중 해당할 가능성이 높은 것을 골라 드립니다.</p></div>
+        <div className="profile-intro"><p>안녕하세요, 오산 시민님</p><strong>두 가지만 알려 주시면 오산시·경기도·중앙정부 혜택 중 해당될 가능성이 높은 것을 찾아 드릴게요</strong></div>
         <div className="profile-fields">
           <div role="radiogroup" aria-label="성별" className="profile-gender">
-            <label><input type="radio" name="gender" checked={gender === 'female'} onChange={() => setGender('female')} />여성</label>
-            <label><input type="radio" name="gender" checked={gender === 'male'} onChange={() => setGender('male')} />남성</label>
+            <label><input type="radio" name="gender" checked={gender === 'female'} onChange={() => setGender('female')} /><IconGenderFemale size={20} aria-hidden="true" />여성</label>
+            <label><input type="radio" name="gender" checked={gender === 'male'} onChange={() => setGender('male')} /><IconGenderMale size={20} aria-hidden="true" />남성</label>
           </div>
           <label className="profile-age">만 나이<input type="number" inputMode="numeric" min={0} max={120} value={age} onChange={event => setAge(event.target.value)} /></label>
           <button type="submit" className="primary-button" disabled={!gender || !validAge}>맞춤 혜택 보기</button>
@@ -63,7 +64,10 @@ export function ProfileCard({ profile, onChange, synced = false, error = '' }: P
   return (
     <section className="profile-card" aria-label="내 조건">
       <div className="profile-summary">
-        <strong>{profile.gender === 'male' ? '남성' : '여성'} · 만 {profile.age}세</strong>
+        <div className="profile-headline">
+          <strong>{profile.gender === 'male' ? '남성' : '여성'} · 만 {profile.age}세</strong>
+          {matchCount !== undefined && <p>받을 가능성이 높은 혜택이 <em>{matchCount}개</em> 있어요</p>}
+        </div>
         <button type="button" className="text-button" onClick={() => setEditing(true)}>수정</button>
         <button type="button" className="account-button" onClick={() => setDetails(value => !value)} aria-expanded={details}>더 정확하게</button>
       </div>

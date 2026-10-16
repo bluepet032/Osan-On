@@ -76,7 +76,7 @@ export function PersonalPage() {
   if (!account.user) {
     return (
       <main id="main-content" className="container personal-page">
-        <div className="page-heading"><div><p className="eyebrow">MY BENEFITS</p><h1>내 혜택함</h1><p>찜한 혜택의 신청 일정, 내 조건에 맞는 새 혜택 알림, 맞춤 키워드를 한곳에서 관리합니다.</p></div></div>
+        <div className="page-heading"><div><p className="eyebrow">찜·알림·키워드</p><h1>내 혜택함</h1><p>찜한 혜택의 신청 일정, 내 조건에 맞는 새 혜택 알림, 맞춤 키워드를 한곳에서 관리합니다.</p></div></div>
         <section className="personal-section sign-in-prompt">
           <h2>Google 로그인이 필요합니다</h2>
           <p>혜택 검색과 맞춤 판정은 로그인 없이 이용할 수 있으며, 찜·일정 알림·새 혜택 알림·키워드는 계정에 저장됩니다.</p>
@@ -91,7 +91,7 @@ export function PersonalPage() {
   return (
     <main id="main-content" className="container personal-page">
       <div className="page-heading">
-        <div><p className="eyebrow">MY BENEFITS</p><h1>내 혜택함</h1><p>{account.user.displayName || account.user.email} 계정에 동기화됩니다.</p></div>
+        <div><p className="eyebrow">찜·알림·키워드</p><h1>내 혜택함</h1><p>{account.user.displayName || account.user.email} 계정에 동기화됩니다.</p></div>
         <div className="summary-cards"><span><strong>{personal.favorites.length}</strong> 찜</span><span><strong>{unread}</strong> 안 읽은 알림</span><span><strong>{personal.keywords.length}</strong> 키워드</span></div>
       </div>
 

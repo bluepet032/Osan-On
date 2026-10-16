@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { OpportunityRow } from '../components/OpportunityRow'
+import { DomainIcon } from '../components/DomainIcon'
 import { DEFAULT_DOMAIN, DOMAIN_LABELS, DOMAINS } from '../constants'
 import { loadOpportunities } from '../data'
 import { hasBasics, judge } from '../eligibility'
@@ -63,12 +64,12 @@ export function WeeklyPage() {
   return (
     <main id="main-content" className="container weekly-page">
       <div className="page-heading">
-        <div><p className="eyebrow">WEEKLY DIGEST</p><h1>주간 요약</h1><p>이번 주와 다음 주에 신청이 마감되는 혜택, 최근 7일 동안 새로 올라온 혜택을 한 번에 확인하세요.</p></div>
+        <div><p className="eyebrow">이번 주 소식</p><h1>주간 요약</h1><p>이번 주와 다음 주에 신청이 마감되는 혜택, 최근 7일 동안 새로 올라온 혜택을 한 번에 확인하세요.</p></div>
         <div className="summary-cards" aria-label="주간 요약 건수"><span><strong>{digest.closingThisWeek.length}</strong> 이번 주 마감</span><span><strong>{digest.closingNextWeek.length}</strong> 다음 주 마감</span><span><strong>{digest.newThisWeek.length}</strong> 새 혜택</span></div>
       </div>
       <div className="domain-tabs" role="group" aria-label="분야">
-        <button className={domain === 'all' ? 'active' : ''} aria-pressed={domain === 'all'} onClick={() => selectDomain('all')}>모든 분야</button>
-        {DOMAINS.map(value => <button key={value} className={domain === value ? 'active' : ''} aria-pressed={domain === value} onClick={() => selectDomain(value)}>{DOMAIN_LABELS[value]}</button>)}
+        <button className={domain === 'all' ? 'active' : ''} aria-pressed={domain === 'all'} onClick={() => selectDomain('all')}><DomainIcon domain="all" />모든 분야</button>
+        {DOMAINS.map(value => <button key={value} className={domain === value ? 'active' : ''} aria-pressed={domain === value} onClick={() => selectDomain(value)}><DomainIcon domain={value} />{DOMAIN_LABELS[value]}</button>)}
       </div>
       {ruledOut > 0 && <p className="search-hint" role="status">내 조건(<Link to="/">혜택 화면에서 수정</Link>)으로 '해당 없음'인 혜택 {ruledOut}건은 뺐습니다.</p>}
       {loading && <div className="message" role="status">혜택 데이터를 불러오는 중입니다…</div>}
