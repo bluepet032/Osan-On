@@ -82,7 +82,7 @@ export function OpportunityPage({ dataset, title, description }: Props) {
   return (
     <main id="main-content" className="container">
       <div className="page-heading">
-        <div><p className="eyebrow">{filters.domain === 'all' ? '모든 분야' : DOMAIN_LABELS[filters.domain as Domain] ?? DOMAIN_LABELS.it} · OPPORTUNITIES</p><h1>{title}</h1><p>{description}</p></div>
+        <div><p className="eyebrow">{filters.domain === 'all' ? '모든 분야' : DOMAIN_LABELS[filters.domain as Domain] ?? '모든 분야'} · OPPORTUNITIES</p><h1>{title}</h1><p>{description}</p></div>
         <div className="summary-cards" aria-label="공고 요약"><span><strong>{freshness.new}</strong> 신규</span><span><strong>{freshness.updated}</strong> 변경</span><span><strong>{freshness.urgent}</strong> 마감임박</span></div>
       </div>
       <Filters items={filterItems} {...filters} onChange={update} onChangeMany={updateMany} />

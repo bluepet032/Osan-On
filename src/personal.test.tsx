@@ -39,7 +39,7 @@ vi.mock('firebase/firestore', () => ({
 
 const savedItem: Opportunity = {
   id: 'notice-1', title: '게임 공모전', source_name: '테스트', source_url: 'https://example.com/notice',
-  organizer: '기관', summary: '게임 개발 공모전', primary_type: 'contest', field_tags: ['게임'], audience_tags: [],
+  organizer: '기관', summary: '게임 개발 공모전', primary_type: 'cash', field_tags: ['게임'], audience_tags: [],
   status: 'today', relevance: { score: 90, reasons: [], decision: 'publish' },
   first_seen_at: '2026-10-01T00:00:00+09:00', last_seen_at: '2026-10-13T00:00:00+09:00', sources: [],
   date_kind: 'exact', recruit_end: '2026-10-13',

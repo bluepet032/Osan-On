@@ -6,7 +6,7 @@ import { Filters } from './Filters'
 
 const base = {
   id: 'a', title: '공고', source_name: '출처', source_url: 'https://example.com/a', organizer: '기관', summary: '요약',
-  primary_type: 'contest', field_tags: [], audience_tags: [], status: 'open',
+  primary_type: 'cash', field_tags: [], audience_tags: [], status: 'open',
   relevance: { score: 80, reasons: [], decision: 'publish' }, first_seen_at: '2026-01-01T00:00:00+09:00',
   last_seen_at: '2026-01-01T00:00:00+09:00', sources: [], date_kind: 'exact',
 } satisfies Opportunity

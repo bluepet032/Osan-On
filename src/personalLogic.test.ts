@@ -9,7 +9,7 @@ const item = {
   source_url: 'https://example.com',
   organizer: '게임재단',
   summary: '대학생 개발자를 위한 공모전',
-  primary_type: 'contest',
+  primary_type: 'cash',
   field_tags: ['AI', '인디'],
   audience_tags: ['대학생'],
   status: 'open',

@@ -8,7 +8,7 @@ describe('Filters search input', () => {
     const onChange = vi.fn()
     render(<Filters
       items={[]}
-      domain="it"
+      domain="living"
       type="all"
       quick=""
       search=""
