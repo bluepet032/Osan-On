@@ -42,6 +42,14 @@ describe('오산온', () => {
     expect(JSON.parse(localStorage.getItem('osanon.profile')!)).toEqual({ gender: 'female', age: 28 })
   })
 
+  it('keeps the collection status for admins only', async () => {
+    render(<App />)
+    expect(screen.queryByRole('link', { name: '수집 상태' })).toBeNull()
+    window.location.hash = '#/status'
+    expect(await screen.findByRole('heading', { name: '관리자 전용 페이지' })).toBeInTheDocument()
+    expect(screen.queryByText('출처별 상태')).toBeNull()
+  })
+
   it('requires Google login for personal features and explains stored data', async () => {
     render(<App />)
     fireEvent.click(screen.getByRole('link', { name: '내 혜택함' }))

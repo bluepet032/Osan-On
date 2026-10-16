@@ -97,9 +97,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .quick-tags { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
 .quick-tags button { padding: 7px 11px; background: transparent; }
 .quick-tags button.active { color: var(--brand); background: var(--brand-soft); border-color: var(--brand); }
-.search-row { display: grid; grid-template-columns: minmax(260px, 1fr) 180px 160px; gap: 10px; margin-top: 18px; }
+.search-row { display: grid; grid-template-columns: minmax(260px, 1fr) 160px; gap: 10px; margin-top: 18px; }
 .advanced-filters { margin-top: 14px; }
 .advanced-toggle-row { display: flex; align-items: center; gap: 10px; }
+/* Only phones fold the support-form and quick tags (Filters.tsx); wider screens always show them. */
+@media (min-width: 781px) { .type-toggle-row { display: none; } .type-filters[hidden] { display: block; } }
 .advanced-toggle { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-muted); padding: 8px 12px; color: var(--text); font-size: 13px; font-weight: 700; }
 .advanced-toggle.has-active { border-color: var(--brand); }
 .advanced-count { display: inline-grid; place-items: center; min-width: 18px; height: 18px; border-radius: 999px; background: var(--brand); color: white; font-size: 11px; }
@@ -189,11 +191,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .icon-button { color: var(--in_kind); font-size: 20px; line-height: 1; }
 .text-button:hover { color: var(--brand); }
 .details { margin-top: 14px; padding: 14px; border-radius: 10px; background: var(--surface-muted); }
-.details dl { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; margin: 0; }
-.details dl div { display: grid; grid-template-columns: 75px 1fr; font-size: 11px; }
-.details dt { color: var(--muted); }
+/* One column: 지원 대상·내용 are long paragraphs that became unreadable split into two narrow columns. */
+.details dl { display: grid; gap: 10px; margin: 0; }
+.details dl div { display: grid; grid-template-columns: 80px 1fr; gap: 12px; font-size: 13px; line-height: 1.65; }
+.details dt { color: var(--muted); font-weight: 700; }
 .details dd { margin: 0; }
-.detail-links { display: flex; gap: 12px; margin-top: 12px; font-size: 11px; }
+.detail-links { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 14px; font-size: 13px; }
 .detail-links a { color: var(--brand); font-weight: 700; }
 .mobile-meta { display: none; }
 
@@ -245,21 +248,31 @@ footer { margin-top: 80px; padding: 30px 0; border-top: 1px solid var(--border);
 footer .container { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 11px; }
 footer strong { color: var(--text); }
 
+.site-header nav a, .account-button { white-space: nowrap; }
+
 @media (max-width: 1100px) {
-  .opportunity { grid-template-columns: 125px minmax(280px, 1fr) 120px 130px; }
+  /* minmax(0, 1fr) lets the title column shrink instead of pushing the status column off screen. */
+  .opportunity { grid-template-columns: 110px minmax(0, 1fr) 110px 120px; gap: 14px; }
+  .header-inner { gap: 16px; }
+  .brand small { display: none; }
   .type-cell { display: none; }
   .status-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* A signed-in admin's header (five links plus the account name) needs about 920px in one row, so the menu moves to its own row below that. */
+@media (max-width: 1000px) {
+  .header-inner { height: auto; min-height: 68px; flex-wrap: wrap; gap: 8px; padding: 10px 0; }
+  .site-header nav { order: 3; width: 100%; overflow-x: auto; }
+}
+
 @media (max-width: 780px) {
   .container, .header-inner { width: min(100% - 28px, 1480px); }
-  .header-inner { height: auto; min-height: 68px; flex-wrap: wrap; gap: 8px; padding: 10px 0; }
   .brand small { display: none; }
-  .site-header nav { order: 3; width: 100%; overflow-x: auto; }
   .site-header nav a { white-space: nowrap; }
   .page-heading { align-items: stretch; flex-direction: column; padding-top: 34px; }
   .summary-cards { grid-template-columns: repeat(3, 1fr); }
   .filter-panel { padding: 14px; border-radius: 14px; }
+  .type-filters { margin-top: 10px; }
   .type-tabs, .quick-tags { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
   .type-tabs button, .quick-tags button { white-space: nowrap; }
   .search-row { grid-template-columns: 1fr; }
@@ -275,7 +288,7 @@ footer strong { color: var(--text); }
   .type-cell, .organizer-cell { display: none; }
   .mobile-meta { display: block; color: var(--muted); font-size: 11px; margin-bottom: 9px; }
   .state-cell { align-items: flex-start; flex-direction: row; justify-content: space-between; }
-  .details dl { grid-template-columns: 1fr; }
+  .details dl div { grid-template-columns: 1fr; gap: 2px; }
   .status-grid { grid-template-columns: 1fr; }
   .source-card dl { grid-template-columns: repeat(2, 1fr); }
   footer .container { align-items: flex-start; flex-direction: column; gap: 8px; }
@@ -398,6 +411,7 @@ footer strong { color: var(--text); }
 @media (max-width: 780px) {
   .profile-card { padding: 14px; border-radius: 14px; }
   .profile-fields > * { flex: 1 1 100%; }
+  .profile-gender label { flex: 1; justify-content: center; }
   .profile-age input { width: 100%; }
 }
 .place-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }

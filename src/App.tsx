@@ -1,5 +1,6 @@
 import { HashRouter, Navigate, NavLink, Route, Routes } from 'react-router-dom'
-import { AccountProvider } from './account'
+import { AccountProvider, useAccount } from './account'
+import { isAdmin } from './admin'
 import { AccountDialogs, AccountToolbar } from './AccountControls'
 import { ThemeControl } from './components/ThemeControl'
 import { NoticePage } from './pages/NoticePage'
@@ -26,7 +27,9 @@ export function App() {
 
 function AppContent() {
   const { notifications } = usePersonalState()
+  const { user } = useAccount()
   const unread = notifications.filter(notification => !notification.read).length
+  const admin = isAdmin(user?.uid)
 
   return (
     <>
@@ -37,7 +40,7 @@ function AppContent() {
             <NavLink to="/" end>혜택</NavLink>
             <NavLink to="/weekly">주간 요약</NavLink>
             <NavLink to="/closed">마감 혜택</NavLink>
-            <NavLink to="/status">수집 상태</NavLink>
+            {admin && <NavLink to="/status">수집 상태</NavLink>}
             <NavLink to="/my">내 혜택함{unread > 0 && <span className="unread-badge">{unread}</span>}</NavLink>
           </nav>
           <div className="header-actions"><AccountToolbar /><ThemeControl /></div>
@@ -49,11 +52,19 @@ function AppContent() {
         <Route path="/closed" element={<OpportunityPage dataset="closed" title="최근 마감 혜택" description="최근 3개월 내 신청이 마감된 혜택을 참고용으로 검색할 수 있습니다." />} />
         <Route path="/weekly" element={<WeeklyPage />} />
         <Route path="/notice/:id" element={<NoticePage />} />
-        <Route path="/status" element={<StatusPage />} />
+        <Route path="/status" element={admin ? <StatusPage /> : <AdminOnly />} />
         <Route path="/my" element={<PersonalPage />} />
       </Routes>
       <footer><div className="container"><strong>오산온</strong><p>정부24 공공서비스 정보를 바탕으로 해당 가능성을 안내합니다. 실제 자격과 신청 방법은 반드시 소관 기관 원문에서 확인하세요.</p></div></footer>
       <AccountDialogs />
     </>
+  )
+}
+
+function AdminOnly() {
+  return (
+    <main id="main-content" className="container">
+      <div className="message"><h1>관리자 전용 페이지</h1><span>수집 상태는 관리자 계정으로 로그인했을 때만 볼 수 있습니다.</span></div>
+    </main>
   )
 }

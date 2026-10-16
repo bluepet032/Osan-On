@@ -28,12 +28,12 @@ test('loads opportunity dashboard and changes theme', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 })
 
-test('status route is reachable', async ({ page }) => {
+test('status route is for admins only', async ({ page }) => {
+  await page.goto('/#/')
+  await expect(page.getByRole('link', { name: '수집 상태' })).toHaveCount(0)
   await page.goto('/#/status')
-  await expect(page.getByRole('heading', { name: '수집 상태' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'GitHub에서 지금 수집 실행' })).toHaveAttribute('href', /actions\/workflows\/collect\.yml$/)
-  await expect(page.getByRole('button', { name: '최신 데이터 다시 불러오기' })).toBeEnabled()
-  await expect(page.locator('details.review-section')).not.toHaveAttribute('open', '')
+  await expect(page.getByRole('heading', { name: '관리자 전용 페이지' })).toBeVisible()
+  await expect(page.getByText('출처별 상태')).toHaveCount(0)
 })
 
 test('requires login for favorites and restores URL and hidden state after reload', async ({ page }) => {
@@ -52,7 +52,7 @@ test('requires login for favorites and restores URL and hidden state after reloa
   await page.getByLabel('통합 검색').fill('인디')
   await expect(page).toHaveURL(/q=%EC%9D%B8%EB%94%94/)
   await expect(page.locator('.result-toolbar strong')).toHaveText('1개')
-  await expect(page.getByRole('button', { name: '서비스 0' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '모든 분야 1' })).toBeVisible()
   await page.getByRole('button', { name: '관심 등록' }).click()
   await expect(page.getByRole('dialog', { name: '오산온 계정' })).toBeVisible()
   await page.getByRole('button', { name: '닫기' }).click()
@@ -179,6 +179,7 @@ test('jurisdiction tabs narrow the list to one level of government', async ({ pa
     opportunity({ id: 'nation', title: '중앙정부 혜택', source_url: 'https://example.com/nation', jurisdiction: 'national' }),
   ])
   await page.goto('/#/')
+  await expect(page.locator('.summary-cards span')).toHaveText(['1 오산시', '1 경기도', '0 마감임박'])
   await expect(page.locator('.opportunity').first()).toContainText('오산시 혜택')
   await page.getByRole('button', { name: /^경기도 1$/ }).click()
   await expect(page).toHaveURL(/place=gyeonggi/)
@@ -186,6 +187,26 @@ test('jurisdiction tabs narrow the list to one level of government', async ({ pa
   await expect(page.locator('.opportunity')).toContainText('경기도 혜택')
   await page.getByRole('button', { name: /^전체 소관 3$/ }).click()
   await expect(page.locator('.opportunity')).toHaveCount(3)
+})
+
+test('phones fold the support-form and quick tags behind a toggle', async ({ page, isMobile }) => {
+  await routeActive(page, [opportunity({})])
+  await page.goto('/#/')
+  const toggle = page.getByRole('button', { name: /^지원 형태·빠른 필터/ })
+  const cash = page.getByRole('button', { name: '현금 1' })
+  if (!isMobile) {
+    await expect(toggle).toBeHidden()
+    await expect(cash).toBeVisible()
+    return
+  }
+  await expect(cash).toBeHidden()
+  await toggle.click()
+  await cash.click()
+  await expect(page).toHaveURL(/type=cash/)
+  // A filter in use keeps the group open, as 상세 조건 does.
+  await page.reload()
+  await expect(cash).toBeVisible()
+  await expect(toggle).toContainText('1')
 })
 
 test('each notice has its own shareable page', async ({ page }) => {

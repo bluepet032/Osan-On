@@ -3,7 +3,7 @@ import { compareOpportunities, matchesOpportunity, type OpportunityFilters } fro
 import type { Opportunity } from './types'
 
 const filters: OpportunityFilters = {
-  domain: 'all', type: 'all', quick: '', search: '', field: '', status: '',
+  domain: 'all', type: 'all', quick: '', search: '', status: '',
 }
 
 const item = {
@@ -25,8 +25,8 @@ describe('matchesOpportunity', () => {
   })
 
   it('combines search and basic filters', () => {
-    expect(matchesOpportunity(item, { ...filters, search: '게임재단', field: 'AI' })).toBe(true)
-    expect(matchesOpportunity(item, { ...filters, search: '게임재단', field: '데이터' })).toBe(false)
+    expect(matchesOpportunity(item, { ...filters, search: '게임재단', type: 'cash' })).toBe(true)
+    expect(matchesOpportunity(item, { ...filters, search: '게임재단', type: 'loan' })).toBe(false)
   })
 
   it('matches every whitespace-separated search term across fields', () => {
