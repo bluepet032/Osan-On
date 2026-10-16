@@ -6,7 +6,6 @@ from datetime import datetime
 from urllib.parse import urlsplit, urlunsplit
 
 from pipeline.dates import status_for
-from pipeline.facets import extract_facets
 from pipeline.models import Opportunity, RawOpportunity, Relevance, SourceRecord
 
 
@@ -60,7 +59,6 @@ def normalize(raw: RawOpportunity, taxonomy: dict, now: datetime) -> Opportunity
     category = raw.category or raw.original_category
     domain = next((slug for word, slug in CATEGORY_DOMAINS.items() if word in category), "living")
     primary_type = next((slug for word, slug in SUPPORT_TYPES if word in raw.support_type), "other")
-    facets = extract_facets(raw)
     status, d_day = status_for(raw.recruit_start, raw.recruit_end, raw.date_kind, now)
     timestamp = raw.collected_at or now.isoformat(timespec="seconds")
     source_url = clean_url(raw.source_url)
@@ -103,12 +101,9 @@ def normalize(raw: RawOpportunity, taxonomy: dict, now: datetime) -> Opportunity
         eligibility=raw.eligibility[:500],
         benefits=raw.benefits[:500],
         location=raw.location[:120],
-        mode=facets.mode,
-        fee=facets.fee,
         domain=domain,  # type: ignore[arg-type]
         jurisdiction=raw.jurisdiction,
         conditions=raw.conditions,
-        regions=facets.regions,
-        prize_manwon=facets.prize_manwon,
+        apply_methods=raw.apply_methods,
         dedupe_key=dedupe_key,
     )

@@ -9,7 +9,7 @@ from pipeline.collectors.registry import create_collector
 from pipeline.config import ROOT, SourceConfig, load_local_env, load_sources, load_taxonomy
 from pipeline.dedupe import deduplicate
 from pipeline.dates import months_ago, parse_iso_date, status_for
-from pipeline.facets import facet_coverage
+from pipeline.facets import FACET_KEYS, facet_coverage
 from pipeline.history import clone_opportunity, identity_keys, reconcile_history
 from pipeline.models import CrawlStatus, Opportunity
 from pipeline.normalize import normalize
@@ -79,6 +79,8 @@ def run_pipeline(
             previous.get("facet_coverage") if previous.get("status") == "success"
             else previous.get("previous_facet_coverage")
         )
+        # Filters that no longer exist must not linger as a baseline (they would fail validation).
+        coverage_baseline = {key: value for key, value in (coverage_baseline or {}).items() if key in FACET_KEYS} or None
         try:
             raw_items = create_collector(source).collect(current, limit=limits[source.id])
             normalized_items = [normalize(item, taxonomy, current) for item in raw_items]

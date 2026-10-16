@@ -94,8 +94,8 @@ def test_source_facet_coverage_must_be_known_shares(tmp_path: Path):
     data_dir = sample_data(tmp_path)
     path = data_dir / "sources.json"
     payload = json.loads(path.read_text(encoding="utf-8"))
-    payload["items"][0]["facet_coverage"] = {"region": 0.5, "prize": 1.0}
-    payload["items"][1]["facet_coverage"] = {"region": 1.5}
+    payload["items"][0]["facet_coverage"] = {"apply": 0.5}
+    payload["items"][1]["facet_coverage"] = {"apply": 1.5}
     payload["items"][2]["previous_facet_coverage"] = {"weather": 0.5}
     path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
 

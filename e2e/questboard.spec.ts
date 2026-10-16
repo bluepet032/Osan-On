@@ -9,7 +9,7 @@ const opportunity = (overrides: Record<string, unknown>) => ({
   primary_type: 'cash', field_tags: ['게임', 'AI', '인디'], audience_tags: ['대학생'], status: 'open',
   relevance: { score: 90, reasons: ['테스트'], decision: 'publish' }, first_seen_at: '2026-07-30T10:00:00+09:00',
   last_seen_at: '2026-07-30T10:00:00+09:00', sources: [{ source_id: 'test', source_name: '테스트 출처', source_url: 'https://example.com/contest', kind: 'official', priority: 100 }],
-  recruit_start: isoDay(-10), recruit_end: isoDay(21), date_kind: 'exact', d_day: 21, fee: 'free', mode: 'online',
+  recruit_start: isoDay(-10), recruit_end: isoDay(21), date_kind: 'exact', d_day: 21,
   ...overrides,
 })
 
@@ -134,52 +134,52 @@ test('weekly digest lists deadlines this week', async ({ page }) => {
   await expect(thisWeek.locator('.section-heading strong')).toHaveText('1건')
 })
 
-test('advanced filters: unknown items, nationwide notices, reload and reset', async ({ page }) => {
+test('advanced filters: how to apply, unknown items, reload and reset', async ({ page }) => {
   const source = (id: string) => ({ source_url: `https://example.com/${id}`, sources: [{ source_id: 'test', source_name: '테스트 출처', source_url: `https://example.com/${id}`, kind: 'official', priority: 100 }] })
   await routeActive(page, [
-    opportunity({ id: 'seoul', title: '서울 무료 게임 행사', ...source('seoul'), regions: ['서울'], fee: 'free', mode: 'offline' }),
-    opportunity({ id: 'nation', title: '전국 게임 공모전', ...source('nation'), regions: ['전국'], fee: 'free', mode: 'online' }),
-    opportunity({ id: 'busan', title: '부산 게임 행사', ...source('busan'), regions: ['부산'], fee: 'paid', mode: 'offline' }),
-    opportunity({ id: 'nodata', title: '정보 없는 게임 공모전', ...source('nodata'), regions: [], fee: 'unknown', mode: '' }),
+    opportunity({ id: 'both', title: '온라인·방문 혜택', ...source('both'), apply_methods: ['online', 'visit'] }),
+    opportunity({ id: 'online', title: '온라인 혜택', ...source('online'), apply_methods: ['online'] }),
+    opportunity({ id: 'visit', title: '방문 혜택', ...source('visit'), apply_methods: ['visit'] }),
+    opportunity({ id: 'nodata', title: '정보 없는 혜택', ...source('nodata'), apply_methods: [] }),
   ])
   await page.goto('/#/')
   await expect(page.locator('.result-toolbar strong')).toHaveText('4개')
 
   await page.getByRole('button', { name: /^상세 조건\s*\d*$/ }).click()
-  const field = (label: string) => page.locator('.advanced-field').filter({ has: page.getByLabel(label) })
-  await expect(field('지역').locator('.advanced-coverage')).toHaveText('정보 있는 공고 75%')
-  // No test item states a prize, so that filter is folded away until opened.
-  await expect(page.locator('.advanced-sparse summary')).toHaveText('정보가 적은 조건 1개 (상금)')
-  await expect(page.getByLabel('상금')).toBeHidden()
-  await page.locator('.advanced-sparse summary').click()
-  await expect(page.getByLabel('상금')).toBeVisible()
-
-  await page.getByLabel('지역').selectOption('서울')
-  await expect(page).toHaveURL(/region=%EC%84%9C%EC%9A%B8/)
+  await expect(page.locator('.advanced-field').filter({ has: page.getByLabel('신청 방법') }).locator('.advanced-coverage')).toHaveText('정보 있는 혜택 75%')
+  await page.getByLabel('신청 방법').selectOption('online')
+  await expect(page).toHaveURL(/apply=online/)
   await expect(page.locator('.result-toolbar strong')).toHaveText('2개')
-  await expect(page.locator('.opportunity')).toContainText(['서울 무료 게임 행사', '전국 게임 공모전'])
+  await expect(page.locator('.opportunity')).toContainText(['온라인·방문 혜택', '온라인 혜택'])
   await expect(page.getByText('정보가 없는 혜택 1건은 목록에서 빠져 있습니다')).toBeVisible()
-
-  await page.getByLabel('참가비').selectOption('free')
-  await expect(page.locator('.result-toolbar strong')).toHaveText('2개')
-  await page.getByLabel('진행 방식').selectOption('online')
-  await expect(page.locator('.result-toolbar strong')).toHaveText('1개')
-  await expect(page.getByRole('button', { name: /^상세 조건\s*\d*$/ })).toContainText('3')
 
   await page.getByRole('button', { name: '함께 보기' }).click()
   await expect(page).toHaveURL(/unknown=1/)
-  await expect(page.locator('.result-toolbar strong')).toHaveText('2개')
-  await expect(page.locator('.opportunity')).toContainText(['전국 게임 공모전', '정보 없는 게임 공모전'])
+  await expect(page.locator('.result-toolbar strong')).toHaveText('3개')
 
   await page.reload()
-  await expect(page.getByLabel('지역')).toHaveValue('서울')
-  await expect(page.getByLabel('진행 방식')).toHaveValue('online')
-  await expect(page.getByRole('checkbox', { name: '정보가 없는 공고도 함께 보기' })).toBeChecked()
-  await expect(page.locator('.result-toolbar strong')).toHaveText('2개')
+  await expect(page.getByLabel('신청 방법')).toHaveValue('online')
+  await expect(page.getByRole('checkbox', { name: '정보가 없는 혜택도 함께 보기' })).toBeChecked()
 
   await page.getByRole('button', { name: '상세 조건 초기화' }).click()
   await expect(page.locator('.result-toolbar strong')).toHaveText('4개')
-  await expect(page).not.toHaveURL(/region=|mode=|fee=|unknown=/)
+  await expect(page).not.toHaveURL(/apply=|unknown=/)
+})
+
+test('jurisdiction tabs narrow the list to one level of government', async ({ page }) => {
+  await routeActive(page, [
+    opportunity({ id: 'osan', title: '오산시 혜택', source_url: 'https://example.com/osan', jurisdiction: 'osan' }),
+    opportunity({ id: 'gg', title: '경기도 혜택', source_url: 'https://example.com/gg', jurisdiction: 'gyeonggi' }),
+    opportunity({ id: 'nation', title: '중앙정부 혜택', source_url: 'https://example.com/nation', jurisdiction: 'national' }),
+  ])
+  await page.goto('/#/')
+  await expect(page.locator('.opportunity').first()).toContainText('오산시 혜택')
+  await page.getByRole('button', { name: /^경기도 1$/ }).click()
+  await expect(page).toHaveURL(/place=gyeonggi/)
+  await expect(page.locator('.opportunity')).toHaveCount(1)
+  await expect(page.locator('.opportunity')).toContainText('경기도 혜택')
+  await page.getByRole('button', { name: /^전체 소관 3$/ }).click()
+  await expect(page.locator('.opportunity')).toHaveCount(3)
 })
 
 test('each notice has its own shareable page', async ({ page }) => {

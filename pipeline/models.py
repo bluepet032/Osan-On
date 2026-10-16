@@ -51,8 +51,6 @@ class RawOpportunity:
     eligibility: str = ""
     benefits: str = ""
     location: str = ""
-    mode: str = ""
-    fee: str = "unknown"
     original_category: str = ""
     collected_at: str | None = None
     jurisdiction: Jurisdiction = "national"
@@ -60,6 +58,8 @@ class RawOpportunity:
     conditions: dict[str, Any] | None = None
     category: str = ""
     support_type: str = ""
+    # How to apply: "online", "visit", "none" (no application needed); empty when unknown.
+    apply_methods: list[str] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -96,15 +96,11 @@ class Opportunity:
     eligibility: str = ""
     benefits: str = ""
     location: str = ""
-    mode: str = ""
-    fee: str = "unknown"
-    is_adjacent: bool = False
     domain: Domain = "living"
     jurisdiction: Jurisdiction = "national"
     conditions: dict[str, Any] | None = None
-    # Advanced-filter facts (see pipeline/facets.py). Empty / None means the source did not say.
-    regions: list[str] = field(default_factory=list)
-    prize_manwon: int | None = None
+    # Advanced-filter fact (see pipeline/facets.py); empty means the source did not say.
+    apply_methods: list[str] = field(default_factory=list)
     last_changed_at: str | None = None
     change_flags: list[str] = field(default_factory=list)
     is_manual_reviewed: bool = False

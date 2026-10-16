@@ -3,7 +3,7 @@ import type { Opportunity } from './types'
 import { weekRanges, weeklyDigest } from './weekly'
 
 const item = (id: string, overrides: Partial<Opportunity>) => ({
-  id, title: id, date_kind: 'exact', recruit_end: null, first_seen_at: '2026-09-01T09:00:00+09:00', is_adjacent: false, ...overrides,
+  id, title: id, date_kind: 'exact', recruit_end: null, first_seen_at: '2026-09-01T09:00:00+09:00', ...overrides,
 }) as Opportunity
 
 describe('weekly digest', () => {
@@ -26,7 +26,6 @@ describe('weekly digest', () => {
       item('later', { recruit_end: '2026-10-30' }),
       item('video', { recruit_end: '2026-10-08', domain: 'housing' }),
       item('rolling', { date_kind: 'ongoing', recruit_end: '2026-10-08' }),
-      item('job', { recruit_end: '2026-10-08', is_adjacent: true }),
       item('fresh', { first_seen_at: '2026-10-05T03:00:00+09:00' }),
     ], 'living', now)
 

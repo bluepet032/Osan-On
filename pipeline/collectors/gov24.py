@@ -19,6 +19,15 @@ OSAN_RE = re.compile(r"(?:^|[^가-힣]|재단법인)오산")
 OTHER_CITY_RE = re.compile(r"경기도\s+\S+[시군]")
 NATIONAL_TYPES = {"중앙행정기관", "공공기관"}
 ONGOING_RE = re.compile(r"상시|수시|연중")
+# 신청방법 is a "||"-joined list such as "기타 온라인신청||방문신청"; "직접입력" (free text) says nothing.
+APPLY_WORDS = (("온라인", "online"), ("방문", "visit"), ("신청불필요", "none"))
+
+
+def apply_methods(text: str) -> list[str]:
+    compact = re.sub(r"\s+", "", text)
+    return [method for word, method in APPLY_WORDS if word in compact]
+
+
 # Only a leading "YYYY.M.D ~ YYYY.M.D" range is trusted: free text such as "5년 이내(2012.7.1. 이후…)"
 # or "2026.2.2.~11.30." would otherwise misdate a live benefit as closed.
 RANGE_RE = re.compile(
@@ -128,4 +137,5 @@ class Gov24Collector(Collector):
             conditions=conditions,
             category=text("서비스분야"),
             support_type=text("지원유형"),
+            apply_methods=apply_methods(row.get("신청방법") or ""),
         )

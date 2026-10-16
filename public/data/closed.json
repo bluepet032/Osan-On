@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-16T22:06:12+09:00",
+  "generated_at": "2026-10-16T22:43:05+09:00",
   "items": [
     {
       "id": "cdb5d0d083621010e6dd",
@@ -23,7 +23,7 @@
         "decision": "publish"
       },
       "first_seen_at": "2026-10-16T22:06:12+09:00",
-      "last_seen_at": "2026-10-16T22:06:12+09:00",
+      "last_seen_at": "2026-10-16T22:43:05+09:00",
       "sources": [
         {
           "source_id": "gov24",
@@ -32,7 +32,7 @@
           "source_post_id": "B55252100005",
           "kind": "government",
           "priority": 100,
-          "fetched_at": "2026-10-16T22:06:12+09:00"
+          "fetched_at": "2026-10-16T22:43:05+09:00"
         }
       ],
       "application_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/B55252100005",
@@ -46,9 +46,6 @@
       "eligibility": "보령시 오천면, 천북면, 주교면, 주포면, 웅천읍 성동리 2년 이상 거주한 주민 또는 주민 자녀",
       "benefits": "보령시 오천면, 천북면, 주교면, 주포면, 웅천읍 성동리 2년 이상 거주한 주민 또는 주민 자녀 장학금 지원",
       "location": "방문신청 · 지역협력부/070-7511-2177",
-      "mode": "",
-      "fee": "unknown",
-      "is_adjacent": false,
       "domain": "childcare",
       "jurisdiction": "national",
       "conditions": {
@@ -76,8 +73,9 @@
         "age_min": null,
         "age_max": 120
       },
-      "regions": [],
-      "prize_manwon": null,
+      "apply_methods": [
+        "visit"
+      ],
       "last_changed_at": null,
       "change_flags": [],
       "is_manual_reviewed": false,
@@ -104,7 +102,7 @@
         "decision": "publish"
       },
       "first_seen_at": "2026-10-16T22:06:12+09:00",
-      "last_seen_at": "2026-10-16T22:06:12+09:00",
+      "last_seen_at": "2026-10-16T22:43:05+09:00",
       "sources": [
         {
           "source_id": "gov24",
@@ -113,7 +111,7 @@
           "source_post_id": "O00043900003",
           "kind": "government",
           "priority": 100,
-          "fetched_at": "2026-10-16T22:06:12+09:00"
+          "fetched_at": "2026-10-16T22:43:05+09:00"
         }
       ],
       "application_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/O00043900003",
@@ -127,9 +125,6 @@
       "eligibility": "< 지원대상 > - 신청자격 : 경기도 거주 '장애인복지법' 제32조에 따라 등록된 19세 이상 장애인 - 지원규모 : 전체 938명(저소득층 우선 선정) ※ 잔여인원 추가모집으로 시군별 모집규모가 상이하오니 공고문 내 시군별 모집규모 참고 ※ 중복수혜 불가 : 타 평생교육이용권 수혜자 및 선정자 - 2026년 제1차 경기도 장애인평생교육이용권 선정자 - 2026년 제1·2차 및 추가모집 경기도 일반(일반(청년 포함)·AI/디지털·노인) 평생교육이용권 선정(예정)자 - 2026년 경기도 내 시·군(광명시, 오산시, 화성시)에서 자체 시행하는 평생교육이용권 수혜자 및 선정(예정)자 ※ 이용자 선정 관련하여 공고문 필히 확인",
       "benefits": "< 2026년 경기도 장애인 평생교육이용권 지원(추가모집) 개요 > ○ 신청기간 : 2026. 9. 14.(월) 10:00 ~ 9. 28.(월) 18:00 ○ 신청대상 : 경기도 거주 19세 이상 등록 장애인 누구나 ※ 중복수혜 불가 : 타 평생교육이용권 수혜자 및 선정자 - 2026년 제1차 경기도 장애인평생교육이용권 선정자 - 2026년 제1·2차 및 추가모집 경기도 일반(일반(청년포함)·AI/디지털·노인) 평생교육이용권 선정(예정)자 - 2026년 경기도 내 시·군(광명시, 오산시, 화성시)에서 자체 시행하는 평생교육이용권 수혜자 및 선정(예정)자 ※ 이용자 선정 관련하여 공고문 필히 확인(저소득층(기초생활수급자, 차상위계층 순) 우선 선정 후 선착순 선정, 저소득층 선정 후에도 잔여 인원 있을 시 소득무관 선착순 선정) ○ 신청방법 : 혜택알리미(정부24)를 통한 온라인 신청(http://www.gov.kr)(원칙)* 또는 시·군 방문 신청** * 온라인 신청 시 본인인증(공",
       "location": "직접입력 · 경기도 평생교육이용권 상담콜센터/1544-6500",
-      "mode": "",
-      "fee": "unknown",
-      "is_adjacent": false,
       "domain": "childcare",
       "jurisdiction": "gyeonggi",
       "conditions": {
@@ -155,10 +150,7 @@
         "age_min": 19,
         "age_max": 120
       },
-      "regions": [
-        "경기"
-      ],
-      "prize_manwon": null,
+      "apply_methods": [],
       "last_changed_at": null,
       "change_flags": [],
       "is_manual_reviewed": false,
@@ -185,7 +177,7 @@
         "decision": "publish"
       },
       "first_seen_at": "2026-10-16T22:06:12+09:00",
-      "last_seen_at": "2026-10-16T22:06:12+09:00",
+      "last_seen_at": "2026-10-16T22:43:05+09:00",
       "sources": [
         {
           "source_id": "gov24",
@@ -194,7 +186,7 @@
           "source_post_id": "641000000111",
           "kind": "government",
           "priority": 100,
-          "fetched_at": "2026-10-16T22:06:12+09:00"
+          "fetched_at": "2026-10-16T22:43:05+09:00"
         }
       ],
       "application_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/641000000111",
@@ -208,9 +200,6 @@
       "eligibility": "○ 양육수당을 받고 있으며 신청일 기준 경기도에 주민등록을 둔 보육가정 미취학(86개월 미만) 어린이",
       "benefits": "○ 지원대상 - 신청일 기준 경기도 시군내 거주하면서 어린이집, 유치원 등에 다니지 않고 가정에서 보육되는 미취학 어린이 (해당월 가정양육수당 또는 부모급여(현금) 수급자) ○ 지원내용 - 신청기간 내 '건강과일'을 신청하여 지원대상자로 선정된 가정보육 어린이에게 경기도산 과일을 포함한 국내산 제철과일 꾸러미를 배송 공급(연2회) ○ 신청기간 : 2026.8.18.~9.18. ○ 지원대상자 선정결과 발표 : 2026.10.8. /(예정) * 시군마다 발표일자는 달라질 수 있음 ○ 과일꾸러미 배송기간 : 2026.10월~12월 / 1회",
       "location": "기타 온라인신청||방문신청 · 친환경농업과/031-8008-4431",
-      "mode": "",
-      "fee": "unknown",
-      "is_adjacent": false,
       "domain": "childcare",
       "jurisdiction": "gyeonggi",
       "conditions": {
@@ -252,8 +241,10 @@
         "age_min": null,
         "age_max": 7
       },
-      "regions": [],
-      "prize_manwon": null,
+      "apply_methods": [
+        "online",
+        "visit"
+      ],
       "last_changed_at": null,
       "change_flags": [],
       "is_manual_reviewed": false,
@@ -280,7 +271,7 @@
         "decision": "publish"
       },
       "first_seen_at": "2026-10-16T22:06:12+09:00",
-      "last_seen_at": "2026-10-16T22:06:12+09:00",
+      "last_seen_at": "2026-10-16T22:43:05+09:00",
       "sources": [
         {
           "source_id": "gov24",
@@ -289,7 +280,7 @@
           "source_post_id": "B55424400002",
           "kind": "government",
           "priority": 100,
-          "fetched_at": "2026-10-16T22:06:12+09:00"
+          "fetched_at": "2026-10-16T22:43:05+09:00"
         }
       ],
       "application_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/B55424400002",
@@ -303,9 +294,6 @@
       "eligibility": "장학생 종류 (모집 대상) 일반대학(원), 한국방송통신대학, 전문대학, 사이버대학에 재학 중인 장애 학생 1. 성적우수 장학생 - 대학생: 일반대학, 한국방송통신대학, 전문대학, 사이버대학에 재학중인 자로 직전학기 성적이 평균 80점 이상인 자 - 대학원생: 대학원에 재학 중인 자로 직전학기 성적이 평균 89점 이상인 자 2. 예·체능 특기 장학생 최근 3년 이내 국내외 예·체능 대회에서 입상한 경력이 있는 대학(원)생 3. 정보통신 특기 장학생 최근 3년 이내 국내외 정보통신대회에서 입상한 경력이 있는 대학(원)생",
       "benefits": "장학생 선발 : 일반대학(원) 및 전문대생 1년에 1회 선발 장학생 선발 인원 : 장애인 20명 내외 - 일반대학(원)생 - 전문대학생 장학금 지급: 학기별 1,000,000원 2회 1년",
       "location": "직접입력 · 한국장애인개발원 장학담당/02-3433-0675",
-      "mode": "",
-      "fee": "unknown",
-      "is_adjacent": false,
       "domain": "childcare",
       "jurisdiction": "national",
       "conditions": {
@@ -331,8 +319,7 @@
         "age_min": 18,
         "age_max": 120
       },
-      "regions": [],
-      "prize_manwon": null,
+      "apply_methods": [],
       "last_changed_at": null,
       "change_flags": [],
       "is_manual_reviewed": false,
@@ -359,7 +346,7 @@
         "decision": "publish"
       },
       "first_seen_at": "2026-10-16T22:06:12+09:00",
-      "last_seen_at": "2026-10-16T22:06:12+09:00",
+      "last_seen_at": "2026-10-16T22:43:05+09:00",
       "sources": [
         {
           "source_id": "gov24",
@@ -368,7 +355,7 @@
           "source_post_id": "641000000874",
           "kind": "government",
           "priority": 100,
-          "fetched_at": "2026-10-16T22:06:12+09:00"
+          "fetched_at": "2026-10-16T22:43:05+09:00"
         }
       ],
       "application_url": "https://www.gov.kr/portal/rcvfvrSvc/dtlEx/641000000874",
@@ -382,9 +369,6 @@
       "eligibility": "○ 도내 플랫폼노동자(배달·대리·화물차주*) *화물차주 : 개인운송사업자 또는 위·수탁 계약 차주(노란색 번호판 차량 소유자)",
       "benefits": "○ 플랫폼노동자 산재보험료 지원 - 플랫폼노동자(배달·대리·화물차주) 산재보험료 본인부담액 최대 80% 지원",
       "location": "직접입력 · 신청 관련 - 경기도일자리재단/031-270-9940||사업 관련 - 경기도청 노동권익과/031-8030-4644",
-      "mode": "",
-      "fee": "unknown",
-      "is_adjacent": false,
       "domain": "admin",
       "jurisdiction": "gyeonggi",
       "conditions": {
@@ -402,8 +386,7 @@
         "age_min": null,
         "age_max": 120
       },
-      "regions": [],
-      "prize_manwon": null,
+      "apply_methods": [],
       "last_changed_at": null,
       "change_flags": [],
       "is_manual_reviewed": false,

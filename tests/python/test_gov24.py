@@ -116,6 +116,15 @@ def test_application_period(monkeypatch):
     assert items["A3"].date_kind == "inquiry"
 
 
+def test_application_methods_are_read_from_the_joined_list(monkeypatch):
+    methods = {"A1": "기타 온라인신청||방문신청", "A2": "정부24온라인신청", "A3": "신청불필요", "A4": "직접입력", "A5": "방문신청||직접입력"}
+    pages = {"serviceList": [[service(key, "경기도 오산시", 신청방법=text) for key, text in methods.items()]], "supportConditions": [[]]}
+
+    items = {item.source_post_id: item.apply_methods for item in collector(FakeClient(pages), monkeypatch).collect(NOW)}
+
+    assert items == {"A1": ["online", "visit"], "A2": ["online"], "A3": ["none"], "A4": [], "A5": ["visit"]}
+
+
 def test_missing_key_raises(monkeypatch):
     with pytest.raises(FetchError, match="GOV24_API_KEY"):
         collector(FakeClient(three_services()), monkeypatch, key=None).collect(NOW)

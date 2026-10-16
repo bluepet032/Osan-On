@@ -55,18 +55,13 @@ export interface Opportunity {
   eligibility?: string
   benefits?: string
   location?: string
-  mode?: string
-  fee?: string
-  is_adjacent?: boolean
   /** Benefit field tab. */
   domain?: Domain
   jurisdiction?: Jurisdiction
   /** null = the source has no condition record, so eligibility needs a manual check. */
   conditions?: Conditions | null
-  /** Region names from pipeline/facets.py; empty when the source does not say. */
-  regions?: string[]
-  /** Prize in 10,000 won; 0 = prize mentioned without amount, null = no information. */
-  prize_manwon?: number | null
+  /** "online", "visit", "none" (no application needed); empty when the source does not say. */
+  apply_methods?: string[]
   last_changed_at?: string | null
   change_flags?: string[]
   is_manual_reviewed?: boolean
@@ -94,8 +89,8 @@ export interface CrawlStatus {
   error?: string | null
   previous_collected_count?: number | null
   /** Share (0–1) of collected items carrying each advanced-filter fact; absent before it was recorded. */
-  facet_coverage?: Partial<Record<'region' | 'mode' | 'fee' | 'audience' | 'prize', number>> | null
-  previous_facet_coverage?: Partial<Record<'region' | 'mode' | 'fee' | 'audience' | 'prize', number>> | null
+  facet_coverage?: Partial<Record<'apply', number>> | null
+  previous_facet_coverage?: Partial<Record<'apply', number>> | null
 }
 
 export interface PersonalState {

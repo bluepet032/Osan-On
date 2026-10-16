@@ -1,28 +1,24 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-16T22:06:12+09:00",
+  "generated_at": "2026-10-16T22:43:05+09:00",
   "items": [
     {
       "source_id": "gov24",
       "source_name": "정부24",
       "status": "success",
-      "started_at": "2026-10-16T22:06:12+09:00",
-      "finished_at": "2026-10-16T22:06:34+09:00",
+      "started_at": "2026-10-16T22:43:05+09:00",
+      "finished_at": "2026-10-16T22:43:29+09:00",
       "collected_count": 1279,
       "published_count": 1279,
       "review_count": 0,
-      "new_count": 1278,
+      "new_count": 15,
       "changed_count": 0,
       "consecutive_failures": 0,
-      "last_success_at": "2026-10-16T22:06:12+09:00",
+      "last_success_at": "2026-10-16T22:43:05+09:00",
       "error": null,
-      "previous_collected_count": null,
+      "previous_collected_count": 1279,
       "facet_coverage": {
-        "region": 0.045,
-        "mode": 0.002,
-        "fee": 0.001,
-        "audience": 0.0,
-        "prize": 0.016
+        "apply": 0.922
       },
       "previous_facet_coverage": null
     }

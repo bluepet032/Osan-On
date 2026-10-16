@@ -49,11 +49,24 @@ def test_facet_coverage_is_recorded_and_kept_as_baseline_through_failures(monkey
     failed = run_once(monkeypatch, output, None, 2)
     recovered = run_once(monkeypatch, output, 4, 3)
 
-    assert set(first["facet_coverage"]) == {"region", "mode", "fee", "audience", "prize"}
+    assert set(first["facet_coverage"]) == {"apply"}
     assert first["previous_facet_coverage"] is None
     assert failed["facet_coverage"] is None
     assert failed["previous_facet_coverage"] == first["facet_coverage"]
     assert recovered["previous_facet_coverage"] == first["facet_coverage"]
+
+
+def test_baseline_drops_coverage_of_filters_that_no_longer_exist(monkeypatch, tmp_path: Path):
+    output = tmp_path / "data"
+    run_once(monkeypatch, output, 4, 1)
+    path = output / "sources.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["items"][0]["facet_coverage"] = {"region": 0.4, "apply": 0.0}
+    path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+
+    second = run_once(monkeypatch, output, 4, 2)
+
+    assert second["previous_facet_coverage"] == {"apply": 0.0}
 
 
 def test_recent_deadlines_survive_missing_posts_and_newer_copies_win(monkeypatch, tmp_path: Path):

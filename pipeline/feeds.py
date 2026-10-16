@@ -41,9 +41,8 @@ def feed_xml(items: list[Opportunity], label: str, now: datetime) -> bytes:
 def write_feeds(output_dir: Path, items: list[Opportunity], now: datetime) -> None:
     """One feed for all fields and one per field tab, matching the site's default list."""
 
-    visible = [item for item in items if not item.is_adjacent]
-    feeds = {"feed.xml": (visible, "전체 분야")}
-    feeds.update({f"feed-{domain}.xml": ([item for item in visible if item.domain == domain], label) for domain, label in DOMAIN_LABELS.items()})
+    feeds = {"feed.xml": (items, "전체 분야")}
+    feeds.update({f"feed-{domain}.xml": ([item for item in items if item.domain == domain], label) for domain, label in DOMAIN_LABELS.items()})
     for filename, (selected, label) in feeds.items():
         path = output_dir / filename
         temporary = path.with_suffix(path.suffix + ".tmp")

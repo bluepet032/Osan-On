@@ -13,7 +13,7 @@ export interface OpportunityFilters {
   status: string
   /** Jurisdiction tab: 'all' or osan / gyeonggi / national; absent means all. */
   place?: string
-  /** Optional detail conditions (region, mode, fee, audience, prize). */
+  /** Optional detail conditions (how to apply). */
   advanced?: AdvancedFilters
 }
 
@@ -31,7 +31,6 @@ function indexOf(item: Opportunity) {
 export function matchesOpportunity(item: Opportunity, filters: OpportunityFilters, options: { fuzzy?: boolean } = {}) {
   if (filters.place && filters.place !== 'all' && item.jurisdiction !== filters.place) return false
   if (filters.domain !== 'all' && domainOf(item) !== filters.domain) return false
-  if (item.is_adjacent && filters.type === 'all') return false
   if (filters.type !== 'all' && item.primary_type !== filters.type) return false
   if (filters.quick && !matchesQuickTag(item, filters.quick)) return false
   if (filters.field && !item.field_tags.includes(filters.field)) return false
@@ -42,7 +41,7 @@ export function matchesOpportunity(item: Opportunity, filters: OpportunityFilter
   return !terms.length || matchesSearch(indexOf(item), terms, options.fuzzy)
 }
 
-export type Sort = 'local' | 'deadline' | 'newest' | 'updated' | 'relevance' | 'prize'
+export type Sort = 'local' | 'deadline' | 'newest' | 'updated'
 
 // 오산온 is for Osan residents, so the city's own benefits come first.
 const LOCAL_RANK: Record<string, number> = { osan: 0, gyeonggi: 1, national: 2 }
@@ -54,9 +53,6 @@ export function compareOpportunities(sort: Sort) {
     if (sort === 'local') return (LOCAL_RANK[left.jurisdiction ?? 'national'] - LOCAL_RANK[right.jurisdiction ?? 'national']) || byDeadline(left, right)
     if (sort === 'newest') return Date.parse(right.first_seen_at) - Date.parse(left.first_seen_at)
     if (sort === 'updated') return Date.parse(right.last_changed_at || right.last_seen_at) - Date.parse(left.last_changed_at || left.last_seen_at)
-    if (sort === 'relevance') return right.relevance.score - left.relevance.score
-    // Notices without a known prize go last; equal prizes show the sooner deadline first.
-    if (sort === 'prize') return (right.prize_manwon ?? -1) - (left.prize_manwon ?? -1) || byDeadline(left, right)
     return byDeadline(left, right)
   }
 }

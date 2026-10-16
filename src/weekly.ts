@@ -37,7 +37,7 @@ export interface WeeklyDigest {
 export function weeklyDigest(items: Opportunity[], domain: Domain | 'all', now = new Date()): WeeklyDigest {
   const today = kstDate(now)
   const { thisWeek, nextWeek } = weekRanges(today)
-  const pool = items.filter(item => !item.is_adjacent && (domain === 'all' || domainOf(item) === domain))
+  const pool = items.filter(item => domain === 'all' || domainOf(item) === domain)
   const since = now.getTime() - 7 * DAY_MS
   return {
     thisWeek,

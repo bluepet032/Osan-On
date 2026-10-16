@@ -19,7 +19,7 @@ DROP_MIN_BASELINE = 10
 # Low baselines are too noisy to judge, so only facts most items used to carry are checked.
 COVERAGE_DROP_RATIO = 0.5
 COVERAGE_MIN_BASELINE = 0.2
-FACET_LABELS = {"region": "지역", "mode": "진행 방식", "fee": "참가비", "audience": "참가 대상", "prize": "상금"}
+FACET_LABELS = {"apply": "신청 방법"}
 FAILURE_PREFIX = "[수집 실패]"
 DROP_PREFIX = "[수집 급감]"
 COVERAGE_PREFIX = "[필터 정보 급감]"
