@@ -125,9 +125,15 @@ test('field tabs, typo-tolerant search and source badges', async ({ page }) => {
   await expect(page.locator('.opportunity')).toHaveCount(1)
 })
 
-test('weekly digest lists deadlines this week', async ({ page }) => {
-  await routeActive(page, [opportunity({ title: '오늘 마감 게임 공모전', recruit_end: isoDay(0), d_day: 0 })])
+test('weekly digest lists deadlines this week and leaves out benefits the profile rules out', async ({ page }) => {
+  await routeActive(page, [
+    opportunity({ title: '오늘 마감 게임 공모전', recruit_end: isoDay(0), d_day: 0 }),
+    opportunity({ id: 'men-only', title: '남성 전용 혜택', source_url: 'https://example.com/men', recruit_end: isoDay(0), d_day: 0, conditions: { codes: ['JA0101'], age_min: null, age_max: null } }),
+  ])
+  await page.addInitScript(() => localStorage.setItem('osanon.profile', JSON.stringify({ gender: 'female', age: 28 })))
   await page.goto('/#/weekly')
+  await expect(page.getByText("'해당 없음'인 혜택 1건은 뺐습니다")).toBeVisible()
+  await expect(page.getByText('남성 전용 혜택')).toHaveCount(0)
   await expect(page.getByRole('heading', { name: '주간 요약' })).toBeVisible()
   const thisWeek = page.locator('section[aria-labelledby="closing-this-week"]')
   await expect(thisWeek).toContainText('오늘 마감 게임 공모전')
@@ -196,7 +202,7 @@ test('each notice has its own shareable page', async ({ page }) => {
   await expect(page.getByRole('link', { name: '원문 보기' })).toHaveAttribute('href', 'https://example.com/contest')
 
   await page.goto('/#/notice/no-such-notice')
-  await expect(page.getByText('공고를 찾을 수 없습니다')).toBeVisible()
+  await expect(page.getByText('혜택을 찾을 수 없습니다')).toBeVisible()
 })
 
 test('the list links to the RSS feed of the selected field', async ({ page }) => {

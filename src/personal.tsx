@@ -2,7 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import type { DocumentData } from 'firebase/firestore'
 import { useAccount } from './account'
 import { loadOpportunities } from './data'
-import { dueReminders, isNewKeywordMatch, kstDate, matchesPersonalKeyword } from './personalLogic'
+import { dueReminders, isNewKeywordMatch, kstDate, matchesPersonalKeyword, newEligibleItems } from './personalLogic'
+import { useProfile } from './profileContext'
 import type { Opportunity, PersonalState } from './types'
 import { readStorage, writeStorage } from './utils'
 
@@ -22,7 +23,7 @@ export interface PersonalKeyword {
 
 export interface PersonalNotification {
   id: string
-  type: 'schedule' | 'keyword'
+  type: 'schedule' | 'keyword' | 'eligible'
   title: string
   message: string
   opportunityId: string
@@ -98,7 +99,7 @@ function keywordFromDocument(id: string, data: DocumentData): PersonalKeyword | 
 }
 
 function notificationFromDocument(id: string, data: DocumentData): PersonalNotification | null {
-  if ((data.type !== 'schedule' && data.type !== 'keyword') || typeof data.title !== 'string' || typeof data.message !== 'string') return null
+  if (!['schedule', 'keyword', 'eligible'].includes(data.type) || typeof data.title !== 'string' || typeof data.message !== 'string') return null
   return {
     id,
     type: data.type,
@@ -118,6 +119,7 @@ function noticeId(value: string) {
 
 export function PersonalProvider({ children }: { children: ReactNode }) {
   const { user, ready: accountReady, openLogin, firebase } = useAccount()
+  const { profile, since: profileSince } = useProfile()
   const userId = user?.uid || ''
   const [local, setLocal] = useState<PersonalState>(loadLocalState)
   const [favorites, setFavorites] = useState<SavedOpportunity[]>([])
@@ -234,7 +236,7 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
         setPublishedReady(true)
       }).catch(reason => {
         if (active && currentRequest === request) {
-          setError(reason instanceof Error ? reason.message : '맞춤 공고를 불러오지 못했습니다.')
+          setError(reason instanceof Error ? reason.message : '혜택 데이터를 불러오지 못했습니다.')
           setPublishedReady(true)
         }
       })
@@ -290,8 +292,21 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
       const id = noticeId('keyword:' + item.id)
       candidates.set(id, {
         type: 'keyword',
-        title: '새 맞춤 공고',
+        title: '새 키워드 혜택',
         message: item.title + ' · ' + matchedWords.join(', '),
+        opportunityId: item.id,
+        sourceUrl: item.source_url,
+        date: '',
+        read: false,
+        createdAt: new Date().toISOString(),
+      })
+    }
+
+    for (const item of newEligibleItems(publishedItems, profile, profileSince)) {
+      candidates.set(noticeId('eligible:' + item.id), {
+        type: 'eligible',
+        title: '내 조건에 맞는 새 혜택',
+        message: item.title + ' · ' + item.organizer,
         opportunityId: item.id,
         sourceUrl: item.source_url,
         date: '',
@@ -326,7 +341,7 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
       if (active) setError(reason instanceof Error ? reason.message : '알림을 갱신하지 못했습니다.')
     })
     return () => { active = false }
-  }, [userId, dataUserId, firebase, storeReady, publishedReady, currentFavorites, currentKeywords, currentNotifications, publishedItems])
+  }, [userId, dataUserId, firebase, storeReady, publishedReady, currentFavorites, currentKeywords, currentNotifications, publishedItems, profile, profileSince])
 
   const state = useMemo(() => ({
     ...local,
@@ -422,7 +437,7 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
     if (!userId || !firebase) return
     const { db, firestore: fs } = firebase
     if (details.resultDate && !/^\d{4}-\d{2}-\d{2}$/.test(details.resultDate)) {
-      setError('합격 발표일은 날짜를 선택해 입력해 주세요.')
+      setError('선정 발표일은 날짜를 선택해 입력해 주세요.')
       return
     }
     if (details.note && details.note.length > 500) {

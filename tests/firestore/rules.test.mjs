@@ -30,6 +30,7 @@ await check('toggle reminders', assertSucceeds(updateDoc(doc(alice, 'users/alice
 await check('save result date and note', assertSucceeds(updateDoc(doc(alice, 'users/alice/favorites/f1'), { resultDate: '2026-11-01', note: '메모', updatedAt: new Date().toISOString() })))
 await check('add keyword', assertSucceeds(addDoc(collection(alice, 'users/alice/keywords'), { word: '게임', createdAt: new Date().toISOString() })))
 await check('create schedule notification', assertSucceeds(setDoc(doc(alice, 'users/alice/notifications/n1'), { ...notification, type: 'schedule', date: '2026-10-20' })))
+await check('create eligible-benefit notification', assertSucceeds(setDoc(doc(alice, 'users/alice/notifications/n4'), { ...notification, type: 'eligible', title: '내 조건에 맞는 새 혜택' })))
 await check('mark notification read', assertSucceeds(updateDoc(doc(alice, 'users/alice/notifications/n1'), { read: true })))
 await check('delete notification', assertSucceeds(deleteDoc(doc(alice, 'users/alice/notifications/n1'))))
 await check('delete favorite', assertSucceeds(deleteDoc(doc(alice, 'users/alice/favorites/f1'))))

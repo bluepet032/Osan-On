@@ -26,13 +26,13 @@ export function NoticePage() {
 
   return (
     <main id="main-content" className="container">
-      <p><a href="#/">← 전체 공고</a></p>
+      <p><a href="#/">← 전체 혜택</a></p>
       {error && <div className="message error" role="alert">{error}</div>}
-      {!error && item === undefined && <div className="message" role="status">공고를 불러오는 중입니다…</div>}
-      {item === null && <div className="message"><strong>공고를 찾을 수 없습니다</strong><span>마감 후 3개월이 지나 목록에서 빠졌거나 주소가 잘못되었을 수 있습니다.</span></div>}
+      {!error && item === undefined && <div className="message" role="status">혜택을 불러오는 중입니다…</div>}
+      {item === null && <div className="message"><strong>혜택을 찾을 수 없습니다</strong><span>마감 후 3개월이 지나 목록에서 빠졌거나 주소가 잘못되었을 수 있습니다.</span></div>}
       {item && <>
         <div className="page-heading"><div><p className="eyebrow">NOTICE</p><h1>{item.title}</h1></div></div>
-        <section className="opportunity-list" aria-label="공고"><OpportunityRow item={item} personal={personal} onToggle={toggle} defaultExpanded /></section>
+        <section className="opportunity-list" aria-label="혜택"><OpportunityRow item={item} personal={personal} onToggle={toggle} defaultExpanded /></section>
       </>}
     </main>
   )

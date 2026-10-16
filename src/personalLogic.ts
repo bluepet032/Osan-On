@@ -1,7 +1,8 @@
+import { hasBasics, judge, type Profile } from './eligibility'
 import type { Opportunity } from './types'
 
 export interface Reminder {
-  milestone: '모집 마감' | '행사 시작' | '행사 종료' | '합격 발표'
+  milestone: '신청 마감' | '행사 시작' | '행사 종료' | '선정 발표'
   date: string
   daysBefore: number
 }
@@ -30,10 +31,10 @@ function addReminders(reminders: Reminder[], milestone: Reminder['milestone'], d
 
 export function dueReminders(item: Opportunity, today: string, resultDate?: string | null): Reminder[] {
   const reminders: Reminder[] = []
-  if (item.date_kind === 'exact') addReminders(reminders, '모집 마감', item.recruit_end, today, [7, 3, 1, 0])
+  if (item.date_kind === 'exact') addReminders(reminders, '신청 마감', item.recruit_end, today, [7, 3, 1, 0])
   addReminders(reminders, '행사 시작', item.event_start, today, [1, 0])
   addReminders(reminders, '행사 종료', item.event_end, today, [1, 0])
-  addReminders(reminders, '합격 발표', resultDate, today, [1, 0])
+  addReminders(reminders, '선정 발표', resultDate, today, [1, 0])
   return reminders
 }
 
@@ -61,4 +62,15 @@ export function isNewKeywordMatch(item: Opportunity, keyword: string, savedAt: s
   const firstSeen = Date.parse(item.first_seen_at)
   const saved = Date.parse(savedAt)
   return Number.isFinite(firstSeen) && Number.isFinite(saved) && firstSeen > saved && matchesPersonalKeyword(item, keyword)
+}
+
+/** Benefits first collected after `since` (when the profile was saved) that likely fit it, newest first. */
+export function newEligibleItems(items: Opportunity[], profile: Profile, since: string, limit = 20): Opportunity[] {
+  const saved = Date.parse(since)
+  // Without gender and age, benefits with no conditions at all would all count as a fit.
+  if (!Number.isFinite(saved) || !hasBasics(profile)) return []
+  return items
+    .filter(item => Date.parse(item.first_seen_at) > saved && judge(item, profile).verdict === 'eligible')
+    .sort((left, right) => Date.parse(right.first_seen_at) - Date.parse(left.first_seen_at))
+    .slice(0, limit)
 }

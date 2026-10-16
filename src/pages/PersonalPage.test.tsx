@@ -32,7 +32,7 @@ describe('PersonalPage favorite details', () => {
 
   it('reflects Firestore updates and does not write a stale untouched field back', async () => {
     const view = render(<PersonalPage />)
-    const resultDate = screen.getByLabelText('합격 발표일')
+    const resultDate = screen.getByLabelText('선정 발표일')
     const note = screen.getByLabelText('메모')
     expect(resultDate).toHaveValue('2026-11-01')
     expect(note).toHaveValue('처음 메모')

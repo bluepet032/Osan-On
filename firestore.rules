@@ -72,7 +72,7 @@ service cloud.firestore {
         allow read, delete: if isOwner(uid);
         allow create: if isOwner(uid)
           && request.resource.data.keys().hasOnly(['type', 'title', 'message', 'opportunityId', 'sourceUrl', 'date', 'read', 'createdAt'])
-          && request.resource.data.type in ['schedule', 'keyword']
+          && request.resource.data.type in ['schedule', 'keyword', 'eligible']
           && shortString(request.resource.data.title, 200)
           && shortString(request.resource.data.message, 2000)
           && shortString(request.resource.data.opportunityId, 100)

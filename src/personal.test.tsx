@@ -12,7 +12,10 @@ const mocks = vi.hoisted(() => ({
   setDocument: vi.fn(),
   transactions: vi.fn(),
   user: { uid: 'test-user' } as { uid: string } | null,
+  profile: {} as Record<string, unknown>,
+  since: '',
 }))
+vi.mock('./profileContext', () => ({ useProfile: () => ({ profile: mocks.profile, since: mocks.since }) }))
 
 // Firebase arrives through the account context once loaded; here it is the mocked Firestore below.
 // One stable object, like the provider's state, so effects that depend on it do not re-run every render.
@@ -68,6 +71,8 @@ describe('personal data connections', () => {
     mocks.deleteDoc.mockReset().mockResolvedValue(undefined)
     mocks.setDocument.mockReset()
     mocks.transactions.mockReset()
+    mocks.profile = {}
+    mocks.since = ''
     mocks.records = {
       favorites: [{ id: 'notice-1', data: () => ({ item: savedItem, remindersEnabled: true, note: '내 메모', resultDate: '2030-11-01' }) }],
       keywords: [], notifications: [],
@@ -105,7 +110,7 @@ describe('personal data connections', () => {
 
   it('refreshes favorites and removes outdated schedule alerts when public data is reloaded', async () => {
     let latest = { ...savedItem, recruit_end: '2026-10-14' }
-    const notificationId = encodeURIComponent('schedule:notice-1:모집 마감:2026-10-14:1')
+    const notificationId = encodeURIComponent('schedule:notice-1:신청 마감:2026-10-14:1')
     mocks.records.notifications = [{ id: notificationId, data: () => ({ type: 'schedule', title: '기존 알림', message: '마감', date: '2026-10-14' }) }]
     vi.stubGlobal('fetch', vi.fn().mockImplementation(async () => ({ ok: true, json: async () => ({ schema_version: 1, items: [latest] }) })))
     render(<PersonalProvider><Probe /></PersonalProvider>)
@@ -144,6 +149,18 @@ describe('personal data connections', () => {
     await waitFor(() => expect(readState().loading).toBe(false))
     await act(async () => {})
     expect(mocks.deleteDoc).not.toHaveBeenCalled()
+  })
+
+  it('alerts new benefits that likely fit the saved profile', async () => {
+    mocks.records.favorites = []
+    mocks.profile = { gender: 'female', age: 30 }
+    mocks.since = '2026-09-01T00:00:00+09:00'
+    const fit = { ...savedItem, id: 'fit', title: '여성 청년 지원', conditions: { codes: ['JA0102'], age_min: 19, age_max: 39 } }
+    const unfit = { ...savedItem, id: 'unfit', conditions: { codes: ['JA0101'], age_min: null, age_max: null } }
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ schema_version: 1, items: [fit, unfit] }) }))
+    render(<PersonalProvider><Probe /></PersonalProvider>)
+    await waitFor(() => expect(mocks.setDocument).toHaveBeenCalledWith('users/test-user/notifications/' + encodeURIComponent('eligible:fit'), expect.objectContaining({ type: 'eligible', title: '내 조건에 맞는 새 혜택', opportunityId: 'fit' })))
+    expect(mocks.setDocument).not.toHaveBeenCalledWith('users/test-user/notifications/' + encodeURIComponent('eligible:unfit'), expect.anything())
   })
 
   it('keeps working when the browser blocks site data', () => {

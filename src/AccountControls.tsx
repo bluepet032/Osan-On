@@ -65,7 +65,7 @@ export function AccountDialogs() {
         <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="migration-title" tabIndex={-1}>
           <section className="modal-card">
             <h2 id="migration-title">이 브라우저의 기존 찜</h2>
-            <p>기존 브라우저 찜 {personal.localFavoriteCount}개를 계정 찜과 합칠까요? 같은 공고는 한 번만 저장하며, 이미 계정에 있는 내용은 덮어쓰지 않습니다.</p>
+            <p>기존 브라우저 찜 {personal.localFavoriteCount}개를 계정 찜과 합칠까요? 같은 혜택은 한 번만 저장하며, 이미 계정에 있는 내용은 덮어쓰지 않습니다.</p>
             <ul className="migration-list">
               {personal.localFavoriteItems.slice(0, 8).map(item => <li key={item.id}>{item.title}</li>)}
               {personal.localFavoriteCount > personal.localFavoriteItems.length && <li>목록에서 찾지 못한 {personal.localFavoriteCount - personal.localFavoriteItems.length}개는 브라우저에 남습니다.</li>}

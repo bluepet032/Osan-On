@@ -39,7 +39,7 @@ export function OpportunityRow({ item, personal, onToggle, defaultExpanded = fal
         </div>
         <p>{item.summary}</p>
         <div className="mobile-meta">{item.organizer} · {STATUS_LABELS[item.status]}</div>
-        <div className="tags" aria-label="공고 분류">
+        <div className="tags" aria-label="혜택 분류">
           <span className={`badge type-badge type-${item.primary_type}`}>{TYPE_LABELS[item.primary_type]}</span>
           {[...item.field_tags, ...item.audience_tags].slice(0, 5).map(tag => <span className="badge tag" key={tag}>{tag}</span>)}
         </div>

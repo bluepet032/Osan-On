@@ -8,6 +8,8 @@ interface ProfileContextValue {
   setProfile: (profile: Profile) => void
   /** True while signed in: the profile is also kept in the account. */
   synced: boolean
+  /** When the account copy was last saved; new-benefit alerts start from here. Empty when signed out. */
+  since: string
   error: string
 }
 
@@ -17,19 +19,22 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const { user, firebase } = useAccount()
   const [profile, setLocal] = useState<Profile>(loadProfile)
   const [error, setError] = useState('')
+  const [since, setSince] = useState('')
   const uid = user?.uid ?? ''
 
   useEffect(() => {
-    if (!uid || !firebase) return
+    if (!uid || !firebase) { setSince(''); return }
     const { db, firestore: fs } = firebase
     const reference = fs.doc(db, 'users', uid, 'profile', 'main')
     let active = true
     const stop = fs.onSnapshot(reference, snapshot => {
       if (!active) return
       if (snapshot.exists()) {
-        const remote = profileFromDocument(snapshot.data())
+        const data = snapshot.data()
+        const remote = profileFromDocument(data)
         saveProfile(remote)
         setLocal(remote)
+        setSince(typeof data.updatedAt === 'string' ? data.updatedAt : '')
         return
       }
       // First sign-in on this account: keep what was entered before logging in.
@@ -46,10 +51,12 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     setError('')
     if (!uid || !firebase) return
     const { db, firestore: fs } = firebase
-    fs.setDoc(fs.doc(db, 'users', uid, 'profile', 'main'), profileToDocument(next)).catch(() => setError('맞춤 조건을 계정에 저장하지 못했습니다.'))
+    const data = profileToDocument(next)
+    setSince(data.updatedAt as string)
+    fs.setDoc(fs.doc(db, 'users', uid, 'profile', 'main'), data).catch(() => setError('맞춤 조건을 계정에 저장하지 못했습니다.'))
   }, [uid, firebase])
 
-  return <ProfileContext.Provider value={{ profile, setProfile, synced: Boolean(uid && firebase), error }}>{children}</ProfileContext.Provider>
+  return <ProfileContext.Provider value={{ profile, setProfile, synced: Boolean(uid && firebase), since, error }}>{children}</ProfileContext.Provider>
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
