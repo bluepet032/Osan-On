@@ -6,7 +6,7 @@ const isoDay = (offset: number) => new Date(Date.now() + 9 * 3_600_000 + offset 
 const opportunity = (overrides: Record<string, unknown>) => ({
   id: 'contest-1', title: 'AI 인디게임 공모전', source_name: '테스트 출처', source_url: 'https://example.com/contest',
   organizer: '게임재단', summary: '대학생 개발팀이 AI 인디게임을 제작해 출품하는 공모전으로 자세한 참가 조건과 일정은 원문에서 확인합니다.',
-  primary_type: 'contest', field_tags: ['게임', 'AI', '인디'], audience_tags: ['대학생'], status: 'open',
+  primary_type: 'cash', field_tags: ['게임', 'AI', '인디'], audience_tags: ['대학생'], status: 'open',
   relevance: { score: 90, reasons: ['테스트'], decision: 'publish' }, first_seen_at: '2026-07-30T10:00:00+09:00',
   last_seen_at: '2026-07-30T10:00:00+09:00', sources: [{ source_id: 'test', source_name: '테스트 출처', source_url: 'https://example.com/contest', kind: 'official', priority: 100 }],
   recruit_start: isoDay(-10), recruit_end: isoDay(21), date_kind: 'exact', d_day: 21, fee: 'free', mode: 'online',
@@ -15,7 +15,7 @@ const opportunity = (overrides: Record<string, unknown>) => ({
 
 test('loads opportunity dashboard and changes theme', async ({ page }) => {
   await page.goto('/#/')
-  await expect(page.getByRole('heading', { name: '지금 도전할 기회' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '나에게 맞는 혜택' })).toBeVisible()
   await page.getByLabel('화면 테마').selectOption('dark')
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 })
@@ -36,7 +36,7 @@ test('requires login for favorites and restores URL and hidden state after reloa
       generated_at: '2026-07-30T12:00:00+09:00',
       items: [
         opportunity({}),
-        opportunity({ id: 'support-1', title: '게임 스타트업 제작지원', summary: '게임 스타트업의 사업화와 콘텐츠 제작비를 지원하며 자세한 대상과 신청 절차는 원문 공고에서 확인합니다.', primary_type: 'support', source_url: 'https://example.com/support', field_tags: ['게임', '창업'], audience_tags: ['창업자·기업'] }),
+        opportunity({ id: 'support-1', title: '게임 스타트업 제작지원', summary: '게임 스타트업의 사업화와 콘텐츠 제작비를 지원하며 자세한 대상과 신청 절차는 원문 공고에서 확인합니다.', primary_type: 'service', source_url: 'https://example.com/support', field_tags: ['게임', '창업'], audience_tags: ['창업자·기업'] }),
       ],
     }),
   }))
@@ -44,18 +44,18 @@ test('requires login for favorites and restores URL and hidden state after reloa
   await page.getByLabel('통합 검색').fill('인디')
   await expect(page).toHaveURL(/q=%EC%9D%B8%EB%94%94/)
   await expect(page.locator('.result-toolbar strong')).toHaveText('1개')
-  await expect(page.getByRole('button', { name: '지원사업 0' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '서비스 0' })).toBeVisible()
   await page.getByRole('button', { name: '관심 등록' }).click()
-  await expect(page.getByRole('dialog', { name: 'QuestBoard 계정' })).toBeVisible()
+  await expect(page.getByRole('dialog', { name: '오산온 계정' })).toBeVisible()
   await page.getByRole('button', { name: '닫기' }).click()
   await page.getByRole('button', { name: '숨김' }).click()
-  await expect(page.getByRole('button', { name: '숨긴 공고 1개 모두 복원' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '숨긴 혜택 1개 모두 복원' })).toBeVisible()
 
   await page.reload()
 
   await expect(page.getByLabel('통합 검색')).toHaveValue('인디')
-  await expect(page.getByRole('button', { name: '숨긴 공고 1개 모두 복원' })).toBeVisible()
-  await page.getByRole('button', { name: '숨긴 공고 1개 모두 복원' }).click()
+  await expect(page.getByRole('button', { name: '숨긴 혜택 1개 모두 복원' })).toBeVisible()
+  await page.getByRole('button', { name: '숨긴 혜택 1개 모두 복원' }).click()
   await expect(page.getByRole('button', { name: '관심 등록' })).toBeVisible()
   await expect(page).toHaveURL(/q=%EC%9D%B8%EB%94%94/)
 })
@@ -99,21 +99,21 @@ test('opening the same notice twice keeps the read state after reload', async ({
 test('field tabs, typo-tolerant search and source badges', async ({ page }) => {
   await routeActive(page, [
     opportunity({}),
-    opportunity({ id: 'video-1', title: '2026 남원시 영상 공모전', organizer: '남원시', summary: '남원의 관광지와 축제를 소재로 한 짧은 영상을 공모하며 자세한 참가 조건과 일정은 원문 공고에서 확인합니다.', source_url: 'https://example.com/video', domain: 'design_media', field_tags: ['영상'], audience_tags: [], relevance: { score: 20, reasons: [], decision: 'publish' }, sources: [{ source_id: 'linkareer', source_name: '링커리어', source_url: 'https://example.com/video', kind: 'aggregate', priority: 40 }] }),
+    opportunity({ id: 'video-1', title: '2026 남원시 영상 공모전', organizer: '남원시', summary: '남원의 관광지와 축제를 소재로 한 짧은 영상을 공모하며 자세한 참가 조건과 일정은 원문 공고에서 확인합니다.', source_url: 'https://example.com/video', domain: 'housing', field_tags: ['영상'], audience_tags: [], relevance: { score: 20, reasons: [], decision: 'publish' }, sources: [{ source_id: 'linkareer', source_name: '링커리어', source_url: 'https://example.com/video', kind: 'aggregate', priority: 40 }] }),
   ])
   await page.goto('/#/')
-  await expect(page.locator('.result-toolbar strong')).toHaveText('1개')
-  await expect(page.locator('.opportunity').first()).toContainText('공식기관')
+  await expect(page.locator('.result-toolbar strong')).toHaveText('2개')
+  await expect(page.locator('.opportunity').filter({ hasText: 'AI 인디게임 공모전' })).toContainText('공식기관')
 
-  await page.getByRole('button', { name: /디자인·영상/ }).click()
-  await expect(page).toHaveURL(/domain=design_media/)
+  await page.getByRole('button', { name: /주거·자립/ }).click()
+  await expect(page).toHaveURL(/domain=housing/)
   await expect(page.locator('.opportunity')).toHaveCount(1)
   await expect(page.locator('.opportunity').first()).toContainText('남원시 영상 공모전')
   await expect(page.locator('.opportunity').first()).toContainText('모음 사이트')
 
   await page.getByRole('button', { name: /모든 분야/ }).click()
   await page.getByLabel('통합 검색').fill('개임')
-  await expect(page.getByText('철자가 비슷한 공고를 보여 드립니다')).toBeVisible()
+  await expect(page.getByText('철자가 비슷한 혜택을 보여 드립니다')).toBeVisible()
   await expect(page.locator('.opportunity')).toHaveCount(1)
 })
 
@@ -150,7 +150,7 @@ test('advanced filters: unknown items, nationwide notices, reload and reset', as
   await expect(page).toHaveURL(/region=%EC%84%9C%EC%9A%B8/)
   await expect(page.locator('.result-toolbar strong')).toHaveText('2개')
   await expect(page.locator('.opportunity')).toContainText(['서울 무료 게임 행사', '전국 게임 공모전'])
-  await expect(page.getByText('정보가 없는 공고 1건은 목록에서 빠져 있습니다')).toBeVisible()
+  await expect(page.getByText('정보가 없는 혜택 1건은 목록에서 빠져 있습니다')).toBeVisible()
 
   await page.getByLabel('참가비').selectOption('free')
   await expect(page.locator('.result-toolbar strong')).toHaveText('2개')
@@ -193,7 +193,28 @@ test('each notice has its own shareable page', async ({ page }) => {
 
 test('the list links to the RSS feed of the selected field', async ({ page }) => {
   await page.goto('/#/')
-  await expect(page.getByRole('link', { name: 'RSS' })).toHaveAttribute('href', /data\/feed-it\.xml$/)
-  await page.goto('/#/?domain=all')
   await expect(page.getByRole('link', { name: 'RSS' })).toHaveAttribute('href', /data\/feed\.xml$/)
+  await page.goto('/#/?domain=living')
+  await expect(page.getByRole('link', { name: 'RSS' })).toHaveAttribute('href', /data\/feed-living\.xml$/)
+})
+
+test('survey answers narrow the list to likely benefits', async ({ page }) => {
+  const conditions = (codes: string[]) => ({ codes, age_min: 19, age_max: 34 })
+  await routeActive(page, [
+    opportunity({ id: 'women', title: '여성 청년 건강검진', source_url: 'https://example.com/women', conditions: conditions(['JA0102']) }),
+    opportunity({ id: 'men', title: '남성 청년 지원', source_url: 'https://example.com/men', conditions: conditions(['JA0101']) }),
+  ])
+  await page.goto('/#/')
+  await page.getByRole('radio', { name: '여성' }).check()
+  await page.getByLabel('만 나이').fill('28')
+  await page.getByRole('button', { name: '맞춤 혜택 보기' }).click()
+
+  await expect(page.getByRole('button', { name: /가능성 높음 1/ })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('.opportunity')).toHaveCount(1)
+  await expect(page.locator('.opportunity')).toContainText('여성 청년 건강검진')
+  await page.getByRole('button', { name: '펼치기' }).click()
+  await expect(page.getByLabel('판정 근거')).toContainText('만 19~34세')
+
+  await page.reload()
+  await expect(page.getByText('여성 · 만 28세')).toBeVisible()
 })

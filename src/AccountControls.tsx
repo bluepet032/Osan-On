@@ -51,7 +51,7 @@ export function AccountDialogs() {
         }}>
           <section className="modal-card">
             <button type="button" className="modal-close" aria-label="닫기" onClick={account.closeLogin}>×</button>
-            <h2 id="login-title">QuestBoard 계정</h2>
+            <h2 id="login-title">오산온 계정</h2>
             <p>Google 계정으로 가입하거나 로그인하면 찜한 공고와 일정, 합격 발표일과 메모, 개인 키워드, 알림 읽음 상태가 계정에 저장되고 기기 간 동기화됩니다.</p>
             <p>저장 정보는 본인 UID 아래 Firestore에 보관됩니다. 계정을 삭제하면 계정 데이터는 함께 삭제됩니다. 이 브라우저에 보관된 확인·숨김과 아직 가져오지 않은 찜은 브라우저에 남습니다. 공고 검색과 열람은 로그인 없이 이용할 수 있습니다.</p>
             {!account.configured && <p className="message-inline" role="status">Firebase 설정이 완료되면 Google 로그인을 사용할 수 있습니다.</p>}

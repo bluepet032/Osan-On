@@ -29,7 +29,7 @@ function fold(line: string): string {
 
 export function favoritesCalendar(favorites: SavedOpportunity[], now = new Date()): string {
   const stamp = now.toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z'
-  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//QuestBoard//Favorites//KO', 'CALSCALE:GREGORIAN']
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Osan-On//Favorites//KO', 'CALSCALE:GREGORIAN']
   for (const { id, item, resultDate } of favorites) {
     const eventEnd = item.event_end?.slice(0, 10) || item.event_start?.slice(0, 10)
     const events: [string, string | undefined, string | undefined][] = [
