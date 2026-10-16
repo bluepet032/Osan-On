@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
+from pipeline.collectors.base import CollectorStructureError
 from pipeline.collectors.bokjiro import BokjiroCollector, conditions_of
 from pipeline.config import SourceConfig
 from pipeline.dedupe import deduplicate
@@ -168,6 +169,17 @@ def test_api_error_response_fails_the_source(monkeypatch):
 
     with pytest.raises(FetchError, match="등록되지 않은 서비스키"):
         collector(Unregistered([]), monkeypatch).collect(NOW)
+
+
+def test_an_empty_page_before_the_end_fails_the_source(monkeypatch):
+    class Hiccup(FakeClient):
+        def get(self, url, headers=None):
+            if "pageNo=2" in url:
+                return Response(url, 200, "<wantedList><totalCount>3</totalCount><resultCode>0</resultCode></wantedList>", "text/xml")
+            return super().get(url, headers)
+
+    with pytest.raises(CollectorStructureError, match="3건 중 2건"):
+        collector(Hiccup([list_row("O1"), list_row("O2"), list_row("O3")], per_page=2), monkeypatch).collect(NOW, limit=100)
 
 
 def benefit(source_id: str, title: str, place: str, priority: int, conditions: dict | None = None):

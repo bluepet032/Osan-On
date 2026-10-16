@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
+from pipeline.collectors.base import CollectorStructureError
 from pipeline.collectors.gov24 import Gov24Collector
 from pipeline.config import SourceConfig
 from pipeline.http import FetchError, Response
@@ -100,6 +101,15 @@ def test_reads_every_page(monkeypatch):
     gov24.PER_PAGE = 2
 
     assert len(gov24.collect(NOW)) == 3
+
+
+def test_an_empty_page_before_the_end_fails_the_source(monkeypatch):
+    pages = {"serviceList": [[service("A1", "경기도 오산시"), service("A2", "경기도 오산시")], [], [service("A3", "경기도 오산시")]], "supportConditions": [[]]}
+    gov24 = collector(FakeClient(pages), monkeypatch)
+    gov24.PER_PAGE = 2
+
+    with pytest.raises(CollectorStructureError, match="3건 중 2건"):
+        gov24.collect(NOW)
 
 
 def test_application_period(monkeypatch):

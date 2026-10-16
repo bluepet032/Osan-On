@@ -55,7 +55,7 @@ function AppContent() {
         <Route path="/status" element={admin ? <StatusPage /> : <AdminOnly />} />
         <Route path="/my" element={<PersonalPage />} />
       </Routes>
-      <footer><div className="container"><strong>오산온</strong><p>정부24 공공서비스 정보를 바탕으로 해당 가능성을 안내합니다. 실제 자격과 신청 방법은 반드시 소관 기관 원문에서 확인하세요.</p></div></footer>
+      <footer><div className="container"><strong>오산온</strong><p>정부24·복지로 공공데이터를 바탕으로 해당 가능성을 안내합니다. 실제 자격과 신청 방법은 반드시 소관 기관 원문에서 확인하세요.</p></div></footer>
       <AccountDialogs />
     </>
   )
