@@ -259,11 +259,15 @@ footer strong { color: var(--text); }
   .status-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* A signed-in admin's header (five links plus the account name) needs about 920px in one row, so the menu moves to its own row below that. */
+@media (max-width: 1000px) {
+  .header-inner { height: auto; min-height: 68px; flex-wrap: wrap; gap: 8px; padding: 10px 0; }
+  .site-header nav { order: 3; width: 100%; overflow-x: auto; }
+}
+
 @media (max-width: 780px) {
   .container, .header-inner { width: min(100% - 28px, 1480px); }
-  .header-inner { height: auto; min-height: 68px; flex-wrap: wrap; gap: 8px; padding: 10px 0; }
   .brand small { display: none; }
-  .site-header nav { order: 3; width: 100%; overflow-x: auto; }
   .site-header nav a { white-space: nowrap; }
   .page-heading { align-items: stretch; flex-direction: column; padding-top: 34px; }
   .summary-cards { grid-template-columns: repeat(3, 1fr); }
