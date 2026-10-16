@@ -13,11 +13,13 @@ from pipeline.models import RawOpportunity
 
 
 # 복지로 대상자(trgterIndvdlNmArray) → 정부24 support condition codes, so src/eligibility.ts can judge them.
-# 저소득 has no single threshold; 중위소득 100% 이하 errs toward showing the benefit.
+# 저소득 has no single threshold; 중위소득 100% 이하 errs toward showing the benefit, and INFERRED_TARGETS
+# marks the band as a guess so src/eligibility.ts never calls it a sure match.
 TARGET_CODES = {
     "장애인": ["JA0328"], "보훈대상자": ["JA0329"], "한부모·조손": ["JA0403"], "다자녀": ["JA0411"],
     "다문화·탈북민": ["JA0401", "JA0402"], "저소득": ["JA0201", "JA0202", "JA0203"],
 }
+INFERRED_TARGETS = {"저소득"}
 APPLY_WORDS = (("인터넷", "online"), ("모바일", "online"), ("E-mail", "online"), ("방문", "visit"))
 # 생애주기(lifeNmArray) → generous 만 나이 ranges (경기도·오산시 청년 조례, 노인복지 사업의 60세 기준).
 # Only stages whose applicant is the person themselves: parents apply for 영유아·아동·청소년 services,
@@ -67,7 +69,8 @@ def conditions_of(targets: str | None, stages: str | None = None) -> dict | None
     codes = sorted({code for name in names for code in TARGET_CODES[name]})
     if len({code[:4] for code in codes}) > 1:
         return None
-    return {"codes": codes, "age_min": None, "age_max": None}
+    inferred = [name for name in names if name in INFERRED_TARGETS]
+    return {"codes": codes, "age_min": None, "age_max": None, **({"inferred": inferred} if inferred else {})}
 
 
 # Gyeonggi's cities and counties other than Osan.

@@ -51,7 +51,8 @@ describe('personal opportunity rules', () => {
   })
 
   it('lists benefits that appeared after the profile was saved and likely fit it, newest first', () => {
-    const benefit = (id: string, firstSeen: string, codes: string[]) => ({ ...item, id, first_seen_at: firstSeen, conditions: { codes, age_min: null, age_max: null } })
+    // An empty condition record no longer reads as a fit, so the open benefits say so in the text.
+    const benefit = (id: string, firstSeen: string, codes: string[]) => ({ ...item, id, first_seen_at: firstSeen, eligibility: '전 국민', conditions: { codes, age_min: null, age_max: null } })
     const items = [
       benefit('old', '2026-10-01T00:00:00+09:00', []),
       benefit('new-fit', '2026-10-05T00:00:00+09:00', []),

@@ -54,7 +54,6 @@ export function OpportunityRow({ item, personal, onToggle, defaultExpanded = fal
         <div className="details">
           {judgement && (
             <div className="verdict-reasons" role="group" aria-label="판정 근거">
-              {judgement.reasons.length === 0 && <div className="reason-box reason-ok"><strong>이래서 해당될 수 있어요</strong><ul><li>성별·나이·소득 등 별도 조건 없음</li></ul></div>}
               {REASON_BOXES.map(([ok, kind, title]) => {
                 const reasons = judgement.reasons.filter(reason => reason.ok === ok)
                 return reasons.length > 0 && (

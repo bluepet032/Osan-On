@@ -13,6 +13,8 @@ export interface Conditions {
   age_max: number | null
   /** 복지로 생애주기 the ages came from; set only for services without listed targets. */
   life?: string[]
+  /** 복지로 target categories whose codes are a guess (저소득 has no single income threshold). */
+  inferred?: string[]
 }
 
 export interface SourceRecord {
