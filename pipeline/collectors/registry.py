@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pipeline.collectors.base import Collector
+from pipeline.collectors.bokjiro import BokjiroCollector
 from pipeline.collectors.gov24 import Gov24Collector
 from pipeline.collectors.html import StructuredHtmlCollector
 from pipeline.config import SourceConfig
@@ -9,6 +10,7 @@ from pipeline.http import HttpClient
 
 DEFAULT_COLLECTOR = "html"
 COLLECTORS: dict[str, type[Collector]] = {
+    "bokjiro": BokjiroCollector,
     "gov24": Gov24Collector,
     "html": StructuredHtmlCollector,
 }

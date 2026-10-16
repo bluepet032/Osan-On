@@ -11,5 +11,19 @@ sources:
     # The whole catalogue is read and filtered to Osan, Gyeonggi and central ministries.
     limit: 20000
     enabled: true
+  - id: bokjiro
+    name: 복지로
+    kind: government
+    # Below 정부24 so a benefit listed by both keeps 정부24's condition codes as the representative copy.
+    priority: 90
+    schedule: slow
+    mode: api
+    list_url: https://apis.data.go.kr/B554287/LocalGovernmentWelfareInformations/LcgvWelfarelist
+    homepage: https://www.bokjiro.go.kr/
+    # Same 공공데이터포털 key; needs its own 활용신청 (data.go.kr/data/15108347). The 오산시청 site
+    # itself disallows crawlers in robots.txt (checked 2026-10-16), so this API is the Osan source.
+    requires_secret: GOV24_API_KEY
+    limit: 1000
+    enabled: true
 
 fallbacks: []

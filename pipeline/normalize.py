@@ -16,10 +16,13 @@ CATEGORY_DOMAINS = {
     "창업": "jobs", "보건": "health", "의료": "health", "행정": "admin", "안전": "admin",
     "임신": "pregnancy", "출산": "pregnancy", "보호": "care", "돌봄": "care", "문화": "culture",
     "환경": "culture", "농림": "agriculture", "농업": "agriculture", "어업": "agriculture",
+    # 복지로 관심주제
+    "일자리": "jobs", "건강": "health", "입양": "care", "위탁": "care",
 }
 # 정부24 지원유형, checked in order: the detail in brackets wins, so "현금(융자)" is a loan.
 SUPPORT_TYPES = (
-    ("융자", "loan"), ("감면", "reduction"), ("현금", "cash"), ("현물", "in_kind"), ("이용권", "voucher"), ("서비스", "service"),
+    ("융자", "loan"), ("감면", "reduction"), ("현금", "cash"), ("현물", "in_kind"), ("이용권", "voucher"), ("바우처", "voucher"), ("지역화폐", "voucher"),
+    ("서비스", "service"),
 )
 
 
