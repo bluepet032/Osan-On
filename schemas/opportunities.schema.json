@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://questboard.local/schemas/opportunities.schema.json",
+  "title": "QuestBoard opportunities payload",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "items"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "source_name", "source_url", "organizer", "status", "summary", "primary_type", "field_tags", "audience_tags", "first_seen_at", "last_seen_at", "sources", "date_kind", "relevance"],
+        "properties": {
+          "id": { "type": "string", "minLength": 8 },
+          "title": { "type": "string", "minLength": 1 },
+          "source_name": { "type": "string" },
+          "source_url": { "type": "string", "format": "uri" },
+          "organizer": { "type": "string", "minLength": 1 },
+          "summary": { "type": "string", "minLength": 60, "maxLength": 180 },
+          "status": { "enum": ["upcoming", "open", "urgent", "today", "closed", "ongoing", "unknown"] },
+          "date_kind": { "enum": ["exact", "ongoing", "first_come", "budget", "unknown", "inquiry"] },
+          "primary_type": { "enum": ["contest", "support", "hackathon", "event", "education", "supporters", "employment", "other"] },
+          "domain": { "enum": ["it", "design_media", "literature_arts", "planning_ideas", "business"], "description": "분야 탭. 없으면 it(IT·게임)으로 봅니다." },
+          "field_tags": { "type": "array", "items": { "type": "string" } },
+          "audience_tags": { "type": "array", "items": { "type": "string" } },
+          "first_seen_at": { "type": "string", "format": "date-time" },
+          "last_seen_at": { "type": "string", "format": "date-time" },
+          "sources": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["source_id", "source_name", "source_url", "kind", "priority"],
+              "properties": {
+                "source_id": { "type": "string", "minLength": 1 },
+                "source_name": { "type": "string", "minLength": 1 },
+                "source_url": { "type": "string", "format": "uri" },
+                "kind": { "type": "string", "minLength": 1 },
+                "priority": { "type": "integer" }
+              }
+            }
+          },
+          "relevance": {
+            "type": "object",
+            "required": ["score", "reasons", "decision"],
+            "properties": {
+              "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+              "reasons": { "type": "array", "items": { "type": "string" } },
+              "decision": { "enum": ["publish", "review", "exclude"] }
+            }
+          }
+        },
+        "not": { "anyOf": [{ "required": ["classification_inputs"] }, { "required": ["body_text"] }] },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

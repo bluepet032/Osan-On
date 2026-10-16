@@ -1,0 +1,93 @@
+types:
+  contest:
+    label: 공모전
+    keywords: [공모전, 경진대회, 콘테스트, 챌린지, 대회]
+  support:
+    label: 지원사업
+    keywords: [지원사업, 제작지원, 사업화, 창업지원, 지원금, 입주기업, 참가기업]
+  hackathon:
+    label: 해커톤·게임잼
+    keywords: [해커톤, 아이디어톤, 게임잼, game jam]
+  event:
+    label: 행사·네트워킹
+    keywords: [컨퍼런스, 세미나, 밋업, 네트워킹, 박람회, 전시회, 데모데이]
+  education:
+    label: 교육·프로그램
+    keywords: [교육, 부트캠프, 아카데미, 멘토링, 프로그램, 캠프]
+  supporters:
+    label: 서포터즈
+    keywords: [서포터즈, 기자단, 홍보단]
+  employment:
+    label: 채용·인턴
+    keywords: [채용, 인턴, 인턴십, 신입, 취업]
+  other:
+    label: 기타
+    keywords: []
+
+fields:
+  game: [게임, 게임개발, 게임기획, 인디게임, 게임그래픽, 게임아트, 게임사운드, 게임 스킨, 무기 스킨, e스포츠, 언리얼, unreal, 유니티, unity]
+  indie: [인디게임, 인디 게임, indie]
+  ai: [인공지능, 생성형 ai, ai, aix, genai, aiengineering, 머신러닝, machine learning, llm, chatgpt, claude]
+  software: [소프트웨어, sw, 프로그래밍, 코딩, 개발자, ict, it, api, erp, 알고리즘, 컴퓨터, 시스템, 오픈소스, 임베디드, 자동화, 디지털 전환, dx, ax, mvp, 핀테크, 푸드테크, 에듀테크, 프롭테크, 헬스테크]
+  web_app: [웹, 앱, 모바일, saas, 플랫폼, it 서비스, 웹서비스, 웹 서비스, 웹개발, 웹 개발, 앱개발, 앱 개발]
+  data: [데이터, 빅데이터, 데이터분석]
+  immersive: [메타버스, vr, ar, xr, 가상현실, 증강현실, 확장현실, 실감콘텐츠, 실감 콘텐츠, 가상융합]
+  cloud_security: [클라우드, 보안, 오픈소스, 암호, 양자, 해킹방어, 해킹 방어]
+  startup: [스타트업, 창업, 사업화]
+  digital_content: [디지털 콘텐츠, 디지털콘텐츠, 콘텐츠 제작, 인터랙티브, 콘텐츠, 캐릭터, 웹툰, 애니메이션, 미디어아트, 3d, 그래픽]
+
+# Common words that also appear outside IT and games (web novels, delivery apps, beauty
+# pop-ups). A title whose only field keywords are these goes to the review queue instead
+# of being published, unless the source or its original category is already IT/game.
+weak_title_keywords: [웹, 앱, 콘텐츠, 콘텐츠 제작, 플랫폼, 캐릭터, 그래픽, 3d, 시스템, 자동화, 컴퓨터, 디지털 전환]
+
+audiences:
+  university: [대학생, 대학원생, 재학생, 대학생 대상]
+  youth: [청년, 만 19세, 만 34세, 만 39세]
+  developer: [개발자, 프로그래머]
+  startup: [예비창업자, 초기창업자, 스타트업, 중소기업]
+  teen: [초등학생, 중학생, 고등학생, 청소년, 어린이, 초·중·고]
+  general: [일반인, 직장인]
+  anyone: [대상 제한 없음, 대상제한없음, 제한없음, 제한 없음, 누구나, 전 국민, 전국민, 국민 누구나]
+
+exclude_phrases:
+  - 스포츠 경기 관람
+  - 경품 이벤트
+  - 단순 체험단
+  - 할인 행사
+  - 상품 판매
+  - 보험 서포터즈
+  - 식품 서포터즈
+  - 화장품 서포터즈
+  - 입찰
+  - 용역
+
+# Non-IT fields shown in their own tabs. An item that does not qualify for IT·게임 is
+# published under one of these when its title or original category names a topic below.
+# Topics become the item's field tags. Avoid one-syllable words: matching is by substring.
+domains:
+  design_media:
+    label: 디자인·영상
+    topics:
+      디자인: [디자인, 로고, 굿즈, 브랜딩, 포스터, 패키지, 캘리그라피, 손글씨, 달력]
+      영상: [영상, 숏폼, 유튜브, ucc, 필름메이커, 뮤직비디오, 광고영상, 영화]
+      사진: [사진, 포토]
+      일러스트·웹툰: [일러스트, 웹툰, 만화, 캐릭터, 그림, 이모티콘, 코믹스, 작화]
+      미술: [미술, 회화, 브릭아트, 아트콘]
+  literature_arts:
+    label: 문학·예술
+    topics:
+      문학: [문학, 소설, 웹소설, 수필, 에세이, 수기, 백일장, 시나리오, 동화, 디카시, 독후감, 서평, 리뷰, 원고, 사연, 칼럼]
+      음악·공연: [음악, 작곡, 가요제, 노래, 밴드, 공연, 연극, 뮤지컬, 댄스, 뮤지션]
+      예술: [예술, 전시회, 전시분야, 전시 분야, 작가상, 입주작가, 예술가]
+  planning_ideas:
+    label: 기획·아이디어
+    topics:
+      아이디어: [아이디어, 제안, 기획]
+      정책·사회: [정책, 규제, 캠페인, 사회공헌, 환경, esg, 공익]
+      마케팅: [마케팅, 광고, 홍보, 브랜드, 슬로건, sns]
+  business:
+    label: 창업·비즈니스
+    topics:
+      창업: [창업, 스타트업, 사업화, 오픈이노베이션]
+      경영·지원: [소상공인, 중소기업, 수출, 컨설팅, 경영, 판로, 투자]

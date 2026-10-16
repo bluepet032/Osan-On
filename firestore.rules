@@ -1,0 +1,68 @@
+rules_version = '2';
+
+// Each user can only touch their own documents, and only with the fields and sizes the
+// site writes (see src/personal.tsx and src/account.tsx). Keep these in sync with the app.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function shortString(value, max) {
+      return value is string && value.size() <= max;
+    }
+
+    function changesOnly(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
+    }
+
+    match /users/{uid} {
+      // The app never writes this document; it only removes it when deleting the account.
+      allow read, delete: if isOwner(uid);
+
+      match /favorites/{favoriteId} {
+        function validFavorite(data) {
+          return data.keys().hasOnly(['item', 'remindersEnabled', 'resultDate', 'note', 'updatedAt'])
+            && data.item is map
+            && data.remindersEnabled is bool
+            && shortString(data.resultDate, 10)
+            && shortString(data.note, 500)
+            && shortString(data.updatedAt, 40);
+        }
+
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid) && validFavorite(request.resource.data);
+        allow update: if isOwner(uid)
+          && validFavorite(request.resource.data)
+          && changesOnly(['remindersEnabled', 'resultDate', 'note', 'updatedAt']);
+      }
+
+      match /keywords/{keywordId} {
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid)
+          && request.resource.data.keys().hasOnly(['word', 'createdAt'])
+          && request.resource.data.word is string
+          && request.resource.data.word.size() >= 1
+          && request.resource.data.word.size() <= 60
+          && shortString(request.resource.data.createdAt, 40);
+      }
+
+      match /notifications/{notificationId} {
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid)
+          && request.resource.data.keys().hasOnly(['type', 'title', 'message', 'opportunityId', 'sourceUrl', 'date', 'read', 'createdAt'])
+          && request.resource.data.type in ['schedule', 'keyword']
+          && shortString(request.resource.data.title, 200)
+          && shortString(request.resource.data.message, 2000)
+          && shortString(request.resource.data.opportunityId, 100)
+          && shortString(request.resource.data.sourceUrl, 2000)
+          && shortString(request.resource.data.date, 10)
+          && request.resource.data.read is bool
+          && shortString(request.resource.data.createdAt, 40);
+        allow update: if isOwner(uid)
+          && changesOnly(['read'])
+          && request.resource.data.read is bool;
+      }
+    }
+  }
+}
