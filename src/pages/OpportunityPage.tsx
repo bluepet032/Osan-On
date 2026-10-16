@@ -95,11 +95,12 @@ export function OpportunityPage({ dataset, title, description }: Props) {
   return (
     <main id="main-content" className="container">
       <div className="page-heading">
-        <div><p className="eyebrow">{filters.domain === 'all' ? '모든 분야' : DOMAIN_LABELS[filters.domain as Domain] ?? '모든 분야'} · BENEFITS</p><h1>{title}</h1><p>{description}</p></div>
+        <div><p className="eyebrow">{filters.domain === 'all' ? '모든 분야' : DOMAIN_LABELS[filters.domain as Domain] ?? '모든 분야'} 혜택</p><h1>{title}</h1><p>{description}</p></div>
         <div className="summary-cards" aria-label="혜택 요약"><span><strong>{summaryCount(item => item.jurisdiction === 'osan')}</strong> 오산시</span><span><strong>{summaryCount(item => item.jurisdiction === 'gyeonggi')}</strong> 경기도</span><span><strong>{summaryCount(isDeadlineSoon)}</strong> 마감임박</span></div>
       </div>
       {/* Remounts when the account copy arrives, so the card shows what was saved there. */}
-      {dataset === 'benefits' && <ProfileCard key={JSON.stringify(profile)} profile={profile} onChange={changeProfile} synced={synced} error={profileError} />}
+      {dataset === 'benefits' && <ProfileCard key={JSON.stringify(profile)} profile={profile} onChange={changeProfile} synced={synced} error={profileError}
+        matchCount={loading ? undefined : payload.items.filter(item => !hidden.has(item.id) && judgements.get(item.id)?.verdict === 'eligible').length} />}
       <div className="match-tabs" role="group" aria-label="맞춤 판정">
         {MATCH_TABS.map(([match, label]) => <button key={match} className={`match-${match} ${filters.match === match ? 'active' : ''}`} aria-pressed={filters.match === match} onClick={() => update('match', match)}>{label} <span>{verdictCount(match)}</span></button>)}
       </div>
