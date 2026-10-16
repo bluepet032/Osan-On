@@ -5,7 +5,7 @@ import { loadOpportunities } from './data'
 import { dueReminders, isNewKeywordMatch, kstDate, matchesPersonalKeyword, newEligibleItems } from './personalLogic'
 import { useProfile } from './profileContext'
 import type { Opportunity, PersonalState } from './types'
-import { copyStorage, readStorage, writeStorage } from './utils'
+import { readStorage, writeStorage } from './utils'
 
 export interface SavedOpportunity {
   id: string
@@ -64,7 +64,6 @@ const EMPTY: PersonalState = { version: 1, favorites: [], read: [], hidden: [] }
 const PersonalContext = createContext<PersonalContextValue | null>(null)
 
 function loadLocalState(): PersonalState {
-  copyStorage('questboard.personal.v1', KEY)
   try {
     const parsed = JSON.parse(readStorage(KEY) || '') as Partial<PersonalState>
     if (parsed.version !== 1) return EMPTY
@@ -254,7 +253,6 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!userId || dataUserId !== userId || !storeReady || !publishedReady || local.favorites.length === 0) return
     const key = IMPORT_KEY + userId
-    copyStorage('questboard.favorite-import.v1.' + userId, key)
     const decision = readStorage(key)
     if (decision !== 'done' && decision !== 'skipped') setMigrationOpen(true)
   }, [userId, dataUserId, storeReady, publishedReady, local.favorites.length])

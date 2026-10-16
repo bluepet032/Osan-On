@@ -97,7 +97,7 @@
 ### 정리하면 좋은 것
 - [x] `config/taxonomy.yml`과 `load_taxonomy()`, `normalize()`·`manual_items()`의 `taxonomy` 인자 삭제 (2026-10-17)
 - [x] 범용 HTML 수집기 `pipeline/collectors/html.py` 삭제 (2026-10-17). gov24·복지로가 쓰던 `with_query`·`dates_from_text`는 `collectors/base.py`로 옮겼고, 수집기가 등록되지 않은 출처는 오류로 처리합니다.
-- [x] 브라우저 저장 키를 `osanon.personal.v1`·`osanon.theme`·`osanon.favorite-import.v1.<uid>`로, 캘린더 UID를 `@osan-on`으로, e2e 파일을 `e2e/osan-on.spec.ts`로 바꿈 (2026-10-17). 옛 `questboard.*` 값은 새 키가 비어 있을 때 한 번 복사하고 옛 키는 남깁니다. QuestBoard(`bluepet032.github.io/QuestBoard/`)가 같은 출처라 localStorage를 함께 쓰기 때문입니다.
+- [x] 브라우저 저장 키를 `osanon.personal.v1`·`osanon.theme`·`osanon.favorite-import.v1.<uid>`로, 캘린더 UID를 `@osan-on`으로, e2e 파일을 `e2e/osan-on.spec.ts`로 바꿈 (2026-10-17). QuestBoard와 같은 출처(bluepet032.github.io)라 저장 키가 겹쳐서 osanon.*으로 분리함. 옛 값은 대부분 QuestBoard 것이라 옮기지 않음.
 - [ ] Dependabot PR 4개 검토(그중 vite 8 업그레이드는 CI 실패)
 
 ### 데이터 품질

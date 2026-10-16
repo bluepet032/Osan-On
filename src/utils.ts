@@ -10,11 +10,6 @@ export function readStorage(key: string): string | null {
 export function writeStorage(key: string, value: string) {
   try { localStorage.setItem(key, value) } catch { /* not saved in this browser */ }
 }
-// Renamed QuestBoard-era keys are copied, not moved: QuestBoard shares this origin (bluepet032.github.io) and still reads them.
-export function copyStorage(from: string, to: string) {
-  const value = readStorage(from)
-  if (value !== null && readStorage(to) === null) writeStorage(to, value)
-}
 
 export const isNew = (item: Opportunity, now = Date.now()) => now - new Date(item.first_seen_at).getTime() <= 72 * HOUR
 export const isUpdated = (item: Opportunity, now = Date.now()) => Boolean(item.last_changed_at) && now - new Date(item.last_changed_at!).getTime() <= 48 * HOUR
