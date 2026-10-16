@@ -52,7 +52,7 @@ test('requires login for favorites and restores URL and hidden state after reloa
   await page.getByLabel('통합 검색').fill('인디')
   await expect(page).toHaveURL(/q=%EC%9D%B8%EB%94%94/)
   await expect(page.locator('.result-toolbar strong')).toHaveText('1개')
-  await expect(page.getByRole('button', { name: '서비스 0' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '모든 분야 1' })).toBeVisible()
   await page.getByRole('button', { name: '관심 등록' }).click()
   await expect(page.getByRole('dialog', { name: '오산온 계정' })).toBeVisible()
   await page.getByRole('button', { name: '닫기' }).click()
@@ -179,6 +179,7 @@ test('jurisdiction tabs narrow the list to one level of government', async ({ pa
     opportunity({ id: 'nation', title: '중앙정부 혜택', source_url: 'https://example.com/nation', jurisdiction: 'national' }),
   ])
   await page.goto('/#/')
+  await expect(page.locator('.summary-cards span')).toHaveText(['1 오산시', '1 경기도', '0 마감임박'])
   await expect(page.locator('.opportunity').first()).toContainText('오산시 혜택')
   await page.getByRole('button', { name: /^경기도 1$/ }).click()
   await expect(page).toHaveURL(/place=gyeonggi/)
@@ -186,6 +187,26 @@ test('jurisdiction tabs narrow the list to one level of government', async ({ pa
   await expect(page.locator('.opportunity')).toContainText('경기도 혜택')
   await page.getByRole('button', { name: /^전체 소관 3$/ }).click()
   await expect(page.locator('.opportunity')).toHaveCount(3)
+})
+
+test('phones fold the support-form and quick tags behind a toggle', async ({ page, isMobile }) => {
+  await routeActive(page, [opportunity({})])
+  await page.goto('/#/')
+  const toggle = page.getByRole('button', { name: /^지원 형태·빠른 필터/ })
+  const cash = page.getByRole('button', { name: '현금 1' })
+  if (!isMobile) {
+    await expect(toggle).toBeHidden()
+    await expect(cash).toBeVisible()
+    return
+  }
+  await expect(cash).toBeHidden()
+  await toggle.click()
+  await cash.click()
+  await expect(page).toHaveURL(/type=cash/)
+  // A filter in use keeps the group open, as 상세 조건 does.
+  await page.reload()
+  await expect(cash).toBeVisible()
+  await expect(toggle).toContainText('1')
 })
 
 test('each notice has its own shareable page', async ({ page }) => {

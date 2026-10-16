@@ -12,7 +12,7 @@ import { currentHashParams } from '../urlState'
 import { compareOpportunities, matchesOpportunity, type Sort } from '../filtering'
 import { usePersonalState } from '../personal'
 import type { Domain, Opportunity } from '../types'
-import { isDeadlineSoon, isNew, isUpdated } from '../utils'
+import { isDeadlineSoon } from '../utils'
 
 // 'benefits' is the open list: dated (active) and 상시·기간 미정 (undated) benefits together.
 type Dataset = 'benefits' | 'closed'
@@ -54,14 +54,12 @@ export function OpportunityPage({ dataset, title, description }: Props) {
     for (const [key, next] of Object.entries(changes)) {
       if (next) copy.set(key, next); else copy.delete(key)
       if (key !== 'page') copy.delete('page')
-      // Detail tags belong to one field tab, so a tag picked in another tab would hide everything.
-      if (key === 'domain') copy.delete('field')
     }
     setParams(copy, { replace: true })
   }
   const update = (key: string, next: string) => updateMany({ [key]: next })
   const filters = {
-    place: value('place', 'all'), domain: value('domain', DEFAULT_DOMAIN), type: value('type', 'all'), advanced: readAdvanced(params), quick: value('quick'), search: value('q'), field: value('field'), status: value('status'),
+    place: value('place', 'all'), domain: value('domain', DEFAULT_DOMAIN), type: value('type', 'all'), advanced: readAdvanced(params), quick: value('quick'), search: value('q'), status: value('status'),
     sort: value('sort', 'local') as Sort, page: Math.max(1, Number(value('page', '1')) || 1),
     match: value('match', hasBasics(profile) ? 'eligible' : 'all') as Match,
   }
@@ -91,15 +89,14 @@ export function OpportunityPage({ dataset, title, description }: Props) {
   const pageItems = visible.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
   const filterItems = payload.items.filter(item => !personal.hidden.includes(item.id))
   const domainItems = filters.domain === 'all' ? payload.items : payload.items.filter(item => domainOf(item) === filters.domain)
-  const freshness = domainItems.reduce((counts, item) => ({
-    new: counts.new + Number(isNew(item)), updated: counts.updated + Number(isUpdated(item)), urgent: counts.urgent + Number(isDeadlineSoon(item)),
-  }), { new: 0, updated: 0, urgent: 0 })
+  // Right after a full collection nearly everything is new, so the cards count local benefits instead.
+  const summaryCount = (test: (item: Opportunity) => boolean) => domainItems.filter(test).length
 
   return (
     <main id="main-content" className="container">
       <div className="page-heading">
         <div><p className="eyebrow">{filters.domain === 'all' ? '모든 분야' : DOMAIN_LABELS[filters.domain as Domain] ?? '모든 분야'} · BENEFITS</p><h1>{title}</h1><p>{description}</p></div>
-        <div className="summary-cards" aria-label="혜택 요약"><span><strong>{freshness.new}</strong> 신규</span><span><strong>{freshness.updated}</strong> 변경</span><span><strong>{freshness.urgent}</strong> 마감임박</span></div>
+        <div className="summary-cards" aria-label="혜택 요약"><span><strong>{summaryCount(item => item.jurisdiction === 'osan')}</strong> 오산시</span><span><strong>{summaryCount(item => item.jurisdiction === 'gyeonggi')}</strong> 경기도</span><span><strong>{summaryCount(isDeadlineSoon)}</strong> 마감임박</span></div>
       </div>
       {/* Remounts when the account copy arrives, so the card shows what was saved there. */}
       {dataset === 'benefits' && <ProfileCard key={JSON.stringify(profile)} profile={profile} onChange={changeProfile} synced={synced} error={profileError} />}

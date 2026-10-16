@@ -12,7 +12,6 @@ describe('Filters search input', () => {
       type="all"
       quick=""
       search=""
-      field=""
       status=""
       onChange={onChange}
     />)

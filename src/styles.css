@@ -97,9 +97,11 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .quick-tags { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
 .quick-tags button { padding: 7px 11px; background: transparent; }
 .quick-tags button.active { color: var(--brand); background: var(--brand-soft); border-color: var(--brand); }
-.search-row { display: grid; grid-template-columns: minmax(260px, 1fr) 180px 160px; gap: 10px; margin-top: 18px; }
+.search-row { display: grid; grid-template-columns: minmax(260px, 1fr) 160px; gap: 10px; margin-top: 18px; }
 .advanced-filters { margin-top: 14px; }
 .advanced-toggle-row { display: flex; align-items: center; gap: 10px; }
+/* Only phones fold the support-form and quick tags (Filters.tsx); wider screens always show them. */
+@media (min-width: 781px) { .type-toggle-row { display: none; } .type-filters[hidden] { display: block; } }
 .advanced-toggle { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-muted); padding: 8px 12px; color: var(--text); font-size: 13px; font-weight: 700; }
 .advanced-toggle.has-active { border-color: var(--brand); }
 .advanced-count { display: inline-grid; place-items: center; min-width: 18px; height: 18px; border-radius: 999px; background: var(--brand); color: white; font-size: 11px; }
@@ -266,6 +268,7 @@ footer strong { color: var(--text); }
   .page-heading { align-items: stretch; flex-direction: column; padding-top: 34px; }
   .summary-cards { grid-template-columns: repeat(3, 1fr); }
   .filter-panel { padding: 14px; border-radius: 14px; }
+  .type-filters { margin-top: 10px; }
   .type-tabs, .quick-tags { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
   .type-tabs button, .quick-tags button { white-space: nowrap; }
   .search-row { grid-template-columns: 1fr; }
