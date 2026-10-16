@@ -4,6 +4,7 @@ import { DOMAIN_LABELS, DOMAINS, JURISDICTION_LABELS, QUICK_TAGS, TYPE_LABELS, T
 import { matchesOpportunity, type OpportunityFilters } from '../filtering'
 import type { Domain, Opportunity, OpportunityType } from '../types'
 import { AdvancedFilterPanel } from './AdvancedFilterPanel'
+import { DomainIcon } from './DomainIcon'
 
 interface Props extends OpportunityFilters {
   items: Opportunity[]
@@ -45,12 +46,29 @@ export function Filters(props: Props) {
   const tagCount = (quick: string) => props.items.filter(item => matchesOpportunity(item, { ...filterValues, quick })).length
   return (
     <section className="filter-panel" aria-label="혜택 검색과 필터">
+      <div className="search-row">
+        <label className="search-box"><span className="sr-only">통합 검색</span><input
+          value={draftSearch}
+          onCompositionStart={() => { composing.current = true }}
+          onCompositionEnd={event => {
+            composing.current = false
+            setDraftSearch(event.currentTarget.value)
+            props.onChange('q', event.currentTarget.value)
+          }}
+          onChange={event => {
+            setDraftSearch(event.target.value)
+            if (!composing.current) props.onChange('q', event.target.value)
+          }}
+          placeholder="어떤 혜택을 찾으세요? 혜택명, 기관, 초성 검색"
+        /></label>
+        <select value={props.status} onChange={event => props.onChange('status', event.target.value)} aria-label="접수 상태"><option value="">모든 상태</option><option value="upcoming">접수예정</option><option value="open">접수중</option><option value="urgent">긴급</option><option value="today">오늘마감</option><option value="ongoing">상시</option><option value="closed">마감</option><option value="unknown">기간 미정</option></select>
+      </div>
       <div className="place-tabs" role="group" aria-label="소관">
         {(['all', ...Object.keys(JURISDICTION_LABELS)]).map(value => <button key={value} className={place === value ? 'active' : ''} aria-pressed={place === value} onClick={() => props.onChange('place', value === 'all' ? '' : value)}>{value === 'all' ? '전체 소관' : JURISDICTION_LABELS[value as keyof typeof JURISDICTION_LABELS]} <span>{placeCount(value)}</span></button>)}
       </div>
       <div className="domain-tabs" role="group" aria-label="분야">
-        <button className={props.domain === 'all' ? 'active' : ''} aria-pressed={props.domain === 'all'} onClick={() => props.onChange('domain', 'all')}>모든 분야 <span>{domainCount('all')}</span></button>
-        {DOMAINS.map(domain => <button key={domain} className={props.domain === domain ? 'active' : ''} aria-pressed={props.domain === domain} onClick={() => props.onChange('domain', domain)}>{DOMAIN_LABELS[domain]} <span>{domainCount(domain)}</span></button>)}
+        <button className={props.domain === 'all' ? 'active' : ''} aria-pressed={props.domain === 'all'} onClick={() => props.onChange('domain', 'all')}><DomainIcon domain="all" />모든 분야 <span>{domainCount('all')}</span></button>
+        {DOMAINS.map(domain => <button key={domain} className={props.domain === domain ? 'active' : ''} aria-pressed={props.domain === domain} onClick={() => props.onChange('domain', domain)}><DomainIcon domain={domain} />{DOMAIN_LABELS[domain]} <span>{domainCount(domain)}</span></button>)}
       </div>
       {/* Phones fold these behind a toggle like 상세 조건; wider screens always show them (styles.css). */}
       <div className="advanced-toggle-row type-toggle-row">
@@ -67,23 +85,6 @@ export function Filters(props: Props) {
         <div className="quick-tags" role="group" aria-label="빠른 필터">
           {QUICK_TAGS.map(tag => <button key={tag} className={props.quick === tag ? 'active' : ''} onClick={() => props.onChange('quick', props.quick === tag ? '' : tag)}>{tag} <span>{tagCount(tag)}</span></button>)}
         </div>
-      </div>
-      <div className="search-row">
-        <label className="search-box"><span className="sr-only">통합 검색</span><input
-          value={draftSearch}
-          onCompositionStart={() => { composing.current = true }}
-          onCompositionEnd={event => {
-            composing.current = false
-            setDraftSearch(event.currentTarget.value)
-            props.onChange('q', event.currentTarget.value)
-          }}
-          onChange={event => {
-            setDraftSearch(event.target.value)
-            if (!composing.current) props.onChange('q', event.target.value)
-          }}
-          placeholder="혜택명, 기관, 분야 검색 (초성 가능)"
-        /></label>
-        <select value={props.status} onChange={event => props.onChange('status', event.target.value)} aria-label="접수 상태"><option value="">모든 상태</option><option value="upcoming">접수예정</option><option value="open">접수중</option><option value="urgent">긴급</option><option value="today">오늘마감</option><option value="ongoing">상시</option><option value="closed">마감</option><option value="unknown">기간 미정</option></select>
       </div>
       <AdvancedFilterPanel advanced={advanced} countWith={countWith} coverage={coverage} onChange={props.onChange}
         onChangeMany={props.onChangeMany ?? (changes => Object.entries(changes).forEach(([key, value]) => props.onChange(key, value)))} />

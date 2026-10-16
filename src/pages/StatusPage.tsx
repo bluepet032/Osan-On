@@ -30,7 +30,7 @@ export function StatusPage() {
   const stale = (item: CrawlStatus) => !item.last_success_at || Date.now() - Date.parse(item.last_success_at) > STALE_AFTER_MS || item.consecutive_failures >= 3
   return (
     <main id="main-content" className="container status-page">
-      <div className="page-heading"><div><p className="eyebrow">PIPELINE HEALTH</p><h1>수집 상태</h1><p>공개 수집기의 최근 실행과 수동 검토 대상을 확인합니다.</p></div></div>
+      <div className="page-heading"><div><p className="eyebrow">관리자</p><h1>수집 상태</h1><p>공개 수집기의 최근 실행과 수동 검토 대상을 확인합니다.</p></div></div>
       {error && <div className="message error" role="alert">{error}</div>}
       <p className="updated-at">마지막 상태 생성: {generated ? new Date(generated).toLocaleString('ko-KR') : '없음'} · 자동 갱신 {AUTO_REFRESH_LABEL}</p>
       <section className="manual-refresh" aria-labelledby="manual-refresh-title">
