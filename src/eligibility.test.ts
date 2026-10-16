@@ -70,6 +70,28 @@ describe('judge', () => {
     expect(judge(item([], null, 120), {}).verdict).toBe('eligible')
   })
 
+  it('never calls a 복지로 life stage a sure match', () => {
+    const youth = { conditions: { codes: [], age_min: 19, age_max: 39, life: ['청년'] } }
+    expect(judge(youth, { age: 28 })).toEqual({ verdict: 'check', reasons: [{ label: '청년(만 19~39세)', ok: true }, { label: '세부 대상은 원문 확인', ok: null }] })
+    expect(judge(youth, { age: 70 }).verdict).toBe('ineligible')
+  })
+
+  it('asks for a check when the text alone limits the age', () => {
+    const text = (eligibility: string, title = '') => ({ conditions: { codes: [], age_min: null, age_max: null }, eligibility, title })
+    expect(judge(text('대상 : 경기도 거주 19~39세 청년'), { age: 45 })).toEqual({ verdict: 'check', reasons: [{ label: '원문의 나이 조건 확인(19~39세)', ok: null }] })
+    expect(judge(text('연령이 19세 이상 39세 이하로'), { age: 45 }).verdict).toBe('check')
+    expect(judge(text('연령이 19세 이상 39세 이하로'), { age: 30 }).verdict).toBe('eligible')
+    // Any mentioned range that fits is enough: the text may list several groups.
+    expect(judge(text('○ 만65세 이상, 장애인(1~3급) ○ 중학생(14~16세 청소년)'), { age: 15 }).verdict).toBe('eligible')
+    expect(judge(text('만 18세 미만의 아동'), { age: 18 }).verdict).toBe('check')
+    expect(judge(text('국가건강검진에서 C형간염 항체 검사', '56세 C형간염 확진검사비 지원'), { age: 30 }).reasons[0].label).toBe('원문의 나이 조건 확인(56세)')
+    // Households and generations are not ages, and an unknown age changes nothing.
+    expect(judge(text('30세대 미만 공동주택', '고엽제환자 2세 수당'), { age: 45 }).verdict).toBe('eligible')
+    expect(judge(text('19~39세 청년'), {}).verdict).toBe('eligible')
+    // A coded age wins over the text.
+    expect(judge({ ...text('65세 이상'), conditions: { codes: [], age_min: 19, age_max: 34 } }, { age: 28 }).verdict).toBe('eligible')
+  })
+
   it('asks for a check when businesses or institutions are among the targets', () => {
     expect(verdict(['JA2101'], { gender: 'female', age: 28 })).toBe('check')
     expect(judge(item(['JA2203']), {}).reasons).toEqual([{ label: '사업자·기관 대상 포함', ok: null }])

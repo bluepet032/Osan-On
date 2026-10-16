@@ -59,7 +59,7 @@ export function OpportunityRow({ item, personal, onToggle, defaultExpanded = fal
                 const reasons = judgement.reasons.filter(reason => reason.ok === ok)
                 return reasons.length > 0 && (
                   <div key={kind} className={`reason-box reason-${kind}`}><strong>{title}</strong>
-                    <ul>{reasons.map(reason => <li key={reason.label}>{reason.label}{ok === null && ' (입력 필요)'}</li>)}</ul>
+                    <ul>{reasons.map(reason => <li key={reason.label}>{reason.label}{reason.input && ' (입력 필요)'}</li>)}</ul>
                   </div>
                 )
               })}
