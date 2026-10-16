@@ -1,16 +1,2 @@
 schema_version: 1
-items:
-  # kocca is disabled because robots.txt forbids its list page; this notice was collected on 2026-10-06.
-  - id: kocca-326D00034004
-    title: '[수정/상시공고] 2026년 글로벌게임허브센터 신규 입주기업 추가모집(상시) 수정공고'
-    source_name: 한국콘텐츠진흥원
-    source_url: https://www.kocca.kr/kocca/pims/view.do?intcNo=326D00034004&menuNo=204104&recptSt=&category=&pageIndex=1&search=&searchWrd=
-    organizer: 한국콘텐츠진흥원
-    summary: 한국콘텐츠진흥원 공식 모집공모 공고. 참가 조건, 세부 일정, 제출 항목과 신청 방법은 주최기관의 최신 원문 공고에서 반드시 확인하세요.
-    recruit_start: '2026-04-27'
-    recruit_end: '2026-12-31'
-    date_kind: exact
-    primary_type: support
-    field_tags: [게임, 디지털 콘텐츠]
-    is_official: true
-    force_publish: true
+items: []

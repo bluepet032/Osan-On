@@ -12,7 +12,6 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from pipeline.classification import AUDIENCE_LABELS
 from pipeline.models import Opportunity, RawOpportunity
 
 
@@ -177,7 +176,7 @@ def extract_facets(raw: RawOpportunity) -> Facets:
 
 # Keys match the site's advanced filters (src/advancedFilters.ts).
 FACET_KEYS = ("region", "mode", "fee", "audience", "prize")
-AUDIENCE_NAMES = frozenset(AUDIENCE_LABELS.values())
+AUDIENCE_NAMES = frozenset({"대학생", "청년", "개발자", "창업자·기업", "청소년", "일반인", "누구나"})
 
 
 def has_facet(item: Opportunity, key: str) -> bool:

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://questboard.local/schemas/opportunities.schema.json",
-  "title": "QuestBoard opportunities payload",
+  "title": "오산온 benefits payload",
   "type": "object",
   "required": ["schema_version", "generated_at", "items"],
   "properties": {
@@ -21,8 +21,24 @@
           "summary": { "type": "string", "minLength": 60, "maxLength": 180 },
           "status": { "enum": ["upcoming", "open", "urgent", "today", "closed", "ongoing", "unknown"] },
           "date_kind": { "enum": ["exact", "ongoing", "first_come", "budget", "unknown", "inquiry"] },
-          "primary_type": { "enum": ["contest", "support", "hackathon", "event", "education", "supporters", "employment", "other"] },
-          "domain": { "enum": ["it", "design_media", "literature_arts", "planning_ideas", "business"], "description": "분야 탭. 없으면 it(IT·게임)으로 봅니다." },
+          "primary_type": { "enum": ["cash", "in_kind", "service", "voucher", "loan", "reduction", "other"], "description": "지원 형태" },
+          "domain": { "enum": ["living", "housing", "childcare", "jobs", "health", "admin", "pregnancy", "care", "culture", "agriculture"], "description": "혜택 분야 탭(정부24 서비스분야)" },
+          "jurisdiction": { "enum": ["osan", "gyeonggi", "national"], "description": "소관: 오산시, 경기도, 중앙행정기관" },
+          "conditions": {
+            "description": "정부24 지원조건. null이면 조건 정보 없음",
+            "oneOf": [
+              { "type": "null" },
+              {
+                "type": "object",
+                "required": ["codes", "age_min", "age_max"],
+                "properties": {
+                  "codes": { "type": "array", "items": { "type": "string", "pattern": "^JA[0-9]{4}$" } },
+                  "age_min": { "type": ["integer", "null"] },
+                  "age_max": { "type": ["integer", "null"] }
+                }
+              }
+            ]
+          },
           "field_tags": { "type": "array", "items": { "type": "string" } },
           "audience_tags": { "type": "array", "items": { "type": "string" } },
           "first_seen_at": { "type": "string", "format": "date-time" },

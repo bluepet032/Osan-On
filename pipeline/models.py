@@ -8,12 +8,14 @@ from typing import Any, Literal
 OpportunityStatus = Literal[
     "upcoming", "open", "urgent", "today", "closed", "ongoing", "unknown"
 ]
-OpportunityType = Literal[
-    "contest", "support", "hackathon", "event", "education", "supporters", "employment", "other"
-]
+# Support form (정부24 지원유형).
+OpportunityType = Literal["cash", "in_kind", "service", "voucher", "loan", "reduction", "other"]
 DateKind = Literal["exact", "ongoing", "first_come", "budget", "unknown", "inquiry"]
-# "it" is the original IT·게임 scope; the others come from taxonomy.yml `domains`.
-Domain = Literal["it", "design_media", "literature_arts", "planning_ideas", "business"]
+# Benefit field tab (정부24 서비스분야).
+Domain = Literal[
+    "living", "housing", "childcare", "jobs", "health", "admin", "pregnancy", "care", "culture", "agriculture"
+]
+Jurisdiction = Literal["osan", "gyeonggi", "national"]
 
 
 @dataclass(slots=True)
@@ -53,6 +55,11 @@ class RawOpportunity:
     fee: str = "unknown"
     original_category: str = ""
     collected_at: str | None = None
+    jurisdiction: Jurisdiction = "national"
+    # {"codes": [...JA codes set to Y], "age_min": int | None, "age_max": int | None}; None = no condition record.
+    conditions: dict[str, Any] | None = None
+    category: str = ""
+    support_type: str = ""
 
 
 @dataclass(slots=True)
@@ -92,7 +99,9 @@ class Opportunity:
     mode: str = ""
     fee: str = "unknown"
     is_adjacent: bool = False
-    domain: Domain = "it"
+    domain: Domain = "living"
+    jurisdiction: Jurisdiction = "national"
+    conditions: dict[str, Any] | None = None
     # Advanced-filter facts (see pipeline/facets.py). Empty / None means the source did not say.
     regions: list[str] = field(default_factory=list)
     prize_manwon: int | None = None

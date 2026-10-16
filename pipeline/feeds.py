@@ -8,12 +8,12 @@ from xml.etree import ElementTree
 from pipeline.models import Opportunity
 
 
-SITE_URL = "https://bluepet032.github.io/QuestBoard/"
+SITE_URL = "https://bluepet032.github.io/Osan-On/"
 FEED_SIZE = 50
 # Same tabs as DOMAIN_LABELS in src/constants.ts.
 DOMAIN_LABELS = {
-    "it": "IT·게임", "design_media": "디자인·영상", "literature_arts": "문학·예술",
-    "planning_ideas": "기획·아이디어", "business": "창업·비즈니스",
+    "living": "생활안정", "housing": "주거·자립", "childcare": "보육·교육", "jobs": "고용·창업", "health": "보건·의료",
+    "admin": "행정·안전", "pregnancy": "임신·출산", "care": "보호·돌봄", "culture": "문화·환경", "agriculture": "농림축산어업",
 }
 
 
@@ -23,8 +23,8 @@ def feed_xml(items: list[Opportunity], label: str, now: datetime) -> bytes:
     rss = ElementTree.Element("rss", version="2.0")
     channel = ElementTree.SubElement(rss, "channel")
     for tag, text in (
-        ("title", f"QuestBoard — {label}"), ("link", SITE_URL),
-        ("description", f"{label} 분야의 새 공모전·지원사업·행사"), ("language", "ko"),
+        ("title", f"오산온 — {label}"), ("link", SITE_URL),
+        ("description", f"{label} 분야의 새 정부·지자체 혜택"), ("language", "ko"),
         ("lastBuildDate", format_datetime(now)),
     ):
         ElementTree.SubElement(channel, tag).text = text

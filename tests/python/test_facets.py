@@ -5,7 +5,6 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from pipeline.classification import classify
 from pipeline.config import load_taxonomy
 from pipeline.facets import extract_facets, facet_coverage, parse_manwon, regions_from_location, regions_from_title
 from pipeline.models import RawOpportunity
@@ -125,23 +124,6 @@ def test_prize_requires_the_word_prize(fields, manwon):
     assert extract_facets(raw(**fields)).prize_manwon == manwon
 
 
-def audiences(**fields):
-    return classify(raw(**fields), load_taxonomy())[2]
-
-
-def test_new_audiences_from_stated_eligibility():
-    assert "누구나" in audiences(eligibility="대상 제한 없음")
-    assert set(audiences(eligibility="대학생, 직장인/일반인")) >= {"대학생", "일반인"}
-    assert "청소년" in audiences(eligibility="어린이, 초등학생, 중학생, 고등학생, 동 연령대 청소년")
-    assert "청소년" in audiences(title="제2회 강남구 세계청소년 백일장")
-
-
-def test_audiences_are_not_read_from_page_body_text():
-    # GCON pages mention 청년·개발자 in menus and other notices; a company matching event got both.
-    tags = audiences(title="2026년 경기게임커넥트 비즈매칭 참가사 모집", body_text="사이트 메뉴 누구나 청소년 일반인 청년 개발자 대학생")
-    assert tags == []
-
-
 def test_facet_coverage_counts_items_that_state_each_fact():
     taxonomy = load_taxonomy()
     now = datetime(2026, 10, 7, tzinfo=ZoneInfo("Asia/Seoul"))
@@ -152,5 +134,5 @@ def test_facet_coverage_counts_items_that_state_each_fact():
         normalize(raw(source_url="https://example.com/4", title="개발 행사"), taxonomy, now),
     ]
 
-    assert facet_coverage(items) == {"region": 0.25, "mode": 0.25, "fee": 0.25, "audience": 0.25, "prize": 0.25}
+    assert facet_coverage(items) == {"region": 0.25, "mode": 0.25, "fee": 0.25, "audience": 0.0, "prize": 0.25}
     assert facet_coverage([]) is None

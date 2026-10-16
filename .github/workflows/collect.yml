@@ -71,6 +71,8 @@ jobs:
           if [[ -n "$MANUAL_LIMIT" ]]; then args+=(--limit "$MANUAL_LIMIT"); fi
           if [[ -n "$MANUAL_SOURCE" ]]; then args+=(--source "$MANUAL_SOURCE"); fi
           python -m pipeline.cli "${args[@]}"
+        env:
+          GOV24_API_KEY: ${{ secrets.GOV24_API_KEY }}
       - name: Validate generated data
         run: python -m pipeline.validate
       - name: Report failing or shrinking sources

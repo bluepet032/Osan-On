@@ -11,8 +11,8 @@ from urllib.parse import unquote, urlsplit
 from urllib.robotparser import RobotFileParser
 
 
-ROBOTS_AGENT = "QuestBoard"
-USER_AGENT = f"{ROBOTS_AGENT}/1.0 (+https://github.com/bluepet032/QuestBoard; public-opportunity-index)"
+ROBOTS_AGENT = "OsanOn"
+USER_AGENT = f"{ROBOTS_AGENT}/1.0 (+https://github.com/bluepet032/Osan-On; public-benefit-index)"
 MIN_HOST_INTERVAL = 1.0
 MAX_RETRY_AFTER = 30.0
 
