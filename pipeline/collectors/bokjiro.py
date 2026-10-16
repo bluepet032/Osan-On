@@ -134,8 +134,12 @@ class BokjiroCollector(Collector):
             root = self._get("LcgvWelfarelist", key, pageNo=page, numOfRows=self.PER_PAGE)
             items = [{child.tag: (child.text or "").strip() for child in entry} for entry in root.findall("servList")]
             rows.extend(items)
-            if not items or len(rows) >= int(root.findtext("totalCount") or 0):
+            total = int(root.findtext("totalCount") or 0)
+            if len(rows) >= total:
                 return rows
+            if not items:
+                # An empty page before the end is a hiccup, not the end: a partial list would hide benefits.
+                raise CollectorStructureError(f"복지로 목록이 {total}건 중 {len(rows)}건에서 끊겼습니다")
             page += 1
 
     def _detail(self, key: str, service_id: str) -> ElementTree.Element:

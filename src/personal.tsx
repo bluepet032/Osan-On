@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import type { DocumentData } from 'firebase/firestore'
 import { useAccount } from './account'
 import { loadOpportunities } from './data'
+import { judge } from './eligibility'
 import { dueReminders, isNewKeywordMatch, kstDate, matchesPersonalKeyword, newEligibleItems } from './personalLogic'
 import { useProfile } from './profileContext'
 import type { Opportunity, PersonalState } from './types'
@@ -318,7 +319,7 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
 
     // Every write re-runs this effect, so re-reading known alerts would cost one Firestore read each time.
     const existingIds = new Set(currentNotifications.map(notification => notification.id))
-    const publishedIds = new Set(publishedItems.map(item => item.id))
+    const publishedById = new Map(publishedItems.map(item => [item.id, item]))
     const saveMissing = async () => {
       for (const [id, value] of candidates) {
         if (!active) return
@@ -333,8 +334,10 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
         if (!active) continue
         const outdated = notification.type === 'schedule'
           ? !notification.date || notification.date < today || !scheduleIds.has(notification.id)
-          // Keyword alerts end with their notice; the size check skips this when public data failed to load.
-          : publishedIds.size > 0 && !publishedIds.has(notification.opportunityId)
+          // Alerts end with their notice; the size check skips this when public data failed to load.
+          : publishedById.size > 0 && (!publishedById.has(notification.opportunityId)
+            // A profile change can turn a "fits me" alert wrong.
+            || (notification.type === 'eligible' && judge(publishedById.get(notification.opportunityId)!, profile).verdict !== 'eligible'))
         if (outdated) await fs.deleteDoc(fs.doc(firestore, 'users', userId, 'notifications', notification.id))
       }
     }

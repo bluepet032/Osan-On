@@ -97,8 +97,12 @@ class Gov24Collector(Collector):
                 raise CollectorStructureError(f"정부24 {endpoint} 응답이 JSON이 아닙니다") from error
             data = payload.get("data") or []
             rows.extend(data)
-            if not data or len(rows) >= int(payload.get("totalCount") or 0):
+            total = int(payload.get("totalCount") or 0)
+            if len(rows) >= total:
                 return rows
+            if not data:
+                # An empty page before the end is a hiccup, not the end: a partial list would hide benefits.
+                raise CollectorStructureError(f"정부24 {endpoint} 목록이 {total}건 중 {len(rows)}건에서 끊겼습니다")
             page += 1
 
     def _raw(self, row: dict, place: str, conditions: dict | None, now: datetime) -> RawOpportunity:

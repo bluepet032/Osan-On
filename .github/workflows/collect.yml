@@ -54,7 +54,7 @@ jobs:
       - name: Install pipeline
         run: python -m pip install -e ".[dev]"
       - name: Test pipeline before crawling
-        # A broken robots.txt check or parser must stop the run before it touches any site.
+        # A broken parser must stop the run before it calls any API.
         run: python -m pytest
       - name: Choose collection group
         id: mode

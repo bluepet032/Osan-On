@@ -163,6 +163,19 @@ describe('personal data connections', () => {
     expect(mocks.setDocument).not.toHaveBeenCalledWith('users/test-user/notifications/' + encodeURIComponent('eligible:unfit'), expect.anything())
   })
 
+  it('removes fit alerts that no longer fit the changed profile', async () => {
+    mocks.records.favorites = []
+    mocks.profile = { gender: 'male', age: 70 }
+    mocks.since = '2026-10-10T00:00:00+09:00'
+    const youth = { ...savedItem, id: 'youth', conditions: { codes: [], age_min: 19, age_max: 39 } }
+    const anyone = { ...savedItem, id: 'anyone', conditions: { codes: [], age_min: null, age_max: null } }
+    mocks.records.notifications = ['anyone', 'youth'].map(id => ({ id: encodeURIComponent('eligible:' + id), data: () => ({ type: 'eligible', title: '내 조건에 맞는 새 혜택', message: id, opportunityId: id, read: false }) }))
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ schema_version: 1, items: [youth, anyone] }) }))
+    render(<PersonalProvider><Probe /></PersonalProvider>)
+    await waitFor(() => expect(mocks.deleteDoc).toHaveBeenCalledWith('users/test-user/notifications/' + encodeURIComponent('eligible:youth')))
+    expect(mocks.deleteDoc).not.toHaveBeenCalledWith('users/test-user/notifications/' + encodeURIComponent('eligible:anyone'))
+  })
+
   it('keeps working when the browser blocks site data', () => {
     mocks.user = null
     const original = Object.getOwnPropertyDescriptor(window, 'localStorage')!
