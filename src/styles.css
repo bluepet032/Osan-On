@@ -189,11 +189,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .icon-button { color: var(--in_kind); font-size: 20px; line-height: 1; }
 .text-button:hover { color: var(--brand); }
 .details { margin-top: 14px; padding: 14px; border-radius: 10px; background: var(--surface-muted); }
-.details dl { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; margin: 0; }
-.details dl div { display: grid; grid-template-columns: 75px 1fr; font-size: 11px; }
-.details dt { color: var(--muted); }
+/* One column: 지원 대상·내용 are long paragraphs that became unreadable split into two narrow columns. */
+.details dl { display: grid; gap: 10px; margin: 0; }
+.details dl div { display: grid; grid-template-columns: 80px 1fr; gap: 12px; font-size: 13px; line-height: 1.65; }
+.details dt { color: var(--muted); font-weight: 700; }
 .details dd { margin: 0; }
-.detail-links { display: flex; gap: 12px; margin-top: 12px; font-size: 11px; }
+.detail-links { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 14px; font-size: 13px; }
 .detail-links a { color: var(--brand); font-weight: 700; }
 .mobile-meta { display: none; }
 
@@ -280,7 +281,7 @@ footer strong { color: var(--text); }
   .type-cell, .organizer-cell { display: none; }
   .mobile-meta { display: block; color: var(--muted); font-size: 11px; margin-bottom: 9px; }
   .state-cell { align-items: flex-start; flex-direction: row; justify-content: space-between; }
-  .details dl { grid-template-columns: 1fr; }
+  .details dl div { grid-template-columns: 1fr; gap: 2px; }
   .status-grid { grid-template-columns: 1fr; }
   .source-card dl { grid-template-columns: repeat(2, 1fr); }
   footer .container { align-items: flex-start; flex-direction: column; gap: 8px; }
@@ -403,6 +404,7 @@ footer strong { color: var(--text); }
 @media (max-width: 780px) {
   .profile-card { padding: 14px; border-radius: 14px; }
   .profile-fields > * { flex: 1 1 100%; }
+  .profile-gender label { flex: 1; justify-content: center; }
   .profile-age input { width: 100%; }
 }
 .place-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }

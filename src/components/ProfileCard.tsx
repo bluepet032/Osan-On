@@ -65,7 +65,7 @@ export function ProfileCard({ profile, onChange, synced = false, error = '' }: P
       <div className="profile-summary">
         <strong>{profile.gender === 'male' ? '남성' : '여성'} · 만 {profile.age}세</strong>
         <button type="button" className="text-button" onClick={() => setEditing(true)}>수정</button>
-        <button type="button" className="text-button" onClick={() => setDetails(value => !value)} aria-expanded={details}>더 정확하게</button>
+        <button type="button" className="account-button" onClick={() => setDetails(value => !value)} aria-expanded={details}>더 정확하게</button>
       </div>
       <small>{storageNote}</small>
       {error && <p className="message-inline error" role="alert">{error}</p>}
