@@ -62,7 +62,7 @@ export function OpportunityPage({ dataset, title, description }: Props) {
   const update = (key: string, next: string) => updateMany({ [key]: next })
   const filters = {
     domain: value('domain', DEFAULT_DOMAIN), type: value('type', 'all'), advanced: readAdvanced(params), quick: value('quick'), search: value('q'), field: value('field'), status: value('status'),
-    sort: value('sort', 'deadline') as Sort, page: Math.max(1, Number(value('page', '1')) || 1),
+    sort: value('sort', 'local') as Sort, page: Math.max(1, Number(value('page', '1')) || 1),
     match: value('match', hasBasics(profile) ? 'eligible' : 'all') as Match,
   }
   const changeProfile = (next: Profile) => {
@@ -109,7 +109,7 @@ export function OpportunityPage({ dataset, title, description }: Props) {
       {unknownHidden > 0 && <p className="search-hint" role="status">선택한 상세 조건의 정보가 없는 혜택 {unknownHidden}건은 목록에서 빠져 있습니다. <button type="button" className="text-button" onClick={() => update('unknown', '1')}>함께 보기</button></p>}
       <div className="result-toolbar">
         <p><strong>{visible.length}개</strong> 혜택 · {payload.generated ? `${new Date(payload.generated).toLocaleString('ko-KR')} 갱신` : '갱신 정보 없음'} · 자동 갱신 {AUTO_REFRESH_LABEL}<button type="button" className="text-button" onClick={reload} disabled={loading}>다시 불러오기</button> · <a href={`${import.meta.env.BASE_URL}data/${filters.domain === 'all' ? 'feed' : `feed-${filters.domain}`}.xml`} title="이 분야의 새 혜택을 RSS로 구독">RSS</a></p>
-        <label>정렬 <select aria-label="정렬" value={filters.sort} onChange={event => update('sort', event.target.value)}><option value="deadline">마감임박순</option><option value="newest">신규등록순</option><option value="updated">최근갱신순</option></select></label>
+        <label>정렬 <select aria-label="정렬" value={filters.sort} onChange={event => update('sort', event.target.value)}><option value="local">오산 우선</option><option value="deadline">마감임박순</option><option value="newest">신규등록순</option><option value="updated">최근갱신순</option></select></label>
       </div>
       <p className="legend" aria-label="판정 안내"><span><b className="badge verdict verdict-eligible">가능성 높음</b> 입력한 조건이 정부24 지원조건을 모두 충족</span><span><b className="badge verdict verdict-check">확인 필요</b> 입력하지 않은 조건이 있거나 조건 정보 없음</span><span>최종 자격은 반드시 원문에서 확인하세요.</span></p>
       {fuzzy && visible.length > 0 && <p className="search-hint" role="status">‘{filters.search}’와 정확히 일치하는 혜택이 없어 철자가 비슷한 혜택을 보여 드립니다.</p>}

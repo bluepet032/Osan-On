@@ -13,6 +13,18 @@ from pipeline.models import RawOpportunity
 
 
 KEY_RE = re.compile(r"serviceKey=[^&\s'\"]+")
+# "경기도 오산시", "(재)오산문화재단", "재단법인오산교육재단", but not "전남바이오산업진흥원".
+OSAN_RE = re.compile(r"(?:^|[^가-힣]|재단법인)오산")
+# Agencies of another Gyeonggi city, e.g. "경기도 고양시 상하수도사업소".
+OTHER_CITY_RE = re.compile(r"경기도\s+\S+[시군]")
+NATIONAL_TYPES = {"중앙행정기관", "공공기관"}
+ONGOING_RE = re.compile(r"상시|수시|연중")
+# Only a leading "YYYY.M.D ~ YYYY.M.D" range is trusted: free text such as "5년 이내(2012.7.1. 이후…)"
+# or "2026.2.2.~11.30." would otherwise misdate a live benefit as closed.
+RANGE_RE = re.compile(
+    r"^\s*20\d{2}\s*[.\-/년]\s*\d{1,2}\s*[.\-/월]\s*\d{1,2}\s*[.일]?\s*(?:\([^)]*\)\s*)?"
+    r"[~∼〜\-–]\s*20\d{2}\s*[.\-/년]\s*\d{1,2}\s*[.\-/월]\s*\d{1,2}"
+)
 
 
 def condition_record(row: dict) -> dict:
@@ -28,12 +40,13 @@ def condition_record(row: dict) -> dict:
 
 def jurisdiction_of(row: dict) -> str | None:
     agency = (row.get("소관기관명") or "").strip()
-    if "오산시" in agency:
+    kind = (row.get("소관기관유형") or "").strip()
+    if OSAN_RE.search(agency):
         return "osan"
-    if agency == "경기도":
-        return "gyeonggi"
-    if (row.get("소관기관유형") or "").strip() == "중앙행정기관":
+    if kind in NATIONAL_TYPES:
         return "national"
+    if "경기" in agency and kind != "시군구" and not OTHER_CITY_RE.search(agency):
+        return "gyeonggi"
     return None
 
 
@@ -82,11 +95,12 @@ class Gov24Collector(Collector):
 
     def _raw(self, row: dict, place: str, conditions: dict | None, now: datetime) -> RawOpportunity:
         period = row.get("신청기한") or ""
-        start, end = dates_from_text(period)
-        if "상시" in period:
-            date_kind = "ongoing"
-        elif end:
+        dated = RANGE_RE.match(period)
+        start, end = dates_from_text(dated.group(0)) if dated else (None, None)
+        if dated and end:
             date_kind = "exact"
+        elif ONGOING_RE.search(period):
+            date_kind = "ongoing"
         else:
             date_kind = "inquiry"
         text = lambda key: re.sub(r"\s+", " ", row.get(key) or "").strip()

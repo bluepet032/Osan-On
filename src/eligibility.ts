@@ -37,7 +37,7 @@ export const hasBasics = (profile: Profile) => Boolean(profile.gender) && profil
 interface Group { prefix: string; none?: string; answer: (profile: Profile) => string[] | undefined; labels: Record<string, string> }
 
 // Within a group any listed code qualifies; every constrained group must qualify.
-// shortcut: JA12xx (소상공인 업종) and JA2xxx (법인) are ignored; upgrade if business users are added.
+// shortcut: JA12xx (소상공인 업종) is ignored; upgrade if business users are added.
 const GROUPS: Group[] = [
   { prefix: 'JA020', answer: profile => profile.income && [profile.income], labels: INCOME_OPTIONS },
   { prefix: 'JA03', none: 'JA0322', answer: profile => profile.traits, labels: TRAIT_OPTIONS },
@@ -62,7 +62,9 @@ export function judge(item: { conditions?: Conditions | null }, profile: Profile
     reasons.push({ label: wanted === 'male' ? '남성 대상' : '여성 대상', ok: profile.gender ? profile.gender === wanted : null })
   }
 
-  const { age_min: min, age_max: max } = conditions
+  const min = conditions.age_min
+  // 정부24 writes "no upper limit" as 120.
+  const max = conditions.age_max != null && conditions.age_max >= 100 ? null : conditions.age_max
   if (min != null || max != null) {
     const age = profile.age
     reasons.push({ label: ageLabel(min, max), ok: age == null ? null : (min == null || age >= min) && (max == null || age <= max) })
@@ -70,10 +72,15 @@ export function judge(item: { conditions?: Conditions | null }, profile: Profile
 
   for (const group of GROUPS) {
     const wanted = conditions.codes.filter(code => code.startsWith(group.prefix) && code !== group.none && code in group.labels)
-    if (!wanted.length || (group.none && codes.has(group.none))) continue
+    const options = Object.keys(group.labels).filter(code => code.startsWith(group.prefix))
+    // Every option checked (e.g. all five income bands) means the group does not restrict anyone.
+    if (!wanted.length || wanted.length === options.length || (group.none && codes.has(group.none))) continue
     const answer = group.answer(profile)
     reasons.push({ label: wanted.map(code => group.labels[code]).join('·') + ' 대상', ok: answer ? wanted.some(code => answer.includes(code)) : null })
   }
+
+  // An individual's profile cannot say whether a benefit for businesses or institutions (JA2xxx) fits them.
+  if (conditions.codes.some(code => code.startsWith('JA2'))) reasons.push({ label: '사업자·기관 대상 포함', ok: null })
 
   const verdict: Verdict = reasons.some(reason => reason.ok === false) ? 'ineligible'
     : reasons.some(reason => reason.ok === null) ? 'check' : 'eligible'

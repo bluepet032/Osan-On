@@ -59,8 +59,21 @@ describe('judge', () => {
     expect(verdict(['JA0102', 'JA0411'], { gender: 'female' })).toBe('check')
   })
 
-  it('ignores corporate-only codes', () => {
-    expect(verdict(['JA2101', 'JA1201'], {})).toBe('eligible')
+  it('treats a group with every option checked as no restriction', () => {
+    const allIncome = ['JA0201', 'JA0202', 'JA0203', 'JA0204', 'JA0205']
+    expect(verdict(allIncome, {})).toBe('eligible')
+    expect(judge(item(allIncome), {}).reasons).toEqual([])
+  })
+
+  it('reads an upper age of 100 or more as no upper limit', () => {
+    expect(judge(item([], 19, 120), { age: 28 }).reasons).toEqual([{ label: '만 19세 이상', ok: true }])
+    expect(judge(item([], null, 120), {}).verdict).toBe('eligible')
+  })
+
+  it('asks for a check when businesses or institutions are among the targets', () => {
+    expect(verdict(['JA2101'], { gender: 'female', age: 28 })).toBe('check')
+    expect(judge(item(['JA2203']), {}).reasons).toEqual([{ label: '사업자·기관 대상 포함', ok: null }])
+    expect(verdict(['JA1201'], {})).toBe('eligible')
   })
 })
 

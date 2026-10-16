@@ -39,12 +39,16 @@ export function matchesOpportunity(item: Opportunity, filters: OpportunityFilter
   return !terms.length || matchesSearch(indexOf(item), terms, options.fuzzy)
 }
 
-export type Sort = 'deadline' | 'newest' | 'updated' | 'relevance' | 'prize'
+export type Sort = 'local' | 'deadline' | 'newest' | 'updated' | 'relevance' | 'prize'
+
+// 오산온 is for Osan residents, so the city's own benefits come first.
+const LOCAL_RANK: Record<string, number> = { osan: 0, gyeonggi: 1, national: 2 }
 
 const byDeadline = (left: Opportunity, right: Opportunity) => (left.d_day ?? 99999) - (right.d_day ?? 99999)
 
 export function compareOpportunities(sort: Sort) {
   return (left: Opportunity, right: Opportunity) => {
+    if (sort === 'local') return (LOCAL_RANK[left.jurisdiction ?? 'national'] - LOCAL_RANK[right.jurisdiction ?? 'national']) || byDeadline(left, right)
     if (sort === 'newest') return Date.parse(right.first_seen_at) - Date.parse(left.first_seen_at)
     if (sort === 'updated') return Date.parse(right.last_changed_at || right.last_seen_at) - Date.parse(left.last_changed_at || left.last_seen_at)
     if (sort === 'relevance') return right.relevance.score - left.relevance.score

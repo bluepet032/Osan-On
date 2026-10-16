@@ -13,6 +13,14 @@ const opportunity = (overrides: Record<string, unknown>) => ({
   ...overrides,
 })
 
+// The open list also reads undated.json; keep the committed (real) data out of fixture-based tests.
+test.beforeEach(async ({ page }) => {
+  await page.route('**/data/undated.json', route => route.fulfill({
+    contentType: 'application/json',
+    body: JSON.stringify({ schema_version: 1, generated_at: '2026-07-30T12:00:00+09:00', items: [] }),
+  }))
+})
+
 test('loads opportunity dashboard and changes theme', async ({ page }) => {
   await page.goto('/#/')
   await expect(page.getByRole('heading', { name: '나에게 맞는 혜택' })).toBeVisible()

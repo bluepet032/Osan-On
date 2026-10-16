@@ -67,6 +67,12 @@ describe('compareOpportunities', () => {
     expect(items.sort(compareOpportunities('prize')).map(value => value.id)).toEqual(['big-soon', 'big-late', 'small', 'none'])
   })
 
+  it('puts Osan first, then Gyeonggi, then national, each by deadline', () => {
+    const at = (id: string, jurisdiction: 'osan' | 'gyeonggi' | 'national', dDay: number | null) => ({ ...make(id, null, dDay), jurisdiction })
+    const items = [at('nation-soon', 'national', 1), at('osan-undated', 'osan', null), at('gg', 'gyeonggi', 5), at('osan-soon', 'osan', 3)]
+    expect(items.sort(compareOpportunities('local')).map(value => value.id)).toEqual(['osan-soon', 'osan-undated', 'gg', 'nation-soon'])
+  })
+
   it('keeps the deadline order with undated items last', () => {
     const items = [make('undated', 100, null), make('later', 0, 9), make('sooner', 0, 2)]
     expect(items.sort(compareOpportunities('deadline')).map(value => value.id)).toEqual(['sooner', 'later', 'undated'])

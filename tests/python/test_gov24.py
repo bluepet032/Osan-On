@@ -142,3 +142,34 @@ def test_normalize_maps_category_and_type(monkeypatch):
     assert item.jurisdiction == "osan"
     assert item.relevance.decision == "publish"
     assert 60 <= len(item.summary) <= 180
+
+
+def test_jurisdiction_covers_affiliated_agencies_but_not_other_cities(monkeypatch):
+    names = {
+        "O1": ("(재)오산문화재단", "지방출자_출연기관"), "O2": ("재단법인오산교육재단", "지방출자_출연기관"),
+        "O3": ("오산시시설관리공단", "지방공기업"), "X1": ("(재)전남바이오산업진흥원", "지방출자_출연기관"),
+        "G1": ("경기도교육청", "교육청"), "G2": ("경기복지재단", "지방출자_출연기관"),
+        "X2": ("경기도 고양시 상하수도사업소", "지방공기업"), "X3": ("경기도 안양시", "시군구"),
+        "N1": ("한국장학재단", "공공기관"), "X4": ("서울특별시교육청", "교육청"),
+    }
+    pages = {"serviceList": [[service(key, name, agency_type=kind) for key, (name, kind) in names.items()]], "supportConditions": [[]]}
+
+    items = {item.source_post_id: item.jurisdiction for item in collector(FakeClient(pages), monkeypatch).collect(NOW)}
+
+    assert items == {"O1": "osan", "O2": "osan", "O3": "osan", "G1": "gyeonggi", "G2": "gyeonggi", "N1": "national"}
+
+
+def test_only_a_leading_dated_range_is_trusted(monkeypatch):
+    periods = {
+        "A1": "2026.1.1.~2026.12.10.", "A2": "2025. 4. 1. ~ 2026. 3. 31.", "A3": "수시", "A4": "연중",
+        "A5": "급여의 사유가 발생한 날로부터 5년 이내(2012. 7. 1. 이후 ...)", "A6": "2026. 2. 2.~11. 30.(예산 소진 시 마감)",
+    }
+    pages = {"serviceList": [[service(key, "경기도 오산시", 신청기한=text) for key, text in periods.items()]], "supportConditions": [[]]}
+
+    items = {item.source_post_id: item for item in collector(FakeClient(pages), monkeypatch).collect(NOW)}
+
+    assert (items["A1"].recruit_start, items["A1"].recruit_end, items["A1"].date_kind) == ("2026-01-01", "2026-12-10", "exact")
+    assert items["A2"].recruit_end == "2026-03-31"
+    assert items["A3"].date_kind == items["A4"].date_kind == "ongoing"
+    assert (items["A5"].recruit_end, items["A5"].date_kind) == (None, "inquiry")
+    assert (items["A6"].recruit_end, items["A6"].date_kind) == (None, "inquiry")
