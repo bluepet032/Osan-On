@@ -17,9 +17,9 @@ CATEGORY_DOMAINS = {
     "임신": "pregnancy", "출산": "pregnancy", "보호": "care", "돌봄": "care", "문화": "culture",
     "환경": "culture", "농림": "agriculture", "농업": "agriculture", "어업": "agriculture",
 }
-# 정부24 지원유형, checked in order: "현금(감면)" is cash first.
+# 정부24 지원유형, checked in order: the detail in brackets wins, so "현금(융자)" is a loan.
 SUPPORT_TYPES = (
-    ("현금", "cash"), ("현물", "in_kind"), ("이용권", "voucher"), ("융자", "loan"), ("감면", "reduction"), ("서비스", "service"),
+    ("융자", "loan"), ("감면", "reduction"), ("현금", "cash"), ("현물", "in_kind"), ("이용권", "voucher"), ("서비스", "service"),
 )
 
 

@@ -47,7 +47,7 @@ describe('오산온', () => {
     fireEvent.click(screen.getByRole('link', { name: '내 혜택함' }))
     expect(await screen.findByRole('heading', { name: 'Google 로그인이 필요합니다' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '로그인 또는 가입' }))
-    expect(screen.getByRole('dialog', { name: '오산온 계정' })).toHaveTextContent('찜한 공고와 일정')
+    expect(screen.getByRole('dialog', { name: '오산온 계정' })).toHaveTextContent('맞춤 조건(성별·나이')
     expect(screen.getByRole('checkbox')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Google로 계속' })).toBeDisabled()
   })

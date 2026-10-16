@@ -66,14 +66,15 @@ QuestBoard(공모전 모음 사이트) 복제본에서 UI·파이프라인 구�
   `admin` 행정·안전, `pregnancy` 임신·출산, `care` 보호·돌봄, `culture` 문화·환경, `agriculture` 농림축산어업
   (매핑 실패 시 `living`)
 - `primary_type`: 공모전 유형 → 지원 형태 `cash` 현금, `in_kind` 현물, `service` 서비스, `voucher` 이용권,
-  `loan` 융자, `reduction` 감면, `other` 기타 (지원유형 문자열 부분 일치)
+  `loan` 융자, `reduction` 감면, `other` 기타 (지원유형 부분 일치, 융자·감면을 먼저 봐서 "현금(융자)"는 융자)
+- `apply_methods`: 신청방법("기타 온라인신청||방문신청")에서 `online`·`visit`·`none`(신청 불필요). "직접입력"만 있으면 빈 목록
 - 추가: `jurisdiction: "osan" | "gyeonggi" | "national"`
 - 추가: `conditions: { codes: string[], age_min: int | null, age_max: int | null } | null`
   (`null` = 조건 정보 없음)
 - `eligibility` = 지원대상(+선정기준), `benefits` = 지원내용, `summary` = 서비스목적요약,
   `organizer` = 소관기관명(+부서명), `application_url`/`source_url` = 상세조회URL
 - `eligibility`/`benefits`는 240자에서 500자로 늘린다(복지 조건은 길다).
-- 공모전 필드(상금·참가비·진행 방식)는 P0에서 그대로 두고(기본값), P1 상세 필터 개편 때 정리한다.
+- 공모전 필드(`regions`, `prize_manwon`, `fee`, `mode`, `is_adjacent`)는 P1에서 삭제했다.
 
 정규화: 혜택 출처뿐이므로 `normalize`는 IT 키워드 분류(`classify`/`assign_domain`)를 호출하지 않고,
 모든 항목을 `publish`(점수 100)로 낸다.
@@ -121,7 +122,9 @@ judge(item, profile) → { verdict, reasons: { label, ok: true | false | null }[
 - 목록은 active + undated(상시·미정)를 함께 보여 준다. 혜택은 대부분 날짜가 없기 때문이다.
 - 기본 정렬은 "오산 우선": 오산시 → 경기도 → 중앙, 같은 소관 안에서는 마감 임박순.
 - 행: 판정 배지 + 소관 배지(오산시/경기도/중앙). 펼치면 판정 근거, 지원대상, 지원내용, 원문·신청 링크.
-- 프로필 저장: P0는 `localStorage('osanon.profile')`, P1에서 로그인 시 Firestore 동기화.
+- 프로필 저장: 항상 `localStorage('osanon.profile')`에 먼저 쓰고, 로그인 중이면 `users/{uid}/profile/main`에도 setDoc한다.
+  계정에 프로필이 없으면 브라우저 값을 올리고, 있으면 계정 값을 브라우저로 내려받는다. 계정 삭제 시 함께 지운다.
+- 소관 탭(전체 소관/오산시/경기도/중앙정부, URL `place`)과 분야 탭(모든 분야 먼저), 상세 조건은 "신청 방법" 하나.
 - 브랜딩: 헤더·푸터·`<title>`을 "오산온 · 오산시민 맞춤 혜택"으로 바꾼다.
 - 메뉴: 혜택 / 주간 요약 / 마감 혜택 / 수집 상태 / 내 혜택함 ("날짜 미상"은 목록에 합쳐지므로 메뉴에서 뺀다)
 

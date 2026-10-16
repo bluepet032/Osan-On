@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { hasBasics, HOUSEHOLD_OPTIONS, INCOME_OPTIONS, TRAIT_OPTIONS, type IncomeCode, type Profile } from '../eligibility'
 
-interface Props { profile: Profile; onChange: (profile: Profile) => void }
+interface Props { profile: Profile; onChange: (profile: Profile) => void; synced?: boolean; error?: string }
 
 const TRAIT_GROUPS: [string, string[]][] = [
   ['임신·출산', ['JA0301', 'JA0302', 'JA0303']],
@@ -11,7 +11,7 @@ const TRAIT_GROUPS: [string, string[]][] = [
 
 const toggle = (list: string[], code: string) => list.includes(code) ? list.filter(value => value !== code) : [...list, code]
 
-export function ProfileCard({ profile, onChange }: Props) {
+export function ProfileCard({ profile, onChange, synced = false, error = '' }: Props) {
   const [editing, setEditing] = useState(!hasBasics(profile))
   const [details, setDetails] = useState(false)
   const [gender, setGender] = useState(profile.gender)
@@ -38,6 +38,10 @@ export function ProfileCard({ profile, onChange }: Props) {
     <label key={code} className="profile-check"><input type="checkbox" checked={list.includes(code)} onChange={() => set(toggle(list, code))} />{label}</label>
   )
 
+  const storageNote = synced
+    ? '로그인한 계정에 저장되어 다른 기기에서도 이어집니다. 본인만 읽을 수 있습니다.'
+    : '입력한 정보는 이 브라우저에만 저장됩니다. 로그인하면 계정에 저장해 다른 기기에서도 쓸 수 있습니다.'
+
   if (editing) {
     return (
       <form className="profile-card" onSubmit={submitBasics} aria-label="맞춤 혜택 설문">
@@ -50,7 +54,8 @@ export function ProfileCard({ profile, onChange }: Props) {
           <label className="profile-age">만 나이<input type="number" inputMode="numeric" min={0} max={120} value={age} onChange={event => setAge(event.target.value)} /></label>
           <button type="submit" className="primary-button" disabled={!gender || !validAge}>맞춤 혜택 보기</button>
         </div>
-        <small>입력한 정보는 이 브라우저에만 저장되며 서버로 보내지 않습니다.</small>
+        <small>{storageNote}</small>
+        {error && <p className="message-inline error" role="alert">{error}</p>}
       </form>
     )
   }
@@ -62,6 +67,8 @@ export function ProfileCard({ profile, onChange }: Props) {
         <button type="button" className="text-button" onClick={() => setEditing(true)}>수정</button>
         <button type="button" className="text-button" onClick={() => setDetails(value => !value)} aria-expanded={details}>더 정확하게</button>
       </div>
+      <small>{storageNote}</small>
+      {error && <p className="message-inline error" role="alert">{error}</p>}
       {details && (
         <form className="profile-details" onSubmit={submitDetails}>
           <label className="profile-income">소득 수준

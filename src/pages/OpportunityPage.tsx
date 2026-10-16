@@ -7,7 +7,7 @@ import { AUTO_REFRESH_LABEL, DEFAULT_DOMAIN, DOMAIN_LABELS, PAGE_SIZE, domainOf 
 import { advancedVerdict, EMPTY_ADVANCED, readAdvanced } from '../advancedFilters'
 import { clearDataCache, loadOpportunities } from '../data'
 import { hasBasics, judge, type Profile, type Verdict } from '../eligibility'
-import { loadProfile, saveProfile } from '../profile'
+import { useProfile } from '../profileContext'
 import { currentHashParams } from '../urlState'
 import { compareOpportunities, matchesOpportunity, type Sort } from '../filtering'
 import { usePersonalState } from '../personal'
@@ -27,7 +27,7 @@ export function OpportunityPage({ dataset, title, description }: Props) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [reloadKey, setReloadKey] = useState(0)
-  const [profile, setProfile] = useState<Profile>(loadProfile)
+  const { profile, setProfile, synced, error: profileError } = useProfile()
   const [params, setParams] = useSearchParams()
   const { state: personal, toggle, restoreHidden } = usePersonalState()
 
@@ -66,7 +66,7 @@ export function OpportunityPage({ dataset, title, description }: Props) {
     match: value('match', hasBasics(profile) ? 'eligible' : 'all') as Match,
   }
   const changeProfile = (next: Profile) => {
-    saveProfile(next); setProfile(next)
+    setProfile(next)
     update('match', '')
   }
 
@@ -101,7 +101,8 @@ export function OpportunityPage({ dataset, title, description }: Props) {
         <div><p className="eyebrow">{filters.domain === 'all' ? '모든 분야' : DOMAIN_LABELS[filters.domain as Domain] ?? '모든 분야'} · BENEFITS</p><h1>{title}</h1><p>{description}</p></div>
         <div className="summary-cards" aria-label="혜택 요약"><span><strong>{freshness.new}</strong> 신규</span><span><strong>{freshness.updated}</strong> 변경</span><span><strong>{freshness.urgent}</strong> 마감임박</span></div>
       </div>
-      {dataset === 'benefits' && <ProfileCard profile={profile} onChange={changeProfile} />}
+      {/* Remounts when the account copy arrives, so the card shows what was saved there. */}
+      {dataset === 'benefits' && <ProfileCard key={JSON.stringify(profile)} profile={profile} onChange={changeProfile} synced={synced} error={profileError} />}
       <div className="match-tabs" role="group" aria-label="맞춤 판정">
         {MATCH_TABS.map(([match, label]) => <button key={match} className={`match-${match} ${filters.match === match ? 'active' : ''}`} aria-pressed={filters.match === match} onClick={() => update('match', match)}>{label} <span>{verdictCount(match)}</span></button>)}
       </div>

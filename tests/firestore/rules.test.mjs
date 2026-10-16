@@ -33,6 +33,10 @@ await check('create schedule notification', assertSucceeds(setDoc(doc(alice, 'us
 await check('mark notification read', assertSucceeds(updateDoc(doc(alice, 'users/alice/notifications/n1'), { read: true })))
 await check('delete notification', assertSucceeds(deleteDoc(doc(alice, 'users/alice/notifications/n1'))))
 await check('delete favorite', assertSucceeds(deleteDoc(doc(alice, 'users/alice/favorites/f1'))))
+const profile = { gender: 'female', age: 28, income: 'JA0202', traits: ['JA0328'], household: [], updatedAt: new Date().toISOString() }
+await check('save profile', assertSucceeds(setDoc(doc(alice, 'users/alice/profile/main'), profile)))
+await check('replace profile without income', assertSucceeds(setDoc(doc(alice, 'users/alice/profile/main'), { gender: 'male', age: 40, updatedAt: new Date().toISOString() })))
+await check('delete profile', assertSucceeds(deleteDoc(doc(alice, 'users/alice/profile/main'))))
 await check('delete user document', assertSucceeds(deleteDoc(doc(alice, 'users/alice'))))
 
 // Anything else must be denied.
@@ -46,6 +50,11 @@ await check('keyword cannot be edited', assertFails(setDoc(doc(alice, 'users/ali
 await check('unknown notification type', assertFails(setDoc(doc(alice, 'users/alice/notifications/n2'), { ...notification, type: 'spam' })))
 await setDoc(doc(alice, 'users/alice/notifications/n3'), notification)
 await check('notification text cannot be edited', assertFails(updateDoc(doc(alice, 'users/alice/notifications/n3'), { message: '변조' })))
+await check('other user cannot write profile', assertFails(setDoc(doc(bob, 'users/alice/profile/main'), profile)))
+await check('profile id other than main', assertFails(setDoc(doc(alice, 'users/alice/profile/other'), profile)))
+await check('unknown profile field', assertFails(setDoc(doc(alice, 'users/alice/profile/main'), { ...profile, name: '홍길동' })))
+await check('invalid profile age', assertFails(setDoc(doc(alice, 'users/alice/profile/main'), { ...profile, age: 999 })))
+await check('invalid profile gender', assertFails(setDoc(doc(alice, 'users/alice/profile/main'), { ...profile, gender: 'x' })))
 await check('unknown collection', assertFails(setDoc(doc(alice, 'users/alice/other/x'), { a: 1 })))
 await check('user document cannot be written', assertFails(setDoc(doc(alice, 'users/alice'), { a: 1 })))
 

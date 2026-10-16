@@ -8,14 +8,17 @@ import { PersonalPage } from './pages/PersonalPage'
 import { StatusPage } from './pages/StatusPage'
 import { WeeklyPage } from './pages/WeeklyPage'
 import { PersonalProvider, usePersonalState } from './personal'
+import { ProfileProvider } from './profileContext'
 
 export function App() {
   return (
     <HashRouter>
       <AccountProvider>
-        <PersonalProvider>
-          <AppContent />
-        </PersonalProvider>
+        <ProfileProvider>
+          <PersonalProvider>
+            <AppContent />
+          </PersonalProvider>
+        </ProfileProvider>
       </AccountProvider>
     </HashRouter>
   )

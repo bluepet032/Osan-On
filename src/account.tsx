@@ -59,7 +59,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     if (!firebase || !user) throw new Error('로그인이 필요합니다.')
     const { authApi, db, firestore } = firebase
     await authApi.reauthenticateWithPopup(user, new authApi.GoogleAuthProvider())
-    for (const name of ['favorites', 'keywords', 'notifications']) {
+    for (const name of ['favorites', 'keywords', 'notifications', 'profile']) {
       const snapshot = await firestore.getDocs(firestore.collection(db, 'users', user.uid, name))
       for (let start = 0; start < snapshot.docs.length; start += 450) {
         const batch = firestore.writeBatch(db)
