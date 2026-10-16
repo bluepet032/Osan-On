@@ -28,12 +28,12 @@ test('loads opportunity dashboard and changes theme', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 })
 
-test('status route is reachable', async ({ page }) => {
+test('status route is for admins only', async ({ page }) => {
+  await page.goto('/#/')
+  await expect(page.getByRole('link', { name: '수집 상태' })).toHaveCount(0)
   await page.goto('/#/status')
-  await expect(page.getByRole('heading', { name: '수집 상태' })).toBeVisible()
-  await expect(page.getByRole('link', { name: 'GitHub에서 지금 수집 실행' })).toHaveAttribute('href', /actions\/workflows\/collect\.yml$/)
-  await expect(page.getByRole('button', { name: '최신 데이터 다시 불러오기' })).toBeEnabled()
-  await expect(page.locator('details.review-section')).not.toHaveAttribute('open', '')
+  await expect(page.getByRole('heading', { name: '관리자 전용 페이지' })).toBeVisible()
+  await expect(page.getByText('출처별 상태')).toHaveCount(0)
 })
 
 test('requires login for favorites and restores URL and hidden state after reload', async ({ page }) => {
