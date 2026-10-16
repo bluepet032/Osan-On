@@ -29,7 +29,6 @@ export function formatDate(value?: string | null) {
 }
 
 export function matchesQuickTag(item: Opportunity, tag: string) {
-  if (tag === '오산시') return item.jurisdiction === 'osan'
   if (tag === 'NEW') return isNew(item)
   if (tag === 'UPDATED') return isUpdated(item)
   if (tag === '마감임박') return isDeadlineSoon(item)

@@ -15,6 +15,15 @@ const item = {
 } satisfies Opportunity
 
 describe('matchesOpportunity', () => {
+  it('filters by jurisdiction tab, with all showing everything', () => {
+    const osan = { ...item, jurisdiction: 'osan' } satisfies Opportunity
+    const national = { ...item, jurisdiction: 'national' } satisfies Opportunity
+    expect(matchesOpportunity(osan, { ...filters, place: 'osan' })).toBe(true)
+    expect(matchesOpportunity(national, { ...filters, place: 'osan' })).toBe(false)
+    expect(matchesOpportunity(national, { ...filters, place: 'all' })).toBe(true)
+    expect(matchesOpportunity(national, filters)).toBe(true)
+  })
+
   it('combines search and basic filters', () => {
     expect(matchesOpportunity(item, { ...filters, search: '게임재단', field: 'AI' })).toBe(true)
     expect(matchesOpportunity(item, { ...filters, search: '게임재단', field: '데이터' })).toBe(false)

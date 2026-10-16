@@ -20,7 +20,7 @@ export const DOMAINS = Object.keys(DOMAIN_LABELS) as Domain[]
 export const DEFAULT_DOMAIN = 'all'
 export const domainOf = (item: { domain?: Domain }): Domain => item.domain ?? 'living'
 export const JURISDICTION_LABELS: Record<Jurisdiction, string> = { osan: '오산시', gyeonggi: '경기도', national: '중앙정부' }
-export const QUICK_TAGS = ['오산시', 'NEW', 'UPDATED', '마감임박'] as const
+export const QUICK_TAGS = ['NEW', 'UPDATED', '마감임박'] as const
 export const PAGE_SIZE = 50
 
 

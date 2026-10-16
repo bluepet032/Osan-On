@@ -61,7 +61,7 @@ export function OpportunityPage({ dataset, title, description }: Props) {
   }
   const update = (key: string, next: string) => updateMany({ [key]: next })
   const filters = {
-    domain: value('domain', DEFAULT_DOMAIN), type: value('type', 'all'), advanced: readAdvanced(params), quick: value('quick'), search: value('q'), field: value('field'), status: value('status'),
+    place: value('place', 'all'), domain: value('domain', DEFAULT_DOMAIN), type: value('type', 'all'), advanced: readAdvanced(params), quick: value('quick'), search: value('q'), field: value('field'), status: value('status'),
     sort: value('sort', 'local') as Sort, page: Math.max(1, Number(value('page', '1')) || 1),
     match: value('match', hasBasics(profile) ? 'eligible' : 'all') as Match,
   }

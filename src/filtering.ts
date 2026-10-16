@@ -11,6 +11,8 @@ export interface OpportunityFilters {
   search: string
   field: string
   status: string
+  /** Jurisdiction tab: 'all' or osan / gyeonggi / national; absent means all. */
+  place?: string
   /** Optional detail conditions (region, mode, fee, audience, prize). */
   advanced?: AdvancedFilters
 }
@@ -27,6 +29,7 @@ function indexOf(item: Opportunity) {
 }
 
 export function matchesOpportunity(item: Opportunity, filters: OpportunityFilters, options: { fuzzy?: boolean } = {}) {
+  if (filters.place && filters.place !== 'all' && item.jurisdiction !== filters.place) return false
   if (filters.domain !== 'all' && domainOf(item) !== filters.domain) return false
   if (item.is_adjacent && filters.type === 'all') return false
   if (filters.type !== 'all' && item.primary_type !== filters.type) return false
