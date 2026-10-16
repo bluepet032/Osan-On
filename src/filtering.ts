@@ -9,7 +9,6 @@ export interface OpportunityFilters {
   type: string
   quick: string
   search: string
-  field: string
   status: string
   /** Jurisdiction tab: 'all' or osan / gyeonggi / national; absent means all. */
   place?: string
@@ -33,7 +32,6 @@ export function matchesOpportunity(item: Opportunity, filters: OpportunityFilter
   if (filters.domain !== 'all' && domainOf(item) !== filters.domain) return false
   if (filters.type !== 'all' && item.primary_type !== filters.type) return false
   if (filters.quick && !matchesQuickTag(item, filters.quick)) return false
-  if (filters.field && !item.field_tags.includes(filters.field)) return false
   if (filters.status && item.status !== filters.status) return false
   if (filters.advanced && !matchesAdvanced(item, filters.advanced)) return false
 

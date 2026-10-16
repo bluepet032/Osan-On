@@ -19,7 +19,7 @@ const items: Opportunity[] = [
 ]
 
 const renderFilters = (advanced = EMPTY_ADVANCED, handlers = { onChange: vi.fn(), onChangeMany: vi.fn() }, list = items) => {
-  render(<Filters items={list} domain="all" type="all" quick="" search="" field="" status="" advanced={advanced} {...handlers} />)
+  render(<Filters items={list} domain="all" type="all" quick="" search="" status="" advanced={advanced} {...handlers} />)
   return handlers
 }
 
