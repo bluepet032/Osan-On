@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { OpportunityRow } from '../components/OpportunityRow'
 import { loadOpportunities } from '../data'
+import { judge } from '../eligibility'
+import { useProfile } from '../profileContext'
 import { usePersonalState } from '../personal'
 import type { Opportunity } from '../types'
 
@@ -14,6 +16,7 @@ export function NoticePage() {
   const [item, setItem] = useState<Opportunity | null | undefined>(undefined)
   const [error, setError] = useState('')
   const { state: personal, toggle } = usePersonalState()
+  const { profile } = useProfile()
 
   useEffect(() => {
     let active = true
@@ -32,7 +35,7 @@ export function NoticePage() {
       {item === null && <div className="message"><strong>혜택을 찾을 수 없습니다</strong><span>마감 후 3개월이 지나 목록에서 빠졌거나 주소가 잘못되었을 수 있습니다.</span></div>}
       {item && <>
         <div className="page-heading"><div><p className="eyebrow">NOTICE</p><h1>{item.title}</h1></div></div>
-        <section className="opportunity-list" aria-label="혜택"><OpportunityRow item={item} personal={personal} onToggle={toggle} defaultExpanded /></section>
+        <section className="opportunity-list" aria-label="혜택"><OpportunityRow item={item} personal={personal} onToggle={toggle} defaultExpanded judgement={judge(item, profile)} /></section>
       </>}
     </main>
   )

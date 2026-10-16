@@ -83,3 +83,23 @@ items:
     assert result.d_day == 0
     assert 50 <= result.relevance.score < 70
     assert result.relevance.decision == "review"
+
+
+def test_manual_benefit_sets_jurisdiction_and_conditions(tmp_path: Path):
+    (tmp_path / "opportunities.yml").write_text('''schema_version: 1
+items:
+  - id: osan-manual
+    title: 오산시 청년 월세 지원
+    source_url: https://example.com/osan
+    organizer: 경기도 오산시
+    summary: 오산시에 사는 무주택 청년의 월세를 지원합니다.
+    date_kind: ongoing
+    jurisdiction: osan
+    conditions: {codes: [JA0412], age_min: 19, age_max: 39}
+''', encoding="utf-8")
+    now = datetime(2026, 10, 16, tzinfo=ZoneInfo("Asia/Seoul"))
+
+    [item] = manual_items(load_taxonomy(), now, tmp_path)
+
+    assert item.jurisdiction == "osan"
+    assert item.conditions == {"codes": ["JA0412"], "age_min": 19, "age_max": 39}

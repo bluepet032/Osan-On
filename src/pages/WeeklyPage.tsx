@@ -55,7 +55,7 @@ export function WeeklyPage() {
       </div>
       {list.length === 0
         ? <div className="message compact">해당하는 혜택이 없습니다.</div>
-        : <div className="opportunity-list">{list.map(item => <OpportunityRow key={item.id} item={item} personal={personal} onToggle={toggle} />)}</div>}
+        : <div className="opportunity-list">{list.map(item => <OpportunityRow key={item.id} item={item} personal={personal} onToggle={toggle} judgement={judge(item, profile)} />)}</div>}
       {more && <Link className="weekly-more" to={more.to}>{more.label} →</Link>}
     </section>
   )

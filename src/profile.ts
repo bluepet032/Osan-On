@@ -2,6 +2,8 @@ import { HOUSEHOLD_OPTIONS, INCOME_OPTIONS, TRAIT_OPTIONS, type IncomeCode, type
 import { readStorage, writeStorage } from './utils'
 
 const KEY = 'osanon.profile'
+// UID of the account the browser copy came from; empty when it was entered while signed out.
+const OWNER_KEY = 'osanon.profile.owner'
 
 export function loadProfile(): Profile {
   try {
@@ -12,7 +14,12 @@ export function loadProfile(): Profile {
   }
 }
 
-export const saveProfile = (profile: Profile) => writeStorage(KEY, JSON.stringify(profile))
+export function saveProfile(profile: Profile, owner = '') {
+  writeStorage(KEY, JSON.stringify(profile))
+  writeStorage(OWNER_KEY, owner)
+}
+
+export const loadProfileOwner = () => readStorage(OWNER_KEY) || ''
 
 /** Account copy (users/{uid}/profile/main); Firestore rejects undefined, so unset fields are left out. */
 export function profileToDocument(profile: Profile, updatedAt = new Date().toISOString()): Record<string, unknown> {

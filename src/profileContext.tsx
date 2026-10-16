@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { useAccount } from './account'
 import { hasBasics, type Profile } from './eligibility'
-import { loadProfile, profileFromDocument, profileToDocument, saveProfile } from './profile'
+import { loadProfile, loadProfileOwner, profileFromDocument, profileToDocument, saveProfile } from './profile'
 
 interface ProfileContextValue {
   profile: Profile
@@ -16,14 +16,19 @@ interface ProfileContextValue {
 const ProfileContext = createContext<ProfileContextValue | null>(null)
 
 export function ProfileProvider({ children }: { children: ReactNode }) {
-  const { user, firebase } = useAccount()
+  const { user, firebase, ready } = useAccount()
   const [profile, setLocal] = useState<Profile>(loadProfile)
   const [error, setError] = useState('')
   const [since, setSince] = useState('')
   const uid = user?.uid ?? ''
 
   useEffect(() => {
-    if (!uid || !firebase) { setSince(''); return }
+    if (!uid || !firebase) {
+      setSince('')
+      // Signed out (once sign-in has been restored): an account's answers must not stay for the next person.
+      if (ready && loadProfileOwner()) { saveProfile({}); setLocal({}) }
+      return
+    }
     const { db, firestore: fs } = firebase
     const reference = fs.doc(db, 'users', uid, 'profile', 'main')
     let active = true
@@ -32,21 +37,25 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       if (snapshot.exists()) {
         const data = snapshot.data()
         const remote = profileFromDocument(data)
-        saveProfile(remote)
+        saveProfile(remote, uid)
         setLocal(remote)
         setSince(typeof data.updatedAt === 'string' ? data.updatedAt : '')
         return
       }
-      // First sign-in on this account: keep what was entered before logging in.
+      // First sign-in on this account: keep what was entered before logging in, but never
+      // another account's answers left in this browser.
+      if (loadProfileOwner() && loadProfileOwner() !== uid) { saveProfile({}); setLocal({}); return }
       const local = loadProfile()
-      if (hasBasics(local)) fs.setDoc(reference, profileToDocument(local)).catch(() => setError('맞춤 조건을 계정에 저장하지 못했습니다.'))
+      if (!hasBasics(local)) return
+      saveProfile(local, uid)
+      fs.setDoc(reference, profileToDocument(local)).catch(() => setError('맞춤 조건을 계정에 저장하지 못했습니다.'))
     }, () => { if (active) setError('계정의 맞춤 조건을 불러오지 못했습니다.') })
     return () => { active = false; stop() }
-  }, [uid, firebase])
+  }, [uid, firebase, ready])
 
   const setProfile = useCallback((next: Profile) => {
     // The browser copy is written first, so a failed account write never loses the answers.
-    saveProfile(next)
+    saveProfile(next, uid && firebase ? uid : '')
     setLocal(next)
     setError('')
     if (!uid || !firebase) return

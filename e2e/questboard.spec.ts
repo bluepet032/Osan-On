@@ -190,9 +190,10 @@ test('jurisdiction tabs narrow the list to one level of government', async ({ pa
 
 test('each notice has its own shareable page', async ({ page }) => {
   const payload = (items: unknown[]) => ({ contentType: 'application/json', body: JSON.stringify({ schema_version: 1, generated_at: '2026-07-30T12:00:00+09:00', items }) })
-  await page.route('**/data/active.json', route => route.fulfill(payload([opportunity({})])))
+  await page.route('**/data/active.json', route => route.fulfill(payload([opportunity({ conditions: { codes: [], age_min: 19, age_max: 34 } })])))
   await page.route('**/data/undated.json', route => route.fulfill(payload([])))
   await page.route('**/data/closed.json', route => route.fulfill(payload([])))
+  await page.addInitScript(() => localStorage.setItem('osanon.profile', JSON.stringify({ gender: 'female', age: 28 })))
   await page.goto('/#/')
   await page.getByRole('button', { name: '펼치기' }).click()
   await page.getByRole('link', { name: '공유용 링크' }).click()
@@ -200,6 +201,9 @@ test('each notice has its own shareable page', async ({ page }) => {
   await expect(page).toHaveURL(/#\/notice\/contest-1$/)
   await expect(page.getByRole('heading', { level: 1, name: 'AI 인디게임 공모전' })).toBeVisible()
   await expect(page.getByRole('link', { name: '원문 보기' })).toHaveAttribute('href', 'https://example.com/contest')
+  // The shared page judges the benefit against the visitor's own profile, as the list does.
+  await expect(page.locator('.verdict')).toHaveText('가능성 높음')
+  await expect(page.getByLabel('판정 근거')).toContainText('만 19~34세')
 
   await page.goto('/#/notice/no-such-notice')
   await expect(page.getByText('혜택을 찾을 수 없습니다')).toBeVisible()
