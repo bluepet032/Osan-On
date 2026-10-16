@@ -11,6 +11,8 @@ export interface Conditions {
   codes: string[]
   age_min: number | null
   age_max: number | null
+  /** 복지로 생애주기 the ages came from; set only for services without listed targets. */
+  life?: string[]
 }
 
 export interface SourceRecord {

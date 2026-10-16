@@ -34,7 +34,8 @@
                 "properties": {
                   "codes": { "type": "array", "items": { "type": "string", "pattern": "^JA[0-9]{4}$" } },
                   "age_min": { "type": ["integer", "null"] },
-                  "age_max": { "type": ["integer", "null"] }
+                  "age_max": { "type": ["integer", "null"] },
+                  "life": { "description": "복지로 생애주기에서 나이를 추정했을 때의 단계 이름", "type": "array", "items": { "type": "string" } }
                 }
               }
             ]

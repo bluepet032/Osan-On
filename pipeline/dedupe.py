@@ -37,6 +37,9 @@ def distinct_posts_of_same_source(left: Opportunity, right: Opportunity) -> bool
 
 
 REGION_WORDS_RE = re.compile(r"오산시|경기도|경기")
+# Word-final 지원·사업 and a lone 등 carry no meaning, but their order differs between the portals
+# ("한방난임 지원 사업" vs "한방난임사업 지원"). 지원금·사업자 keep their letters.
+FILLER_WORDS_RE = re.compile(r"(?:지원|사업)+\b|\b등\b")
 
 
 def same_local_benefit(left: Opportunity, right: Opportunity) -> bool:
@@ -44,9 +47,10 @@ def same_local_benefit(left: Opportunity, right: Opportunity) -> bool:
 
     if left.jurisdiction != right.jurisdiction or left.jurisdiction == "national":
         return False
-    a, b = (normalize_text(REGION_WORDS_RE.sub("", item.title)) for item in (left, right))
+    a, b = (normalize_text(FILLER_WORDS_RE.sub("", REGION_WORDS_RE.sub("", item.title))) for item in (left, right))
     shorter = min(a, b, key=len)
-    return (len(shorter) >= 6 and (a in b or b in a)) or SequenceMatcher(None, a, b).ratio() >= 0.8
+    # Two- or three-letter leftovers ("노인") are too generic to call the same program.
+    return len(shorter) >= 4 and ((len(shorter) >= 6 and (a in b or b in a)) or SequenceMatcher(None, a, b).ratio() >= 0.8)
 
 
 def is_duplicate(left: Opportunity, right: Opportunity) -> bool:

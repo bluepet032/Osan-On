@@ -19,22 +19,50 @@ TARGET_CODES = {
     "다문화·탈북민": ["JA0401", "JA0402"], "저소득": ["JA0201", "JA0202", "JA0203"],
 }
 APPLY_WORDS = (("인터넷", "online"), ("모바일", "online"), ("E-mail", "online"), ("방문", "visit"))
+# 생애주기(lifeNmArray) → generous 만 나이 ranges (경기도·오산시 청년 조례, 노인복지 사업의 60세 기준).
+# Only stages whose applicant is the person themselves: parents apply for 영유아·아동·청소년 services,
+# so those stages say nothing about the applicant's age.
+LIFE_AGES: dict[str, tuple[int, int | None]] = {"청년": (19, 39), "중장년": (35, 64), "노년": (60, None)}
+PREGNANCY_CODES = ["JA0301", "JA0302", "JA0303"]
 
 
 def split_list(value: str | None) -> list[str]:
     return [part.strip() for part in (value or "").split(",") if part.strip()]
 
 
-def conditions_of(targets: str | None) -> dict | None:
+def life_conditions(stages: str | None) -> dict | None:
+    """An age range (or pregnancy codes) from 생애주기, or None when the stages cannot be one condition.
+
+    `life` marks the condition as a coarse category, so src/eligibility.ts never calls it a sure match.
+    """
+
+    names = [name.replace(" ", "") for name in split_list(stages)]
+    if names == ["임신·출산"]:
+        return {"codes": PREGNANCY_CODES, "age_min": None, "age_max": None, "life": names}
+    if not names or any(name not in LIFE_AGES for name in names):
+        return None  # unknown stages, or 임신·출산 mixed with ages (an OR the condition format cannot hold)
+    ranges = sorted(LIFE_AGES[name] for name in names)
+    low, high = ranges[0]
+    for start, end in ranges[1:]:
+        if high is not None and start > high + 1:
+            return None  # a gap, e.g. 영유아 and 노년
+        high = None if high is None or end is None else max(high, end)
+    return {"codes": [], "age_min": low, "age_max": high, "life": names}
+
+
+def conditions_of(targets: str | None, stages: str | None = None) -> dict | None:
     """Condition codes for the listed targets, or None when they cannot be judged.
 
     The source lists targets without saying whether, say, 한부모 and 저소득 must both hold,
     so targets spanning several condition groups (income, personal, household) are left
-    to the original notice instead of being read too strictly.
+    to the original notice instead of being read too strictly. Without targets, the
+    life stages still say who the service is for.
     """
 
     names = split_list(targets)
-    if not names or any(name not in TARGET_CODES for name in names):
+    if not names:
+        return life_conditions(stages)
+    if any(name not in TARGET_CODES for name in names):
         return None
     codes = sorted({code for name in names for code in TARGET_CODES[name]})
     if len({code[:4] for code in codes}) > 1:
@@ -42,12 +70,24 @@ def conditions_of(targets: str | None) -> dict | None:
     return {"codes": codes, "age_min": None, "age_max": None}
 
 
+# Gyeonggi's cities and counties other than Osan.
+OTHER_GYEONGGI_CITIES = re.compile(
+    "수원|성남|의정부|안양|부천|광명|평택|동두천|안산|고양|과천|구리|남양주|시흥|군포|의왕|하남|용인|파주|이천|안성|김포|화성|광주|양주|포천|여주|연천|가평|양평"
+)
+
+
 def place_of(row: dict) -> str | None:
     if row.get("ctpvNm") != "경기도":
         return None
     if row.get("sggNm") == "오산시":
         return "osan"
-    return None if row.get("sggNm") else "gyeonggi"
+    if row.get("sggNm"):
+        return None
+    # Some city services come without sggNm; their department ("경기도 구리시 보건소") or title gives the city away.
+    department, title = row.get("bizChrDeptNm") or "", row.get("servNm") or ""
+    if re.match(rf"경기도\s*(?:{OTHER_GYEONGGI_CITIES.pattern})(?:시|군)", department) or re.search(rf"(?:{OTHER_GYEONGGI_CITIES.pattern})(?:시|군|형)", title):
+        return None
+    return "gyeonggi"
 
 
 def ymd(value: str | None) -> str | None:
@@ -134,7 +174,7 @@ class BokjiroCollector(Collector):
             original_category=row.get("intrsThemaNmArray", ""),
             collected_at=now.isoformat(timespec="seconds"),
             jurisdiction=place_of(row),  # type: ignore[arg-type]
-            conditions=conditions_of(row.get("trgterIndvdlNmArray")),
+            conditions=conditions_of(row.get("trgterIndvdlNmArray"), row.get("lifeNmArray")),
             # 서민금융 is attached to most services and says nothing about the field.
             category=", ".join(theme for theme in split_list(row.get("intrsThemaNmArray")) if theme != "서민금융"),
             support_type=row.get("srvPvsnNm", ""),

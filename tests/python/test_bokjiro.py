@@ -89,6 +89,20 @@ def test_keeps_osan_and_gyeonggi_level_services_with_details(monkeypatch):
     assert sum("LcgvWelfaredetailed" in url for url in client.requests) == 2
 
 
+@pytest.mark.parametrize(("department", "title", "expected"), [
+    ("경기도 복지국 노인복지과", "노인 월동난방비 지원", "gyeonggi"),
+    # Real 2026-10-17 rows without sggNm that belong to another city.
+    ("경기도 구리시 보건소 건강증진과", "난임부부 시술비 지원(경기형) 사업", None),
+    ("경기도 수원시 시민복지국 돌봄정책과", "수원형 통합돌봄 수원새빛돌봄(누구나) 사업", None),
+    ("경기도 복지국 노인복지과", "안성시 무연고 사망자 관리(장제인건비)", None),
+    ("경기도 파주시 복지정책국 노인장애인과", "(파주시)무연고 사망자 장례비 지원", None),
+    ("경기도 여성가족국 여성정책과", "일본군'위안부' 피해자 생활안정지원", "gyeonggi"),
+])
+def test_city_services_without_sgg_are_not_province_benefits(department, title, expected):
+    from pipeline.collectors.bokjiro import place_of
+    assert place_of({"ctpvNm": "경기도", "bizChrDeptNm": department, "servNm": title}) == expected
+
+
 def test_a_dated_enforcement_period_becomes_the_deadline(monkeypatch):
     client = FakeClient([list_row("O1")], ends={"O1": "20261231"})
 
@@ -109,6 +123,26 @@ def test_a_dated_enforcement_period_becomes_the_deadline(monkeypatch):
 def test_targets_become_conditions_only_within_one_group(targets, expected):
     result = conditions_of(targets)
     assert (result and result["codes"]) == expected
+
+
+@pytest.mark.parametrize(("stages", "expected"), [
+    ("청년", ([], 19, 39)),
+    ("노년, 청년, 중장년", ([], 19, None)),
+    ("임신 · 출산", (["JA0301", "JA0302", "JA0303"], None, None)),
+    # Parents apply for children's services, so a child stage says nothing about the applicant's age.
+    ("아동, 청소년", None),
+    ("청소년, 청년", None),
+    # A gap, pregnancy mixed with ages, or nothing to go on: no judgement.
+    ("청년, 노년", None),
+    ("임신 · 출산, 청년", None),
+    ("", None),
+])
+def test_life_stages_judge_services_without_targets(stages, expected):
+    result = conditions_of("", stages)
+    assert (result and (result["codes"], result["age_min"], result["age_max"])) == expected
+    assert result is None or result["life"]
+    # Listed targets keep deciding on their own.
+    assert conditions_of("장애인", stages) == {"codes": ["JA0328"], "age_min": None, "age_max": None}
 
 
 def test_category_and_support_form_are_mapped(monkeypatch):
@@ -161,3 +195,18 @@ def test_the_same_benefit_from_both_portals_is_merged_and_keeps_gov24_conditions
     taxi = next(item for item in items if "택시" in item.title)
     assert taxi.title == "중증장애인 택시요금 할인 지원" and taxi.conditions == gov24.conditions
     assert {source.source_id for source in taxi.sources} == {"gov24", "bokjiro"}
+
+
+@pytest.mark.parametrize(("bokjiro_title", "gov24_title", "merged"), [
+    # Real pairs from 2026-10-17 that differed only in 지원·사업·등 or a descriptive suffix.
+    ("한방난임 지원 사업", "한방난임사업 지원", True),
+    ("어린이집 입학준비금 지원", "어린이집 입학준비금(현장학습비 등) 지원", True),
+    ("기초생활수급 노인 월동난방비 지원", "노인월동난방비 등 지원", True),
+    # Different programs that share most words.
+    ("경기청년 매치업 플러스(북부특화형)", "경기청년 일자리 매치업 플러스", False),
+    ("한부모가족 아동양육비 지원", "한부모가족 학습재료비 등 지원", False),
+    ("청년 지원금", "청년 사업자 지원", False),
+])
+def test_filler_words_do_not_split_the_same_local_benefit(bokjiro_title, gov24_title, merged):
+    items = deduplicate([benefit("gov24", gov24_title, "gyeonggi", 100), benefit("bokjiro", bokjiro_title, "gyeonggi", 90)])
+    assert (len(items) == 1) == merged
