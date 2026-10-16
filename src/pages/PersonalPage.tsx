@@ -7,7 +7,7 @@ function downloadCalendar(favorites: SavedOpportunity[]) {
   const url = URL.createObjectURL(new Blob([favoritesCalendar(favorites)], { type: 'text/calendar;charset=utf-8' }))
   const link = document.createElement('a')
   link.href = url
-  link.download = 'questboard-favorites.ics'
+  link.download = 'osanon-favorites.ics'
   document.body.append(link)
   link.click()
   link.remove()
@@ -76,10 +76,10 @@ export function PersonalPage() {
   if (!account.user) {
     return (
       <main id="main-content" className="container personal-page">
-        <div className="page-heading"><div><p className="eyebrow">PERSONAL ASSISTANT</p><h1>내 비서</h1><p>찜한 공고 일정과 맞춤 키워드를 한곳에서 관리합니다.</p></div></div>
+        <div className="page-heading"><div><p className="eyebrow">MY BENEFITS</p><h1>내 혜택함</h1><p>찜한 혜택의 신청 일정, 내 조건에 맞는 새 혜택 알림, 맞춤 키워드를 한곳에서 관리합니다.</p></div></div>
         <section className="personal-section sign-in-prompt">
           <h2>Google 로그인이 필요합니다</h2>
-          <p>공고 검색과 열람은 공개로 이용할 수 있으며, 찜·일정 알림·키워드는 계정에 저장됩니다.</p>
+          <p>혜택 검색과 맞춤 판정은 로그인 없이 이용할 수 있으며, 찜·일정 알림·새 혜택 알림·키워드는 계정에 저장됩니다.</p>
           <button type="button" className="primary-button" onClick={account.openLogin}>로그인 또는 가입</button>
         </section>
       </main>
@@ -91,7 +91,7 @@ export function PersonalPage() {
   return (
     <main id="main-content" className="container personal-page">
       <div className="page-heading">
-        <div><p className="eyebrow">PERSONAL ASSISTANT</p><h1>내 비서</h1><p>{account.user.displayName || account.user.email} 계정에 동기화됩니다.</p></div>
+        <div><p className="eyebrow">MY BENEFITS</p><h1>내 혜택함</h1><p>{account.user.displayName || account.user.email} 계정에 동기화됩니다.</p></div>
         <div className="summary-cards"><span><strong>{personal.favorites.length}</strong> 찜</span><span><strong>{unread}</strong> 안 읽은 알림</span><span><strong>{personal.keywords.length}</strong> 키워드</span></div>
       </div>
 
@@ -104,7 +104,7 @@ export function PersonalPage() {
       </div>}
 
       <section className="personal-section" aria-labelledby="notifications-title">
-        <div className="section-heading"><div><h2 id="notifications-title">알림함</h2><p>사이트에 접속했을 때 일정과 새 맞춤 공고를 확인합니다.</p></div>
+        <div className="section-heading"><div><h2 id="notifications-title">알림함</h2><p>사이트에 접속하면 찜한 혜택의 일정, 맞춤 조건을 저장한 뒤 새로 올라온 '가능성 높음' 혜택(최근 20건), 키워드에 맞는 새 혜택을 확인합니다.</p></div>
           {unread > 0 && <button type="button" className="text-button" onClick={personal.markAllNotificationsRead}>모두 읽음</button>}
         </div>
         {personal.loading ? <p role="status">계정 데이터를 불러오는 중입니다…</p> : personal.notifications.length === 0 ? <p className="empty-personal">새 알림이 없습니다.</p> : (
@@ -115,7 +115,7 @@ export function PersonalPage() {
                   {notification.date && <small>일정: {notification.date}</small>}
                 </div>
                 <div className="notification-actions">
-                  {notification.opportunityId && <a href={`#/notice/${notification.opportunityId}`}>공고 보기</a>}
+                  {notification.opportunityId && <a href={`#/notice/${notification.opportunityId}`}>혜택 보기</a>}
                   {notification.sourceUrl && <a href={notification.sourceUrl} target="_blank" rel="noopener noreferrer">원문 보기</a>}
                   {!notification.read && <button type="button" className="text-button" onClick={() => personal.markNotificationRead(notification.id)}>읽음</button>}
                 </div>
@@ -126,10 +126,10 @@ export function PersonalPage() {
       </section>
 
       <section className="personal-section" aria-labelledby="favorites-title">
-        <div className="section-heading"><div><h2 id="favorites-title">찜한 공고와 일정</h2><p>정확한 모집 마감·행사 날짜와 직접 입력한 합격 발표일을 기준으로 알림을 만듭니다.</p></div>
+        <div className="section-heading"><div><h2 id="favorites-title">찜한 혜택과 일정</h2><p>정확한 신청 마감일과 직접 입력한 선정 발표일을 기준으로 알림을 만듭니다.</p></div>
           {personal.favorites.length > 0 && <button type="button" className="text-button" onClick={() => downloadCalendar(personal.favorites)}>캘린더로 내보내기(.ics)</button>}
         </div>
-        {personal.favorites.length === 0 ? <p className="empty-personal">아직 찜한 공고가 없습니다.</p> : (
+        {personal.favorites.length === 0 ? <p className="empty-personal">아직 찜한 혜택이 없습니다.</p> : (
           <div className="saved-list">
             {personal.favorites.map(favorite => (
               <article className="saved-card" key={favorite.id}>
@@ -139,10 +139,10 @@ export function PersonalPage() {
                 </div>
                 <label className="saved-toggle"><input type="checkbox" checked={favorite.remindersEnabled} onChange={event => personal.setRemindersEnabled(favorite.id, event.target.checked)} /> 일정 알림 켜기</label>
                 <div className="schedule-fields">
-                  <label>합격 발표일 <input type="date" value={favoriteDrafts[favorite.id]?.resultDate ?? favorite.resultDate} onFocus={event => focusedDetails.current.set(favorite.id + ':resultDate', event.currentTarget.value)} onChange={event => changeFavoriteDetail(favorite.id, 'resultDate', event.currentTarget.value)} onBlur={event => saveFavoriteDetail(favorite.id, 'resultDate', event.currentTarget.value, favorite.resultDate)} /></label>
+                  <label>선정 발표일 <input type="date" value={favoriteDrafts[favorite.id]?.resultDate ?? favorite.resultDate} onFocus={event => focusedDetails.current.set(favorite.id + ':resultDate', event.currentTarget.value)} onChange={event => changeFavoriteDetail(favorite.id, 'resultDate', event.currentTarget.value)} onBlur={event => saveFavoriteDetail(favorite.id, 'resultDate', event.currentTarget.value, favorite.resultDate)} /></label>
                   <label>메모 <textarea maxLength={500} value={favoriteDrafts[favorite.id]?.note ?? favorite.note} onFocus={event => focusedDetails.current.set(favorite.id + ':note', event.currentTarget.value)} onChange={event => changeFavoriteDetail(favorite.id, 'note', event.currentTarget.value)} onBlur={event => saveFavoriteDetail(favorite.id, 'note', event.currentTarget.value, favorite.note)} placeholder="선택 입력" /></label>
                 </div>
-                <small>모집 마감: {favorite.item.date_kind === 'exact' ? (favorite.item.recruit_end || '일정 없음') : '정확한 날짜 없음'} · 행사: {[favorite.item.event_start, favorite.item.event_end].filter(Boolean).join(' ~ ') || '일정 없음'}</small>
+                <small>신청 마감: {favorite.item.date_kind === 'exact' ? (favorite.item.recruit_end || '일정 없음') : favorite.item.date_kind === 'ongoing' ? '상시 신청' : '정확한 날짜 없음'}</small>
               </article>
             ))}
           </div>
@@ -150,24 +150,24 @@ export function PersonalPage() {
       </section>
 
       <section className="personal-section" aria-labelledby="keywords-title">
-        <div className="section-heading"><div><h2 id="keywords-title">맞춤 키워드</h2><p>제목·기관·요약·출처·분야·대상 태그 중 하나라도 일치하면 목록에 표시합니다.</p></div></div>
+        <div className="section-heading"><div><h2 id="keywords-title">맞춤 키워드</h2><p>혜택명·기관·요약·분야 중 하나라도 일치하면 목록에 표시하고, 새로 올라오면 알려 드립니다.</p></div></div>
         <form className="keyword-form" onSubmit={event => void addKeyword(event)}>
           <label className="sr-only" htmlFor="personal-keyword">추가할 키워드</label>
-          <input id="personal-keyword" value={keyword} onChange={event => setKeyword(event.target.value)} maxLength={60} placeholder="예: 게임, 미디어" />
+          <input id="personal-keyword" value={keyword} onChange={event => setKeyword(event.target.value)} maxLength={60} placeholder="예: 월세, 출산, 장학금" />
           <button className="primary-button" type="submit" disabled={!keyword.trim()}>키워드 추가</button>
         </form>
         {personal.keywords.length === 0 ? <p className="empty-personal">등록된 키워드가 없습니다.</p> : <ul className="keyword-list">
           {personal.keywords.map(value => <li key={value.id}><span>{value.word}</span><button type="button" className="text-button muted" onClick={() => personal.removeKeyword(value.id)}>삭제</button></li>)}
         </ul>}
-        <h3>맞춤 공고 {personal.personalizedItems.length}개</h3>
-        {personal.personalizedItems.length === 0 ? <p className="empty-personal">현재 키워드와 일치하는 공고가 없습니다.</p> : <ul className="personal-match-list">
+        <h3>키워드 혜택 {personal.personalizedItems.length}개</h3>
+        {personal.personalizedItems.length === 0 ? <p className="empty-personal">현재 키워드와 일치하는 혜택이 없습니다.</p> : <ul className="personal-match-list">
           {personal.personalizedItems.map(item => <li key={item.id}><a href={item.source_url} target="_blank" rel="noopener noreferrer">{item.title}</a><span>{item.organizer} · {[...item.field_tags, ...item.audience_tags].join(', ')}</span></li>)}
         </ul>}
       </section>
 
       <section className="personal-section account-settings">
         <h2>계정</h2>
-        <p>계정 삭제 시 Firestore에 저장된 이 계정의 찜·키워드·알림을 함께 지웁니다.</p>
+        <p>계정 삭제 시 Firestore에 저장된 이 계정의 맞춤 조건·찜·키워드·알림을 함께 지웁니다.</p>
         <button type="button" className="danger-button" onClick={() => void deleteAccount()}>계정과 데이터 삭제</button>
       </section>
     </main>

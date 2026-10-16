@@ -3,7 +3,7 @@ import type { Opportunity } from './types'
 import { weekRanges, weeklyDigest } from './weekly'
 
 const item = (id: string, overrides: Partial<Opportunity>) => ({
-  id, title: id, date_kind: 'exact', recruit_end: null, first_seen_at: '2026-09-01T09:00:00+09:00', is_adjacent: false, ...overrides,
+  id, title: id, date_kind: 'exact', recruit_end: null, first_seen_at: '2026-09-01T09:00:00+09:00', ...overrides,
 }) as Opportunity
 
 describe('weekly digest', () => {
@@ -24,15 +24,14 @@ describe('weekly digest', () => {
       item('today', { recruit_end: '2026-10-07' }),
       item('next-week', { recruit_end: '2026-10-15' }),
       item('later', { recruit_end: '2026-10-30' }),
-      item('video', { recruit_end: '2026-10-08', domain: 'design_media' }),
+      item('video', { recruit_end: '2026-10-08', domain: 'housing' }),
       item('rolling', { date_kind: 'ongoing', recruit_end: '2026-10-08' }),
-      item('job', { recruit_end: '2026-10-08', is_adjacent: true }),
       item('fresh', { first_seen_at: '2026-10-05T03:00:00+09:00' }),
-    ], 'it', now)
+    ], 'living', now)
 
     expect(digest.closingThisWeek.map(entry => entry.id)).toEqual(['today', 'friday'])
     expect(digest.closingNextWeek.map(entry => entry.id)).toEqual(['next-week'])
     expect(digest.newThisWeek.map(entry => entry.id)).toEqual(['fresh'])
-    expect(weeklyDigest([item('video', { recruit_end: '2026-10-08', domain: 'design_media' })], 'all', now).closingThisWeek).toHaveLength(1)
+    expect(weeklyDigest([item('video', { recruit_end: '2026-10-08', domain: 'housing' })], 'all', now).closingThisWeek).toHaveLength(1)
   })
 })

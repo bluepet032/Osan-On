@@ -14,13 +14,12 @@
   --brand: #536df5;
   --brand-soft: #e8ecff;
   --shadow: 0 14px 36px rgba(31, 43, 77, .08);
-  --contest: #6575e8;
-  --support: #b67a00;
-  --hackathon: #8a5bd1;
-  --event: #168887;
-  --education: #2774c9;
-  --supporters: #c05288;
-  --employment: #25845a;
+  --cash: #6575e8;
+  --in_kind: #b67a00;
+  --service: #8a5bd1;
+  --voucher: #168887;
+  --loan: #2774c9;
+  --reduction: #c05288;
   --other: #68728a;
 }
 
@@ -36,13 +35,12 @@
   --brand: #8294ff;
   --brand-soft: #252c54;
   --shadow: 0 14px 36px rgba(0, 0, 0, .25);
-  --contest: #8d9aff;
-  --support: #ffc64f;
-  --hackathon: #c495ff;
-  --event: #5cd2cf;
-  --education: #75baff;
-  --supporters: #f88bbd;
-  --employment: #6cdaa5;
+  --cash: #8d9aff;
+  --in_kind: #ffc64f;
+  --service: #c495ff;
+  --voucher: #5cd2cf;
+  --loan: #75baff;
+  --reduction: #f88bbd;
   --other: #a8b1c7;
 }
 
@@ -89,13 +87,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .type-tabs button, .quick-tags button { border: 1px solid var(--border); border-radius: 10px; padding: 9px 13px; background: var(--surface-muted); color: var(--muted); font-weight: 600; font-size: 13px; }
 .type-tabs button span, .quick-tags button span { margin-left: 4px; opacity: .65; font-weight: 500; }
 .type-tabs button.active { background: var(--brand); color: white; border-color: transparent; }
-.type-tabs button.active.type-contest { background: var(--contest); }
-.type-tabs button.active.type-support { background: var(--support); }
-.type-tabs button.active.type-hackathon { background: var(--hackathon); }
-.type-tabs button.active.type-event { background: var(--event); }
-.type-tabs button.active.type-education { background: var(--education); }
-.type-tabs button.active.type-supporters { background: var(--supporters); }
-.type-tabs button.active.type-employment { background: var(--employment); }
+.type-tabs button.active.type-cash { background: var(--cash); }
+.type-tabs button.active.type-in_kind { background: var(--in_kind); }
+.type-tabs button.active.type-service { background: var(--service); }
+.type-tabs button.active.type-voucher { background: var(--voucher); }
+.type-tabs button.active.type-loan { background: var(--loan); }
+.type-tabs button.active.type-reduction { background: var(--reduction); }
 .type-tabs button.active.type-other { background: var(--other); }
 .quick-tags { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
 .quick-tags button { padding: 7px 11px; background: transparent; }
@@ -130,27 +127,25 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .legend { display: flex; flex-wrap: wrap; gap: 18px; align-items: center; padding: 13px 18px; border: 1px solid var(--border); border-radius: 12px 12px 0 0; background: var(--surface-muted); color: var(--muted); font-size: 12px; }
 .legend span { display: flex; align-items: center; gap: 6px; }
 .legend i { width: 13px; height: 13px; border-radius: 4px; background: currentColor; }
-.type-support { color: var(--support); }
-.type-contest { color: var(--contest); }
-.type-hackathon { color: var(--hackathon); }
+.type-in_kind { color: var(--in_kind); }
+.type-cash { color: var(--cash); }
+.type-service { color: var(--service); }
 .type-indie { color: #e94b9b; }
-.type-event { color: var(--event); }
-.type-education { color: var(--education); }
-.type-supporters { color: var(--supporters); }
-.type-employment { color: var(--employment); }
+.type-voucher { color: var(--voucher); }
+.type-loan { color: var(--loan); }
+.type-reduction { color: var(--reduction); }
 .type-other { color: var(--other); }
 
 .opportunity-list { border: 1px solid var(--border); border-top: 0; border-radius: 0 0 14px 14px; overflow: hidden; background: var(--surface); }
 .opportunity { --type-color: var(--other); position: relative; display: grid; grid-template-columns: 145px minmax(350px, 1fr) 140px 180px 150px; gap: 20px; align-items: center; min-height: 128px; padding: 20px 22px 20px 28px; border-bottom: 1px solid var(--border); }
 .opportunity:last-child { border-bottom: 0; }
 .opportunity::before { content: ''; position: absolute; left: 0; top: 20px; bottom: 20px; width: 4px; border-radius: 0 5px 5px 0; background: var(--type-color); }
-.opportunity.type-contest { --type-color: var(--contest); }
-.opportunity.type-support { --type-color: var(--support); }
-.opportunity.type-hackathon { --type-color: var(--hackathon); }
-.opportunity.type-event { --type-color: var(--event); }
-.opportunity.type-education { --type-color: var(--education); }
-.opportunity.type-supporters { --type-color: var(--supporters); }
-.opportunity.type-employment { --type-color: var(--employment); }
+.opportunity.type-cash { --type-color: var(--cash); }
+.opportunity.type-in_kind { --type-color: var(--in_kind); }
+.opportunity.type-service { --type-color: var(--service); }
+.opportunity.type-voucher { --type-color: var(--voucher); }
+.opportunity.type-loan { --type-color: var(--loan); }
+.opportunity.type-reduction { --type-color: var(--reduction); }
 .opportunity.is-read .title-line a { color: var(--muted); }
 .date-cell { align-self: stretch; display: flex; flex-direction: column; justify-content: center; gap: 3px; border-right: 1px solid var(--border); }
 .date-cell strong { color: var(--type-color); font-size: 21px; }
@@ -191,7 +186,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 :root[data-theme='dark'] .status-ongoing { color: #ffdb6d; background: #453a17; }
 .row-actions { display: flex; align-items: center; gap: 5px; }
 .icon-button, .text-button { border: 0; background: transparent; color: var(--muted); padding: 5px; font-size: 11px; }
-.icon-button { color: var(--support); font-size: 20px; line-height: 1; }
+.icon-button { color: var(--in_kind); font-size: 20px; line-height: 1; }
 .text-button:hover { color: var(--brand); }
 .details { margin-top: 14px; padding: 14px; border-radius: 10px; background: var(--surface-muted); }
 .details dl { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; margin: 0; }
@@ -359,3 +354,53 @@ footer strong { color: var(--text); }
 .advanced-sparse-fields { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 1100px) { .advanced-sparse-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 780px) { .advanced-sparse-fields { grid-template-columns: 1fr; } }
+
+/* 오산온: profile survey, verdict tabs and badges */
+.profile-card { display: grid; gap: 14px; margin-bottom: 16px; padding: 20px; border: 1px solid var(--brand); border-radius: 18px; background: linear-gradient(135deg, var(--brand-soft), var(--surface) 70%); box-shadow: var(--shadow); }
+.profile-card p { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+.profile-card small { color: var(--muted); font-size: 12px; }
+.profile-fields { display: flex; flex-wrap: wrap; align-items: end; gap: 12px; }
+.profile-gender { display: flex; gap: 8px; }
+.profile-gender label, .profile-check { display: inline-flex; align-items: center; gap: 6px; padding: 9px 13px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-weight: 600; font-size: 14px; cursor: pointer; }
+.profile-gender label:has(input:checked), .profile-check:has(input:checked) { border-color: var(--brand); color: var(--brand); background: var(--brand-soft); }
+.profile-age, .profile-income { display: grid; gap: 4px; color: var(--muted); font-size: 12px; font-weight: 700; }
+.profile-age input { width: 110px; }
+.profile-age input, .profile-income select { padding: 9px 11px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 14px; }
+.primary-button { padding: 10px 18px; border: 0; border-radius: 10px; background: var(--brand); color: #fff; font-weight: 700; }
+.primary-button:disabled { opacity: .45; cursor: not-allowed; }
+.profile-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.profile-summary strong { font-size: 17px; margin-right: auto; }
+.profile-details { display: grid; gap: 12px; }
+.profile-details fieldset { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 12px; border: 1px solid var(--border); border-radius: 12px; }
+.profile-details legend { padding: 0 6px; color: var(--muted); font-size: 12px; font-weight: 700; }
+.profile-check { padding: 7px 11px; font-size: 13px; }
+.profile-details .primary-button { justify-self: start; }
+.profile-hint { font-size: 12px !important; }
+.match-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.match-tabs button { border: 1px solid var(--border); border-radius: 999px; padding: 9px 16px; background: var(--surface); color: var(--muted); font-weight: 700; font-size: 14px; }
+.match-tabs button span { margin-left: 4px; opacity: .7; }
+.match-tabs button.active { color: #fff; border-color: transparent; background: var(--brand); }
+.match-tabs button.active.match-eligible { background: var(--verdict-eligible); }
+.match-tabs button.active.match-check { background: var(--verdict-check); }
+:root { --verdict-eligible: #12805c; --verdict-check: #b25e00; --verdict-ineligible: #8a93a6; }
+:root[data-theme='dark'] { --verdict-eligible: #4fd6a3; --verdict-check: #ffae52; --verdict-ineligible: #7d8597; }
+.verdict { color: #fff; background: var(--verdict-check); }
+.verdict-eligible { background: var(--verdict-eligible); }
+.verdict-ineligible { background: var(--verdict-ineligible); }
+:root[data-theme='dark'] .verdict { color: #10131a; }
+.jurisdiction { border: 1px solid currentColor; color: var(--muted); }
+.jurisdiction-osan { color: var(--brand); background: var(--brand-soft); }
+.verdict-reasons { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0 0 12px; padding: 0; list-style: none; font-size: 13px; font-weight: 600; }
+.reason-ok { color: var(--verdict-eligible); }
+.reason-fail { color: var(--verdict-ineligible); text-decoration: line-through; }
+.reason-unknown { color: var(--verdict-check); }
+.pre-line { white-space: pre-line; }
+@media (max-width: 780px) {
+  .profile-card { padding: 14px; border-radius: 14px; }
+  .profile-fields > * { flex: 1 1 100%; }
+  .profile-age input { width: 100%; }
+}
+.place-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.place-tabs button { border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; background: var(--surface-muted); color: var(--muted); font-weight: 700; font-size: 14px; }
+.place-tabs button span { margin-left: 4px; opacity: .7; font-weight: 500; }
+.place-tabs button.active { color: var(--brand); background: var(--brand-soft); border-color: var(--brand); }

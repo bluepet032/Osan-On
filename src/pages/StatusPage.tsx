@@ -47,7 +47,7 @@ export function StatusPage() {
       <details className="review-section">
         <summary className="section-heading"><div><h2>수동 검토 큐 (운영자용)</h2><p>관련성 점수 50~69점 후보입니다. 승인·제외는 <code>manual/overrides.yml</code>과 <code>manual/exclusions.yml</code>에서 처리합니다. 눌러서 펼치세요.</p></div><strong>{review.length}건</strong></summary>
         <div className="review-list">{review.map(item => <article key={item.id}><div><a href={item.source_url} target="_blank" rel="noopener noreferrer">{item.title}</a><span>{item.source_name} · {item.organizer}</span></div><strong>{item.relevance.score}점</strong><ul>{item.relevance.reasons.map(reason => <li key={reason}>{reason}</li>)}</ul></article>)}</div>
-        {!review.length && <div className="message">검토 대기 공고가 없습니다.</div>}
+        {!review.length && <div className="message">검토 대기 혜택이 없습니다.</div>}
       </details>
     </main>
   )

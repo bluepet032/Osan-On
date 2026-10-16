@@ -47,11 +47,32 @@ service cloud.firestore {
           && shortString(request.resource.data.createdAt, 40);
       }
 
+      // Eligibility answers (src/profile.ts). One document, always written whole with setDoc.
+      match /profile/{profileId} {
+        function codeList(value, max) {
+          return value is list && value.size() <= max;
+        }
+
+        function validProfile(data) {
+          return profileId == 'main'
+            && data.keys().hasOnly(['gender', 'age', 'income', 'traits', 'household', 'updatedAt'])
+            && (!('gender' in data) || data.gender in ['male', 'female'])
+            && (!('age' in data) || (data.age is int && data.age >= 0 && data.age <= 120))
+            && (!('income' in data) || data.income in ['JA0201', 'JA0202', 'JA0203', 'JA0204', 'JA0205'])
+            && (!('traits' in data) || codeList(data.traits, 30))
+            && (!('household' in data) || codeList(data.household, 20))
+            && shortString(data.updatedAt, 40);
+        }
+
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validProfile(request.resource.data);
+      }
+
       match /notifications/{notificationId} {
         allow read, delete: if isOwner(uid);
         allow create: if isOwner(uid)
           && request.resource.data.keys().hasOnly(['type', 'title', 'message', 'opportunityId', 'sourceUrl', 'date', 'read', 'createdAt'])
-          && request.resource.data.type in ['schedule', 'keyword']
+          && request.resource.data.type in ['schedule', 'keyword', 'eligible']
           && shortString(request.resource.data.title, 200)
           && shortString(request.resource.data.message, 2000)
           && shortString(request.resource.data.opportunityId, 100)

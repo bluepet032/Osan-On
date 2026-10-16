@@ -13,7 +13,8 @@ from pipeline.normalize import clean_url, normalize
 ALLOWED_FIELDS = {
     "title", "organizer", "summary", "application_url", "document_url", "recruit_start",
     "recruit_end", "event_start", "event_end", "date_kind", "eligibility", "benefits",
-    "location", "mode", "fee", "primary_type", "field_tags", "audience_tags", "is_adjacent",
+    "location", "primary_type", "field_tags", "audience_tags", "apply_methods",
+    "jurisdiction", "conditions",
     "domain",
 }
 KST = ZoneInfo("Asia/Seoul")
@@ -43,8 +44,6 @@ def manual_items(taxonomy: dict, now: datetime, manual_dir: Path | None = None) 
             eligibility=item.get("eligibility", ""),
             benefits=item.get("benefits", ""),
             location=item.get("location", ""),
-            mode=item.get("mode", ""),
-            fee=item.get("fee", "unknown"),
             collected_at=now.isoformat(timespec="seconds"),
         )
         opportunity = normalize(raw, taxonomy, now)

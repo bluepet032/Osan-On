@@ -105,34 +105,3 @@ def test_identically_titled_reposts_on_one_source_still_merge():
 
     assert len(deduplicate([post("353364", "2026-10-20"), post("353594", "2026-10-21")])) == 1
 
-
-def test_merge_keeps_an_item_published_in_another_field_tab():
-    def video(source_id: str, url: str, priority: int):
-        return normalize(RawOpportunity(
-            source_id=source_id, source_name=source_id, source_url=url, title="2026 남원시 영상 공모전",
-            organizer="남원시", source_kind="aggregate", source_priority=priority,
-            recruit_end="2026-10-31", date_kind="exact", collected_at=NOW.isoformat(),
-        ), load_taxonomy(), NOW)
-
-    merged = deduplicate([video("linkareer", "https://linkareer.com/activity/1", 40), video("wevity", "https://wevity.com/1", 40)])
-
-    assert len(merged) == 1
-    assert merged[0].domain == "design_media"
-    assert merged[0].relevance.decision == "publish"
-
-
-def test_merge_does_not_restore_it_from_a_mixed_photo_category():
-    items = []
-    for source_id, category in (
-        ("wevity", "광고/마케팅, 영상/UCC/사진, 웹/모바일/IT, 예체능/미술/음악"),
-        ("linkareer", "사진/영상/UCC"),
-    ):
-        items.append(normalize(RawOpportunity(
-            source_id=source_id, source_name=source_id, source_url=f"https://{source_id}.example.com/photo",
-            title="LG 대국민 미소 사진 공모전", organizer="LG", original_category=category,
-            body_text=category, recruit_end="2026-10-19", date_kind="exact",
-        ), load_taxonomy(), NOW))
-    [merged] = deduplicate(items)
-    assert merged.domain == "design_media" and merged.field_tags == ["사진"]
-    assert merged.relevance.decision == "publish" and merged.relevance.score < 70
-    assert len(merged.sources) == 2

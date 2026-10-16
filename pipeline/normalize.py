@@ -5,13 +5,25 @@ import re
 from datetime import datetime
 from urllib.parse import urlsplit, urlunsplit
 
-from pipeline.classification import assign_domain, classify
 from pipeline.dates import status_for
-from pipeline.facets import extract_facets
-from pipeline.models import Opportunity, RawOpportunity, SourceRecord
+from pipeline.models import Opportunity, RawOpportunity, Relevance, SourceRecord
 
 
 TRACKING_KEYS = ("utm_", "fbclid", "gclid")
+# 정부24 서비스분야 → field tab; anything unmapped is shown under 생활안정.
+CATEGORY_DOMAINS = {
+    "생활안정": "living", "주거": "housing", "보육": "childcare", "교육": "childcare", "고용": "jobs",
+    "창업": "jobs", "보건": "health", "의료": "health", "행정": "admin", "안전": "admin",
+    "임신": "pregnancy", "출산": "pregnancy", "보호": "care", "돌봄": "care", "문화": "culture",
+    "환경": "culture", "농림": "agriculture", "농업": "agriculture", "어업": "agriculture",
+    # 복지로 관심주제
+    "일자리": "jobs", "건강": "health", "입양": "care", "위탁": "care",
+}
+# 정부24 지원유형, checked in order: the detail in brackets wins, so "현금(융자)" is a loan.
+SUPPORT_TYPES = (
+    ("융자", "loan"), ("감면", "reduction"), ("현금", "cash"), ("현물", "in_kind"), ("이용권", "voucher"), ("바우처", "voucher"), ("지역화폐", "voucher"),
+    ("서비스", "service"),
+)
 
 
 def clean_url(value: str) -> str:
@@ -42,17 +54,14 @@ def summarize(raw: RawOpportunity) -> str:
         if prefix:
             value = f"{value}. {prefix}"
     if len(value) < 60:
-        value = f"{value}. 참가 조건, 세부 일정, 제출 항목과 신청 방법은 주최기관의 최신 원문 공고에서 반드시 확인하세요."
+        value = f"{value}. 지원 대상, 선정 기준, 신청 기간과 방법, 구비서류는 소관 기관의 최신 원문 안내에서 신청 전에 반드시 확인하세요."
     return value[:180]
 
 
 def normalize(raw: RawOpportunity, taxonomy: dict, now: datetime) -> Opportunity:
-    primary_type, fields, audiences, relevance, adjacent = classify(raw, taxonomy)
-    domain, topics, relevance = assign_domain(raw, taxonomy, relevance)
-    facets = extract_facets(raw)
-    if domain != "it":
-        # IT sub-field tags are noise outside the IT tab; show the field's own topics instead.
-        fields = topics
+    category = raw.category or raw.original_category
+    domain = next((slug for word, slug in CATEGORY_DOMAINS.items() if word in category), "living")
+    primary_type = next((slug for word, slug in SUPPORT_TYPES if word in raw.support_type), "other")
     status, d_day = status_for(raw.recruit_start, raw.recruit_end, raw.date_kind, now)
     timestamp = raw.collected_at or now.isoformat(timespec="seconds")
     source_url = clean_url(raw.source_url)
@@ -69,10 +78,10 @@ def normalize(raw: RawOpportunity, taxonomy: dict, now: datetime) -> Opportunity
         organizer=organizer,
         summary=summarize(raw),
         primary_type=primary_type,  # type: ignore[arg-type]
-        field_tags=fields,
-        audience_tags=audiences,
+        field_tags=[category] if category else [],
+        audience_tags=[],
         status=status,
-        relevance=relevance,
+        relevance=Relevance(score=100, reasons=["정부 공공서비스"], decision="publish"),
         first_seen_at=timestamp,
         last_seen_at=timestamp,
         sources=[SourceRecord(
@@ -92,14 +101,12 @@ def normalize(raw: RawOpportunity, taxonomy: dict, now: datetime) -> Opportunity
         event_end=raw.event_end,
         date_kind=raw.date_kind,
         d_day=d_day,
-        eligibility=raw.eligibility[:240],
-        benefits=raw.benefits[:240],
+        eligibility=raw.eligibility[:500],
+        benefits=raw.benefits[:500],
         location=raw.location[:120],
-        mode=facets.mode,
-        fee=facets.fee,
-        is_adjacent=adjacent,
         domain=domain,  # type: ignore[arg-type]
-        regions=facets.regions,
-        prize_manwon=facets.prize_manwon,
+        jurisdiction=raw.jurisdiction,
+        conditions=raw.conditions,
+        apply_methods=raw.apply_methods,
         dedupe_key=dedupe_key,
     )

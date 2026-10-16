@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from datetime import date
 from difflib import SequenceMatcher
 
@@ -35,6 +36,19 @@ def distinct_posts_of_same_source(left: Opportunity, right: Opportunity) -> bool
     return any(left_posts[source_id] != right_posts[source_id] for source_id in left_posts.keys() & right_posts.keys())
 
 
+REGION_WORDS_RE = re.compile(r"오산시|경기도|경기")
+
+
+def same_local_benefit(left: Opportunity, right: Opportunity) -> bool:
+    """정부24 and 복지로 list many of the same Osan/Gyeonggi benefits under slightly different, undated titles."""
+
+    if left.jurisdiction != right.jurisdiction or left.jurisdiction == "national":
+        return False
+    a, b = (normalize_text(REGION_WORDS_RE.sub("", item.title)) for item in (left, right))
+    shorter = min(a, b, key=len)
+    return (len(shorter) >= 6 and (a in b or b in a)) or SequenceMatcher(None, a, b).ratio() >= 0.8
+
+
 def is_duplicate(left: Opportunity, right: Opportunity) -> bool:
     if left.id == right.id:
         return True
@@ -52,6 +66,8 @@ def is_duplicate(left: Opportunity, right: Opportunity) -> bool:
     left_source_ids = {source.source_id for source in left.sources}
     right_source_ids = {source.source_id for source in right.sources}
     cross_source = left_source_ids.isdisjoint(right_source_ids)
+    if cross_source and same_local_benefit(left, right):
+        return True
     title_similarity = similarity(left.title, right.title)
     return (
         title_similarity >= 0.90
@@ -78,16 +94,8 @@ def merge(left: Opportunity, right: Opportunity) -> Opportunity:
     winner.audience_tags = sorted(set(winner.audience_tags + other.audience_tags))
     winner.relevance.score = max(winner.relevance.score, other.relevance.score)
     winner.relevance.reasons = list(dict.fromkeys(winner.relevance.reasons + other.relevance.reasons))
-    if winner.relevance.score >= 70:
-        winner.relevance.decision, winner.domain = "publish", "it"
-    else:
-        # Below the IT threshold, keep a copy that was published in another field tab.
-        tabbed = next((item for item in (winner, other) if item.domain != "it" and item.relevance.decision == "publish"), None)
-        if tabbed:
-            winner.relevance.decision, winner.domain = "publish", tabbed.domain
-            winner.field_tags = sorted(set(tabbed.field_tags))
-        else:
-            winner.relevance.decision = "review" if winner.relevance.score >= 50 else "exclude"
+    if "publish" in (winner.relevance.decision, other.relevance.decision):
+        winner.relevance.decision = "publish"
     winner.first_seen_at = min(winner.first_seen_at, other.first_seen_at)
     winner.last_seen_at = max(winner.last_seen_at, other.last_seen_at)
     return winner

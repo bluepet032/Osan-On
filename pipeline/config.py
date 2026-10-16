@@ -9,7 +9,7 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
-LOCAL_ENV_KEYS = {"QUESTBOARD_SOURCES"}
+LOCAL_ENV_KEYS = {"QUESTBOARD_SOURCES", "GOV24_API_KEY"}
 
 
 @dataclass(frozen=True, slots=True)

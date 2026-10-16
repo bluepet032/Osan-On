@@ -1,7 +1,6 @@
 import { useId, useState } from 'react'
 import {
-  activeAdvancedCount, ADVANCED_LABELS, ADVANCED_PARAMS, AUDIENCE_OPTIONS, coverageLabel, FEE_OPTIONS, MODE_OPTIONS, NATIONWIDE, PRIZE_OPTIONS, REGION_OPTIONS,
-  SPARSE_COVERAGE, type AdvancedFilters, type AdvancedKey,
+  activeAdvancedCount, ADVANCED_LABELS, ADVANCED_PARAMS, APPLY_OPTIONS, coverageLabel, SPARSE_COVERAGE, type AdvancedFilters, type AdvancedKey,
 } from '../advancedFilters'
 
 interface Props {
@@ -18,11 +17,7 @@ interface Props {
 type Field = { key: AdvancedKey; label: string; empty: string; options: [string, string][]; hint?: string }
 
 const FIELDS: Field[] = [
-  { key: 'audience', label: ADVANCED_LABELS.audience, empty: '모든 대상', options: AUDIENCE_OPTIONS.map(value => [value, value]), hint: '대상 제한이 없는 공고도 함께 보여 줍니다.' },
-  { key: 'region', label: ADVANCED_LABELS.region, empty: '모든 지역', options: [[NATIONWIDE, '전국 공고만'], ...REGION_OPTIONS.map((value): [string, string] => [value, value])], hint: '지역을 고르면 전국 공고도 함께 보여 줍니다.' },
-  { key: 'mode', label: ADVANCED_LABELS.mode, empty: '모든 방식', options: Object.entries(MODE_OPTIONS), hint: '온·오프라인 병행은 양쪽 모두에 나옵니다.' },
-  { key: 'fee', label: ADVANCED_LABELS.fee, empty: '모든 참가비', options: Object.entries(FEE_OPTIONS) },
-  { key: 'prize', label: ADVANCED_LABELS.prize, empty: '상금 조건 없음', options: Object.entries(PRIZE_OPTIONS) },
+  { key: 'apply', label: ADVANCED_LABELS.apply, empty: '모든 신청 방법', options: Object.entries(APPLY_OPTIONS), hint: '온라인과 방문을 모두 받는 혜택은 양쪽에 나옵니다.' },
 ]
 
 export function AdvancedFilterPanel({ advanced, countWith, coverage, onChange, onChangeMany }: Props) {
@@ -68,7 +63,7 @@ export function AdvancedFilterPanel({ advanced, countWith, coverage, onChange, o
           )}
           <label className="advanced-unknown">
             <input type="checkbox" checked={advanced.includeUnknown} onChange={event => onChange('unknown', event.target.checked ? '1' : '')} />
-            <span>정보가 없는 공고도 함께 보기</span>
+            <span>정보가 없는 혜택도 함께 보기</span>
           </label>
         </div>
       )}

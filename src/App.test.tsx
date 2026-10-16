@@ -5,7 +5,7 @@ import { clearDataCache } from './data'
 
 const payload = { schema_version: 1, generated_at: '2026-07-30T12:00:00+09:00', items: [] }
 
-describe('QuestBoard', () => {
+describe('오산온', () => {
   afterEach(() => cleanup())
   beforeEach(() => {
     localStorage.clear()
@@ -14,20 +14,40 @@ describe('QuestBoard', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => payload }))
   })
 
-  it('renders the main opportunity navigation and empty state without login', async () => {
+  it('renders the benefit navigation, survey and empty state without login', async () => {
     render(<App />)
-    expect(screen.getByRole('link', { name: /QuestBoard/ })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /전체/ })).toBeInTheDocument()
-    expect(screen.getByLabelText('분류 색상 안내')).toHaveTextContent('인디')
-    await waitFor(() => expect(screen.getByText('조건에 맞는 공고가 없습니다.')).toBeInTheDocument())
+    expect(screen.getByRole('link', { name: /오산온/ })).toBeInTheDocument()
+    expect(screen.getByRole('form', { name: '맞춤 혜택 설문' })).toBeInTheDocument()
+    expect(screen.getByLabelText('판정 안내')).toHaveTextContent('원문에서 확인')
+    await waitFor(() => expect(screen.getByText('조건에 맞는 혜택이 없습니다.')).toBeInTheDocument())
+  })
+
+  it('switches to likely benefits once gender and age are entered, and remembers them', async () => {
+    const benefit = (id: string, codes: string[]) => ({
+      id, title: `혜택 ${id}`, source_name: '정부24', source_url: `https://www.gov.kr/${id}`, organizer: '경기도 오산시',
+      summary: '요약', primary_type: 'cash', field_tags: [], audience_tags: [], status: 'ongoing', date_kind: 'ongoing',
+      relevance: { score: 100, reasons: [], decision: 'publish' }, first_seen_at: '2026-07-01T00:00:00+09:00', last_seen_at: '2026-07-30T00:00:00+09:00',
+      sources: [], jurisdiction: 'osan', conditions: { codes, age_min: 19, age_max: 34 },
+    })
+    const data = { ...payload, items: [benefit('women', ['JA0102']), benefit('men', ['JA0101']), benefit('veterans', ['JA0329'])] }
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url: string) => ({ ok: true, json: async () => url.includes('active') ? data : payload })))
+    render(<App />)
+    fireEvent.click(screen.getByRole('radio', { name: '여성' }))
+    fireEvent.change(screen.getByLabelText('만 나이'), { target: { value: '28' } })
+    fireEvent.click(screen.getByRole('button', { name: '맞춤 혜택 보기' }))
+
+    expect(await screen.findByRole('link', { name: '혜택 women' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: '혜택 men' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /확인 필요 1/ })).toBeInTheDocument()
+    expect(JSON.parse(localStorage.getItem('osanon.profile')!)).toEqual({ gender: 'female', age: 28 })
   })
 
   it('requires Google login for personal features and explains stored data', async () => {
     render(<App />)
-    fireEvent.click(screen.getByRole('link', { name: '내 비서' }))
+    fireEvent.click(screen.getByRole('link', { name: '내 혜택함' }))
     expect(await screen.findByRole('heading', { name: 'Google 로그인이 필요합니다' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '로그인 또는 가입' }))
-    expect(screen.getByRole('dialog', { name: 'QuestBoard 계정' })).toHaveTextContent('찜한 공고와 일정')
+    expect(screen.getByRole('dialog', { name: '오산온 계정' })).toHaveTextContent('맞춤 조건(성별·나이')
     expect(screen.getByRole('checkbox')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Google로 계속' })).toBeDisabled()
   })

@@ -1,132 +1,29 @@
 sources:
-  - id: bizinfo
-    name: 기업마당
+  - id: gov24
+    name: 정부24
     kind: government
-    priority: 80
+    priority: 100
     schedule: slow
-    mode: html
-    list_url: https://www.bizinfo.go.kr/sii/siia/selectSIIA200View.do
-    homepage: https://www.bizinfo.go.kr/
-    # The whole list was 310 items on 2026-10-15, so 350 reads all of it.
-    limit: 350
+    mode: api
+    list_url: https://api.odcloud.kr/api/gov24/v3/serviceList
+    homepage: https://www.gov.kr/portal/rcvfvrSvc/main
+    requires_secret: GOV24_API_KEY
+    # The whole catalogue is read and filtered to Osan, Gyeonggi and central ministries.
+    limit: 20000
     enabled: true
-  - id: kstartup
-    name: K-Startup
+  - id: bokjiro
+    name: 복지로
     kind: government
-    priority: 80
+    # Below 정부24 so a benefit listed by both keeps 정부24's condition codes as the representative copy.
+    priority: 90
     schedule: slow
-    mode: html
-    list_url: https://www.k-startup.go.kr/web/contents/bizpbanc-ongoing.do
-    homepage: https://www.k-startup.go.kr/
-    enabled: true
-  - id: kocca
-    name: 한국콘텐츠진흥원
-    kind: official
-    priority: 100
-    schedule: slow
-    mode: html
-    list_url: https://www.kocca.kr/kocca/pims/list.do?menuNo=204104
-    homepage: https://www.kocca.kr/
-    # robots.txt has "Disallow:/kocca/*/list.do", which covers this list page, checked 2026-10-15.
-    enabled: false
-  - id: nipa
-    name: 정보통신산업진흥원
-    kind: official
-    priority: 100
-    schedule: slow
-    mode: html
-    list_url: https://www.nipa.kr/home/2-2
-    homepage: https://www.nipa.kr/
-    enabled: true
-  - id: wevity
-    name: 위비티
-    kind: aggregate
-    priority: 40
-    schedule: fast
-    mode: html
-    list_url: https://www.wevity.com/?c=find&s=1&gub=1
-    homepage: https://www.wevity.com/
-    enabled: true
-  - id: thinkcontest
-    name: 씽굿
-    kind: aggregate
-    priority: 40
-    schedule: fast
-    mode: html
-    list_url: https://www.thinkcontest.com/thinkgood/user/contest/index.do
-    homepage: https://www.thinkcontest.com/
-    enabled: true
-  - id: linkareer
-    name: 링커리어
-    kind: aggregate
-    priority: 40
-    schedule: fast
-    mode: html
-    list_url: https://linkareer.com/list/contest
-    homepage: https://linkareer.com/
-    # The list is longer than 400 (2026-10-15); each item also opens a detail page, ~1s each.
-    limit: 300
-    enabled: true
-  - id: eventus
-    name: 이벤터스
-    kind: specialist
-    priority: 60
-    schedule: fast
-    mode: html
-    list_url: https://event-us.kr/search
-    homepage: https://event-us.kr/
-    enabled: true
-  - id: onoffmix
-    name: 온오프믹스
-    kind: specialist
-    priority: 60
-    schedule: fast
-    mode: html
-    list_url: https://onoffmix.com/event/main
-    homepage: https://onoffmix.com/
-    # robots.txt allows only named search/preview bots (User-agent: * / Disallow: /), checked 2026-10-06.
-    enabled: false
-  - id: dev_event
-    name: Dev-Event GitHub
-    kind: specialist
-    priority: 60
-    schedule: fast
-    mode: markdown
-    list_url: https://raw.githubusercontent.com/brave-people/Dev-Event/master/README.md
-    homepage: https://github.com/brave-people/Dev-Event
-    enabled: true
-  - id: dacon
-    name: DACON
-    kind: specialist
-    priority: 60
-    schedule: fast
-    mode: html
-    list_url: https://dacon.io/competitions
-    homepage: https://dacon.io/
-    enabled: true
-  - id: gcon
-    name: 경기콘텐츠진흥원
-    kind: official
-    priority: 100
-    schedule: slow
-    mode: html
-    list_url: https://www.gcon.or.kr/gcon/business/gconNotice/list.do?menuNo=200061
-    homepage: https://www.gcon.or.kr/
-    enabled: true
-  - id: momo365
-    name: 모모365
-    kind: aggregate
-    priority: 40
-    schedule: slow
-    mode: html
-    list_url: https://www.momo365.net/Support?ViewType=list&cd=support
-    homepage: https://www.momo365.net/
+    mode: api
+    list_url: https://apis.data.go.kr/B554287/LocalGovernmentWelfareInformations/LcgvWelfarelist
+    homepage: https://www.bokjiro.go.kr/
+    # Same 공공데이터포털 key; needs its own 활용신청 (data.go.kr/data/15108347). The 오산시청 site
+    # itself disallows crawlers in robots.txt (checked 2026-10-16), so this API is the Osan source.
+    requires_secret: GOV24_API_KEY
+    limit: 1000
     enabled: true
 
-fallbacks:
-  - id: contestkorea
-    name: 콘테스트코리아
-    list_url: https://www.contestkorea.com/
-  - id: startup_plus
-    name: 서울 스타트업플러스
-    list_url: https://www.startup-plus.kr/
+fallbacks: []

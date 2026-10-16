@@ -1,77 +1,35 @@
 import type { Opportunity } from './types'
 
-// Facts behind these filters are often missing (see pipeline/facets.py). Each filter
+// Facts behind these filters are sometimes missing (see pipeline/facets.py). Each filter
 // therefore answers "match", "mismatch" or "unknown", and unknown items are hidden unless
 // the viewer asks to include them, so the page can say how many were left out and why.
 
 export interface AdvancedFilters {
-  region: string
-  mode: string
-  fee: string
-  audience: string
-  prize: string
+  apply: string
   includeUnknown: boolean
 }
 
-export const EMPTY_ADVANCED: AdvancedFilters = { region: '', mode: '', fee: '', audience: '', prize: '', includeUnknown: false }
+export const EMPTY_ADVANCED: AdvancedFilters = { apply: '', includeUnknown: false }
 
 /** URL parameter for each filter; `unknown=1` includes items without the information. */
-export const ADVANCED_PARAMS = { region: 'region', mode: 'mode', fee: 'fee', audience: 'aud', prize: 'prize' } as const
+export const ADVANCED_PARAMS = { apply: 'apply' } as const
 export type AdvancedKey = keyof typeof ADVANCED_PARAMS
-export const ADVANCED_LABELS: Record<AdvancedKey, string> = { region: '지역', mode: '진행 방식', fee: '참가비', audience: '참가 대상', prize: '상금' }
+export const ADVANCED_LABELS: Record<AdvancedKey, string> = { apply: '신청 방법' }
 
-export const NATIONWIDE = '전국'
-export const REGION_OPTIONS = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종', '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주']
-export const MODE_OPTIONS: Record<string, string> = { online: '온라인', offline: '오프라인' }
-export const FEE_OPTIONS: Record<string, string> = { free: '무료', paid: '유료' }
-export const AUDIENCE_OPTIONS = ['대학생', '청소년', '청년', '일반인', '개발자', '창업자·기업']
-export const OPEN_TO_ALL = '누구나'
-export const PRIZE_OPTIONS: Record<string, string> = { any: '상금 있음', '100': '100만원 이상', '500': '500만원 이상', '1000': '1,000만원 이상' }
+export const APPLY_OPTIONS: Record<string, string> = { online: '온라인 신청 가능', visit: '방문 신청', none: '신청 불필요' }
 
 export type Verdict = 'match' | 'mismatch' | 'unknown'
 
-function regionVerdict(item: Opportunity, region: string): Verdict {
-  const regions = item.regions ?? []
-  if (!regions.length) return 'unknown'
-  if (region === NATIONWIDE) return regions.includes(NATIONWIDE) ? 'match' : 'mismatch'
-  // A nationwide notice is open to every region.
-  return regions.includes(region) || regions.includes(NATIONWIDE) ? 'match' : 'mismatch'
-}
-
-function modeVerdict(item: Opportunity, mode: string): Verdict {
-  if (item.mode === 'hybrid') return 'match'
-  if (item.mode === 'online' || item.mode === 'offline') return item.mode === mode ? 'match' : 'mismatch'
-  return 'unknown'
-}
-
-function feeVerdict(item: Opportunity, fee: string): Verdict {
-  if (item.fee === 'free' || item.fee === 'paid') return item.fee === fee ? 'match' : 'mismatch'
-  return 'unknown'
-}
-
-function audienceVerdict(item: Opportunity, audience: string): Verdict {
-  const tags = item.audience_tags
-  if (tags.includes(audience) || tags.includes(OPEN_TO_ALL)) return 'match'
-  return tags.some(tag => AUDIENCE_OPTIONS.includes(tag)) ? 'mismatch' : 'unknown'
-}
-
-function prizeVerdict(item: Opportunity, prize: string): Verdict {
-  const amount = item.prize_manwon
-  if (amount === undefined || amount === null) return 'unknown'
-  if (prize === 'any') return 'match'
-  // 0 means a prize is mentioned without an amount, so a minimum cannot be checked.
-  if (amount === 0) return 'unknown'
-  return amount >= Number(prize) ? 'match' : 'mismatch'
+function applyVerdict(item: Opportunity, method: string): Verdict {
+  const methods = item.apply_methods ?? []
+  if (!methods.length) return 'unknown'
+  return methods.includes(method) ? 'match' : 'mismatch'
 }
 
 /** Whether the item carries the fact behind a filter at all, whatever value is chosen. */
 export function hasAdvancedInfo(item: Opportunity, key: AdvancedKey): boolean {
   switch (key) {
-    case 'region': return Boolean(item.regions?.length)
-    case 'mode': return item.mode === 'online' || item.mode === 'offline' || item.mode === 'hybrid'
-    case 'fee': return item.fee === 'free' || item.fee === 'paid'
-    case 'audience': return item.audience_tags.some(tag => tag === OPEN_TO_ALL || AUDIENCE_OPTIONS.includes(tag))
-    case 'prize': return item.prize_manwon !== undefined && item.prize_manwon !== null
+    case 'apply': return Boolean(item.apply_methods?.length)
   }
 }
 
@@ -91,11 +49,9 @@ export function coveragePercent(share: number): string {
   return `${share < 1 ? Math.min(99, Math.round(share * 100)) : 100}%`
 }
 
-export const coverageLabel = (share: number) => `정보 있는 공고 ${coveragePercent(share)}`
+export const coverageLabel = (share: number) => `정보 있는 혜택 ${coveragePercent(share)}`
 
-const CHECKS: Record<AdvancedKey, (item: Opportunity, value: string) => Verdict> = {
-  region: regionVerdict, mode: modeVerdict, fee: feeVerdict, audience: audienceVerdict, prize: prizeVerdict,
-}
+const CHECKS: Record<AdvancedKey, (item: Opportunity, value: string) => Verdict> = { apply: applyVerdict }
 
 export const activeAdvancedCount = (filters: AdvancedFilters) =>
   (Object.keys(ADVANCED_PARAMS) as AdvancedKey[]).filter(key => filters[key]).length
@@ -119,22 +75,6 @@ export function matchesAdvanced(item: Opportunity, filters: AdvancedFilters): bo
 }
 
 export function readAdvanced(params: URLSearchParams): AdvancedFilters {
-  const read = (key: AdvancedKey, allowed: string[]) => {
-    const value = params.get(ADVANCED_PARAMS[key]) ?? ''
-    return allowed.includes(value) ? value : ''
-  }
-  return {
-    region: read('region', [NATIONWIDE, ...REGION_OPTIONS]),
-    mode: read('mode', Object.keys(MODE_OPTIONS)),
-    fee: read('fee', Object.keys(FEE_OPTIONS)),
-    audience: read('audience', AUDIENCE_OPTIONS),
-    prize: read('prize', Object.keys(PRIZE_OPTIONS)),
-    includeUnknown: params.get('unknown') === '1',
-  }
-}
-
-export function prizeLabel(amount: number | null | undefined): string {
-  if (amount === undefined || amount === null) return '정보 없음'
-  if (amount === 0) return '상금·상품 있음(금액 미상)'
-  return `${amount.toLocaleString('ko-KR')}만원`
+  const apply = params.get(ADVANCED_PARAMS.apply) ?? ''
+  return { apply: apply in APPLY_OPTIONS ? apply : '', includeUnknown: params.get('unknown') === '1' }
 }

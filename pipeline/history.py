@@ -18,7 +18,6 @@ IMPORTANT_FIELDS = (
     "eligibility",
     "benefits",
     "location",
-    "mode",
     "application_url",
     "document_url",
 )

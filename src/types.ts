@@ -1,7 +1,17 @@
-export type OpportunityType = 'contest' | 'support' | 'hackathon' | 'event' | 'education' | 'supporters' | 'employment' | 'other'
+/** Support form (정부24 지원유형). */
+export type OpportunityType = 'cash' | 'in_kind' | 'service' | 'voucher' | 'loan' | 'reduction' | 'other'
 export type OpportunityStatus = 'upcoming' | 'open' | 'urgent' | 'today' | 'closed' | 'ongoing' | 'unknown'
 export type DateKind = 'exact' | 'ongoing' | 'first_come' | 'budget' | 'unknown' | 'inquiry'
-export type Domain = 'it' | 'design_media' | 'literature_arts' | 'planning_ideas' | 'business'
+/** Benefit field tab (정부24 서비스분야). */
+export type Domain = 'living' | 'housing' | 'childcare' | 'jobs' | 'health' | 'admin' | 'pregnancy' | 'care' | 'culture' | 'agriculture'
+export type Jurisdiction = 'osan' | 'gyeonggi' | 'national'
+
+/** 정부24 support conditions: JA codes set to Y plus the target age range (만 나이). */
+export interface Conditions {
+  codes: string[]
+  age_min: number | null
+  age_max: number | null
+}
 
 export interface SourceRecord {
   source_id: string
@@ -45,15 +55,13 @@ export interface Opportunity {
   eligibility?: string
   benefits?: string
   location?: string
-  mode?: string
-  fee?: string
-  is_adjacent?: boolean
-  /** Field tab; data generated before tabs existed has no value and counts as 'it'. */
+  /** Benefit field tab. */
   domain?: Domain
-  /** Region names from pipeline/facets.py; empty when the source does not say. */
-  regions?: string[]
-  /** Prize in 10,000 won; 0 = prize mentioned without amount, null = no information. */
-  prize_manwon?: number | null
+  jurisdiction?: Jurisdiction
+  /** null = the source has no condition record, so eligibility needs a manual check. */
+  conditions?: Conditions | null
+  /** "online", "visit", "none" (no application needed); empty when the source does not say. */
+  apply_methods?: string[]
   last_changed_at?: string | null
   change_flags?: string[]
   is_manual_reviewed?: boolean
@@ -81,8 +89,8 @@ export interface CrawlStatus {
   error?: string | null
   previous_collected_count?: number | null
   /** Share (0–1) of collected items carrying each advanced-filter fact; absent before it was recorded. */
-  facet_coverage?: Partial<Record<'region' | 'mode' | 'fee' | 'audience' | 'prize', number>> | null
-  previous_facet_coverage?: Partial<Record<'region' | 'mode' | 'fee' | 'audience' | 'prize', number>> | null
+  facet_coverage?: Partial<Record<'apply', number>> | null
+  previous_facet_coverage?: Partial<Record<'apply', number>> | null
 }
 
 export interface PersonalState {

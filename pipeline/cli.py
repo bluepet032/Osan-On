@@ -8,7 +8,7 @@ from pipeline.runner import run_pipeline
 
 
 def parser() -> argparse.ArgumentParser:
-    value = argparse.ArgumentParser(description="QuestBoard data pipeline")
+    value = argparse.ArgumentParser(description="Osan-On benefit data pipeline")
     value.add_argument("--schedule", choices=["fast", "slow", "all"], default="all")
     value.add_argument("--source", action="append", dest="sources", help="실행할 출처 ID (반복 가능)")
     value.add_argument("--limit", type=int, help="모든 출처의 최대 수집 개수(생략하면 sources.yml의 limit, 없으면 150)")
@@ -21,7 +21,7 @@ def main() -> None:
     items, statuses = run_pipeline(args.output, args.schedule, set(args.sources or []), args.limit)
     success = sum(status.status == "success" for status in statuses)
     failed = sum(status.status == "failed" for status in statuses)
-    print(f"QuestBoard: {len(items)}개 정규화, 출처 성공 {success}, 실패 {failed}")
+    print(f"오산온: {len(items)}개 정규화, 출처 성공 {success}, 실패 {failed}")
 
 
 if __name__ == "__main__":

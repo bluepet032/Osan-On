@@ -99,7 +99,7 @@ def test_robots_longest_rule_wins(server):
 
 def test_robots_group_naming_our_agent_replaces_the_catch_all_group(server):
     routes, _, _ = server
-    routes["https://site.example/robots.txt"] = "User-agent: *\nDisallow: /\n\nUser-agent: questboard\nDisallow: /private\n"
+    routes["https://site.example/robots.txt"] = "User-agent: *\nDisallow: /\n\nUser-agent: osanon\nDisallow: /private\n"
     routes["https://site.example/list"] = "ok"
 
     assert HttpClient().get("https://site.example/list").text == "ok"
