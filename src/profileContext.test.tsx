@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   remote: null as Record<string, unknown> | null,
   setDoc: vi.fn(async () => undefined),
   receive: null as ((snapshot: unknown) => void) | null,
+  failRead: false,
+  subscriptions: 0,
   user: { uid: 'u1' } as { uid: string } | null,
   ready: true,
 }))
@@ -15,20 +17,23 @@ const services = { db: {}, firestore }
 vi.mock('./account', () => ({ useAccount: () => ({ user: mocks.user, firebase: services, ready: mocks.ready }) }))
 vi.mock('firebase/firestore', () => ({
   doc: (_db: unknown, ...path: string[]) => path.join('/'),
-  onSnapshot: (_path: string, receive: (snapshot: unknown) => void) => {
+  onSnapshot: (_path: string, receive: (snapshot: unknown) => void, fail: (error: Error) => void) => {
     mocks.receive = receive
-    receive({ exists: () => mocks.remote !== null, data: () => mocks.remote })
+    mocks.subscriptions += 1
+    if (mocks.failRead) fail(new Error('unavailable'))
+    else receive({ exists: () => mocks.remote !== null, data: () => mocks.remote })
     return vi.fn()
   },
   setDoc: mocks.setDoc,
 }))
 
 function Probe() {
-  const { profile, setProfile, synced } = useProfile()
+  const { profile, setProfile, saveState, retry } = useProfile()
   return <div>
     <output>{JSON.stringify(profile)}</output>
-    <span>{synced ? 'synced' : 'local'}</span>
+    <span data-testid="state">{saveState}</span>
     <button onClick={() => setProfile({ gender: 'male', age: 40 })}>change</button>
+    <button onClick={retry}>retry</button>
   </div>
 }
 
@@ -39,14 +44,16 @@ describe('ProfileProvider', () => {
     mocks.remote = null
     mocks.user = { uid: 'u1' }
     mocks.ready = true
-    mocks.setDoc.mockClear()
+    mocks.setDoc.mockReset()
+    mocks.setDoc.mockResolvedValue(undefined)
+    mocks.failRead = false
+    mocks.subscriptions = 0
   })
 
   it('uploads the browser profile when the account has none', () => {
     localStorage.setItem('osanon.profile', JSON.stringify({ gender: 'female', age: 28 }))
     render(<ProfileProvider><Probe /></ProfileProvider>)
     expect(mocks.setDoc).toHaveBeenCalledWith('users/u1/profile/main', expect.objectContaining({ gender: 'female', age: 28 }))
-    expect(screen.getByText('synced')).toBeInTheDocument()
   })
 
   it('prefers the account profile and keeps a browser copy', () => {
@@ -100,6 +107,53 @@ describe('ProfileProvider', () => {
     render(<ProfileProvider><Probe /></ProfileProvider>)
     act(() => screen.getByRole('button', { name: 'change' }).click())
     expect(mocks.setDoc).not.toHaveBeenCalled()
-    expect(screen.getByText('local')).toBeInTheDocument()
+    expect(screen.getByTestId('state')).toHaveTextContent('local')
+  })
+
+  it('says saved only once the account write succeeds', async () => {
+    let finish = () => {}
+    mocks.setDoc.mockImplementationOnce(() => new Promise<undefined>(resolve => { finish = () => resolve(undefined) }))
+    render(<ProfileProvider><Probe /></ProfileProvider>)
+    act(() => screen.getByRole('button', { name: 'change' }).click())
+    expect(screen.getByTestId('state')).toHaveTextContent('syncing')
+    await act(async () => finish())
+    expect(screen.getByTestId('state')).toHaveTextContent('saved')
+  })
+
+  it('reports a failed account write and retries it with the same answers', async () => {
+    mocks.setDoc.mockRejectedValueOnce(new Error('permission-denied'))
+    render(<ProfileProvider><Probe /></ProfileProvider>)
+    await act(async () => screen.getByRole('button', { name: 'change' }).click())
+    expect(screen.getByTestId('state')).toHaveTextContent('failed')
+    await act(async () => screen.getByRole('button', { name: 'retry' }).click())
+    expect(mocks.setDoc).toHaveBeenCalledTimes(2)
+    expect(mocks.setDoc).toHaveBeenLastCalledWith('users/u1/profile/main', expect.objectContaining({ gender: 'male', age: 40 }))
+    expect(screen.getByTestId('state')).toHaveTextContent('saved')
+  })
+
+  it('keeps unsaved answers when the account copy comes back after a failed write', async () => {
+    mocks.remote = { gender: 'female', age: 28, updatedAt: '2026-10-16T00:00:00Z' }
+    mocks.setDoc.mockRejectedValueOnce(new Error('permission-denied'))
+    render(<ProfileProvider><Probe /></ProfileProvider>)
+    await act(async () => screen.getByRole('button', { name: 'change' }).click())
+    // Firestore rolls the rejected write back and sends the old account copy again.
+    act(() => mocks.receive!({ exists: () => true, data: () => mocks.remote }))
+    expect(screen.getByRole('status')).toHaveTextContent('{"gender":"male","age":40}')
+    expect(screen.getByTestId('state')).toHaveTextContent('failed')
+    await act(async () => screen.getByRole('button', { name: 'retry' }).click())
+    expect(mocks.setDoc).toHaveBeenLastCalledWith('users/u1/profile/main', expect.objectContaining({ gender: 'male', age: 40 }))
+  })
+
+  it('reports a failed account read and retries by reading again', async () => {
+    mocks.failRead = true
+    mocks.remote = { gender: 'male', age: 33, updatedAt: '2026-10-16T00:00:00Z' }
+    render(<ProfileProvider><Probe /></ProfileProvider>)
+    expect(screen.getByTestId('state')).toHaveTextContent('failed')
+    mocks.failRead = false
+    await act(async () => screen.getByRole('button', { name: 'retry' }).click())
+    expect(mocks.subscriptions).toBe(2)
+    expect(mocks.setDoc).not.toHaveBeenCalled()
+    expect(screen.getByTestId('state')).toHaveTextContent('saved')
+    expect(screen.getByRole('status')).toHaveTextContent('{"gender":"male","age":33}')
   })
 })
