@@ -58,7 +58,7 @@ def summarize(raw: RawOpportunity) -> str:
     return value[:180]
 
 
-def normalize(raw: RawOpportunity, taxonomy: dict, now: datetime) -> Opportunity:
+def normalize(raw: RawOpportunity, now: datetime) -> Opportunity:
     category = raw.category or raw.original_category
     domain = next((slug for word, slug in CATEGORY_DOMAINS.items() if word in category), "living")
     primary_type = next((slug for word, slug in SUPPORT_TYPES if word in raw.support_type), "other")

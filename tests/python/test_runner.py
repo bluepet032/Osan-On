@@ -81,7 +81,7 @@ def test_recent_deadlines_survive_missing_posts_and_newer_copies_win(monkeypatch
             return records
 
     monkeypatch.setattr(runner, "create_collector", lambda source: Collector())
-    monkeypatch.setattr(runner, "manual_items", lambda taxonomy, now: [])
+    monkeypatch.setattr(runner, "manual_items", lambda now: [])
     output = tmp_path / "data"
     kst = ZoneInfo("Asia/Seoul")
     first, _ = runner.run_pipeline(output_dir=output, names={"gov24"}, now=datetime(2026, 10, 13, 3, tzinfo=kst))
@@ -123,7 +123,7 @@ def test_capped_source_keeps_open_notices_beyond_the_limit(monkeypatch, tmp_path
             ) for key in listed[now.day]]
 
     monkeypatch.setattr(runner, "create_collector", lambda source: Collector())
-    monkeypatch.setattr(runner, "manual_items", lambda taxonomy, now: [])
+    monkeypatch.setattr(runner, "manual_items", lambda now: [])
     output = tmp_path / "data"
     kst = ZoneInfo("Asia/Seoul")
     run = lambda day: runner.run_pipeline(output_dir=output, names={"gov24"}, limit=3, now=datetime(2026, 10, day, 3, tzinfo=kst))[0]
@@ -152,7 +152,7 @@ def test_source_limit_comes_from_config_unless_the_run_overrides_it(monkeypatch,
     source = SourceConfig("gov24", "정부24", "aggregate", 40, "fast", "html", "https://example.com", "https://example.com", limit=2)
     monkeypatch.setattr(runner, "load_sources", lambda: ([source], []))
     monkeypatch.setattr(runner, "create_collector", lambda source: Collector())
-    monkeypatch.setattr(runner, "manual_items", lambda taxonomy, now: [])
+    monkeypatch.setattr(runner, "manual_items", lambda now: [])
     output = tmp_path / "data"
     kst = ZoneInfo("Asia/Seoul")
     runner.run_pipeline(output_dir=output, now=datetime(2026, 10, 1, 3, tzinfo=kst))
@@ -173,7 +173,7 @@ def test_archived_notices_still_obey_manual_exclusions(monkeypatch, tmp_path: Pa
     from pipeline.overrides import apply_overrides
 
     monkeypatch.setattr(runner, "apply_overrides", lambda items, now: apply_overrides(items, manual_dir=manual, now=now))
-    monkeypatch.setattr(runner, "manual_items", lambda taxonomy, now: [])
+    monkeypatch.setattr(runner, "manual_items", lambda now: [])
     monkeypatch.setattr(runner, "create_collector", lambda source: FakeCollector(0))
     items, _ = runner.run_pipeline(output_dir=tmp_path / "data", names={"gov24"}, now=datetime(2027, 1, 1, tzinfo=ZoneInfo("Asia/Seoul")))
     assert items == []

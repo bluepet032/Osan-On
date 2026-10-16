@@ -6,9 +6,8 @@ from datetime import datetime
 from urllib.parse import unquote
 from xml.etree import ElementTree
 
-from pipeline.collectors.base import Collector, CollectorStructureError
+from pipeline.collectors.base import Collector, CollectorStructureError, with_query
 from pipeline.collectors.gov24 import KEY_RE
-from pipeline.collectors.html import with_query
 from pipeline.http import FetchError
 from pipeline.models import RawOpportunity
 

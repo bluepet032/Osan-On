@@ -1,7 +1,6 @@
 import pytest
 
 from pipeline.collectors.gov24 import Gov24Collector
-from pipeline.collectors.html import StructuredHtmlCollector
 from pipeline.collectors.registry import create_collector
 from pipeline.config import SourceConfig, load_sources
 
@@ -17,8 +16,9 @@ def test_source_id_selects_dedicated_collector():
     assert isinstance(create_collector(source("gov24")), Gov24Collector)
 
 
-def test_unknown_source_falls_back_to_generic_html():
-    assert type(create_collector(source("onoffmix"))) is StructuredHtmlCollector
+def test_source_without_collector_is_rejected():
+    with pytest.raises(ValueError):
+        create_collector(source("onoffmix"))
 
 
 def test_explicit_collector_overrides_source_id():

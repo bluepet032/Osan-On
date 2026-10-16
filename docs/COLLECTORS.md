@@ -28,7 +28,7 @@
 
 `pipeline/http.py`의 공통 HTTP 클라이언트는 실행마다 호스트별 robots.txt를 한 번 읽어 `QuestBoard` 에이전트 기준으로 허용 여부를 확인합니다. robots.txt가 없거나 4xx면 허용하고, 5xx·접속 실패면 RFC 9309에 따라 전체 금지로 봅니다. 금지된 URL은 요청하지 않고 출처 실패(`robots.txt가 수집을 허용하지 않습니다`)로 기록합니다. 같은 호스트에는 최소 1초 간격(robots.txt의 `Crawl-delay`가 더 길면 그 값)으로 요청하고, 429·503의 `Retry-After`가 30초 이하면 기다렸다가 재시도하며, 그보다 길면 재시도하지 않습니다.
 
-수집기는 `sources.yml`의 `collector` 값 → 출처 ID와 같은 이름 → 범용 `html` 순으로 고릅니다. 다른 출처의 수집기를 재사용하려면 `collector: wevity`처럼 지정하고, 등록되지 않은 이름은 실행 시 오류로 처리합니다.
+수집기는 `sources.yml`의 `collector` 값 → 출처 ID와 같은 이름 순으로 고릅니다. 다른 출처의 수집기를 재사용하려면 `collector: wevity`처럼 지정하고, 등록되지 않은 이름은 실행 시 오류로 처리합니다.
 
 새 수집기를 추가할 때는 `pipeline/collectors/base.py`의 계약을 구현하고 `registry.py`의 `COLLECTORS`에 이름을 등록한 뒤, 응답을 최소화한 HTML/API 픽스처로 정상·필드 누락·구조 변경·부분 실패 테스트를 작성합니다. 픽스처에도 원문 전체나 불필요한 개인정보를 넣지 않습니다.
 

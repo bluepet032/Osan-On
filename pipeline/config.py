@@ -60,6 +60,3 @@ def load_sources(path: Path | None = None) -> tuple[list[SourceConfig], list[dic
     sources = [SourceConfig(**item) for item in document.get("sources", [])]
     return sources, document.get("fallbacks", [])
 
-
-def load_taxonomy(path: Path | None = None) -> dict[str, Any]:
-    return load_yaml(path or ROOT / "config" / "taxonomy.yml")

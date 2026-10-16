@@ -5,7 +5,7 @@ import { loadOpportunities } from './data'
 import { dueReminders, isNewKeywordMatch, kstDate, matchesPersonalKeyword, newEligibleItems } from './personalLogic'
 import { useProfile } from './profileContext'
 import type { Opportunity, PersonalState } from './types'
-import { readStorage, writeStorage } from './utils'
+import { copyStorage, readStorage, writeStorage } from './utils'
 
 export interface SavedOpportunity {
   id: string
@@ -58,11 +58,13 @@ interface PersonalContextValue {
   markAllNotificationsRead: () => void
 }
 
-const KEY = 'questboard.personal.v1'
+const KEY = 'osanon.personal.v1'
+const IMPORT_KEY = 'osanon.favorite-import.v1.'
 const EMPTY: PersonalState = { version: 1, favorites: [], read: [], hidden: [] }
 const PersonalContext = createContext<PersonalContextValue | null>(null)
 
 function loadLocalState(): PersonalState {
+  copyStorage('questboard.personal.v1', KEY)
   try {
     const parsed = JSON.parse(readStorage(KEY) || '') as Partial<PersonalState>
     if (parsed.version !== 1) return EMPTY
@@ -251,7 +253,8 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!userId || dataUserId !== userId || !storeReady || !publishedReady || local.favorites.length === 0) return
-    const key = 'questboard.favorite-import.v1.' + userId
+    const key = IMPORT_KEY + userId
+    copyStorage('questboard.favorite-import.v1.' + userId, key)
     const decision = readStorage(key)
     if (decision !== 'done' && decision !== 'skipped') setMigrationOpen(true)
   }, [userId, dataUserId, storeReady, publishedReady, local.favorites.length])
@@ -413,7 +416,7 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
         imported.add(id)
       }
       setLocal(current => ({ ...current, favorites: current.favorites.filter(id => !imported.has(id)) }))
-      writeStorage('questboard.favorite-import.v1.' + userId, 'done')
+      writeStorage(IMPORT_KEY + userId, 'done')
       setMigrationOpen(false)
       setMigrationMessage('현재 공개 목록에서 확인되는 기존 찜을 계정 찜에 합쳤습니다. 확인되지 않는 항목의 브라우저 찜은 그대로 보존했습니다.')
     } catch (reason) {
@@ -422,7 +425,7 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
   }, [userId, firebase, publishedItems, publishedReady, local.favorites])
 
   const closeMigration = (skip: boolean) => {
-    if (skip && userId) writeStorage('questboard.favorite-import.v1.' + userId, 'skipped')
+    if (skip && userId) writeStorage(IMPORT_KEY + userId, 'skipped')
     setMigrationOpen(false)
   }
 

@@ -3,7 +3,6 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from pipeline.config import load_taxonomy
 from pipeline.models import CrawlStatus, RawOpportunity
 from pipeline.normalize import normalize
 from pipeline.storage import write_all
@@ -21,7 +20,7 @@ def sample_data(tmp_path: Path) -> Path:
         source_id="gov24", source_name="정부24", source_url=f"https://www.gov.kr/portal/rcvfvrSvc/dtlEx/{key}",
         title=f"오산시 청년 지원 {key}", summary="청년의 생활 안정을 위해 매달 지원금을 드립니다", date_kind="ongoing",
         jurisdiction="osan", conditions={"codes": ["JA0102"], "age_min": 19, "age_max": 34}, category="생활안정", support_type="현금",
-    ), load_taxonomy(), NOW) for key in ("A1", "A2")]
+    ), NOW) for key in ("A1", "A2")]
     stamp = NOW.isoformat(timespec="seconds")
     statuses = [CrawlStatus(source_id=f"s{index}", source_name=f"출처{index}", status="success", started_at=stamp, finished_at=stamp) for index in range(3)]
     write_all(data_dir, items, statuses, NOW)

@@ -2,7 +2,6 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from pipeline.config import load_taxonomy
 from pipeline.dedupe import deduplicate
 from pipeline.models import RawOpportunity
 from pipeline.normalize import normalize
@@ -24,7 +23,7 @@ items:
     (tmp_path / "overrides.yml").write_text("schema_version: 1\nitems: []\n", encoding="utf-8")
     (tmp_path / "exclusions.yml").write_text("schema_version: 1\nids: []\nsource_urls: []\n", encoding="utf-8")
     now = datetime(2026, 7, 30, tzinfo=ZoneInfo("Asia/Seoul"))
-    items = manual_items(load_taxonomy(), now, tmp_path)
+    items = manual_items(now, tmp_path)
     assert items[0].relevance.decision == "publish"
     assert apply_overrides(items, tmp_path) == items
 
@@ -37,7 +36,7 @@ def merged_item(now: datetime):
         source_priority=priority, title="AI 게임 개발 공모전", application_url="https://apply.example/1",
         recruit_end="2026-08-31", date_kind="exact",
     ) for source_id, priority in (("official", 100), ("aggregate", 40))]
-    [item] = deduplicate([normalize(raw, load_taxonomy(), now) for raw in raws])
+    [item] = deduplicate([normalize(raw, now) for raw in raws])
     assert item.source_url == "https://official.example/post/1"
     return item
 
@@ -68,7 +67,7 @@ def test_override_recalculates_deadline_and_review_score(tmp_path: Path):
         summary="대학생 개발팀이 AI 게임을 제작해 출품하는 소프트웨어 공모전입니다.",
         recruit_end="2026-08-31",
         date_kind="exact",
-    ), load_taxonomy(), now)
+    ), now)
     (tmp_path / "overrides.yml").write_text('''schema_version: 1
 items:
   - id: ''' + item.id + '''
@@ -99,7 +98,7 @@ items:
 ''', encoding="utf-8")
     now = datetime(2026, 10, 16, tzinfo=ZoneInfo("Asia/Seoul"))
 
-    [item] = manual_items(load_taxonomy(), now, tmp_path)
+    [item] = manual_items(now, tmp_path)
 
     assert item.jurisdiction == "osan"
     assert item.conditions == {"codes": ["JA0412"], "age_min": 19, "age_max": 39}

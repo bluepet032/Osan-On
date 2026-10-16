@@ -113,7 +113,7 @@ def test_targets_become_conditions_only_within_one_group(targets, expected):
 
 def test_category_and_support_form_are_mapped(monkeypatch):
     rows = [list_row("O1", intrsThemaNmArray="서민금융, 임신·출산", srvPvsnNm="지역화폐"), list_row("O2", intrsThemaNmArray="서민금융", srvPvsnNm="현물지급")]
-    items = {raw.source_post_id: normalize(raw, {}, NOW) for raw in collector(FakeClient(rows), monkeypatch).collect(NOW)}
+    items = {raw.source_post_id: normalize(raw, NOW) for raw in collector(FakeClient(rows), monkeypatch).collect(NOW)}
 
     assert (items["O1"].domain, items["O1"].primary_type) == ("pregnancy", "voucher")
     assert (items["O2"].domain, items["O2"].primary_type) == ("living", "in_kind")
@@ -140,7 +140,7 @@ def benefit(source_id: str, title: str, place: str, priority: int, conditions: d
     return normalize(RawOpportunity(
         source_id=source_id, source_name=source_id, source_url=f"https://example.com/{source_id}/{title}", source_post_id=title,
         title=title, organizer=f"{source_id} 기관", date_kind="ongoing", source_priority=priority, jurisdiction=place, conditions=conditions,
-    ), {}, NOW)
+    ), NOW)
 
 
 def test_the_same_benefit_from_both_portals_is_merged_and_keeps_gov24_conditions():

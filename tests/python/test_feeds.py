@@ -3,7 +3,6 @@ from pathlib import Path
 from xml.etree import ElementTree
 from zoneinfo import ZoneInfo
 
-from pipeline.config import load_taxonomy
 from pipeline.models import RawOpportunity
 from pipeline.normalize import normalize
 from pipeline.storage import write_all
@@ -18,7 +17,7 @@ def notice(key: str, *, domain: str = "living", decision: str = "publish", end: 
     item = normalize(RawOpportunity(
         source_id="test", source_name="테스트", source_url=f"https://example.com/{key}",
         title=f"게임 공모전 {key} <특별> & 상금", recruit_end=end, date_kind="exact" if end else "unknown",
-    ), load_taxonomy(), NOW)
+    ), NOW)
     item.domain, item.first_seen_at = domain, first_seen
     item.relevance.decision = decision
     return item

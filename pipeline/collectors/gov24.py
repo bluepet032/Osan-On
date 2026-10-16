@@ -6,8 +6,7 @@ import re
 from datetime import datetime
 from urllib.parse import unquote
 
-from pipeline.collectors.base import Collector, CollectorStructureError
-from pipeline.collectors.html import dates_from_text, with_query
+from pipeline.collectors.base import Collector, CollectorStructureError, dates_from_text, with_query
 from pipeline.http import FetchError
 from pipeline.models import RawOpportunity
 

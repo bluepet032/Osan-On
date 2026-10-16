@@ -94,7 +94,7 @@ pnpm test:e2e
 - 정확한 마감일이 없으면 날짜 미상 화면으로 이동합니다.
 - 원문 본문·포스터·첨부파일은 재배포하지 않고 링크, 추출 요약, 분류 결과와 해시성 식별자만 저장합니다.
 
-키워드 점수와 분야 탭 주제어는 [config/taxonomy.yml](config/taxonomy.yml)(`fields`, `weak_title_keywords`, `domains`), 출처는 [config/sources.yml](config/sources.yml)에서 관리합니다. 상세 수집 정책은 [docs/COLLECTORS.md](docs/COLLECTORS.md)를 참고하세요.
+출처는 [config/sources.yml](config/sources.yml)에서 관리합니다. 상세 수집 정책은 [docs/COLLECTORS.md](docs/COLLECTORS.md)를 참고하세요.
 
 ## 수동 관리
 

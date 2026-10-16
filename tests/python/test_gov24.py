@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from pipeline.collectors.gov24 import Gov24Collector
-from pipeline.config import SourceConfig, load_taxonomy
+from pipeline.config import SourceConfig
 from pipeline.http import FetchError, Response
 from pipeline.normalize import normalize
 
@@ -144,7 +144,7 @@ def test_support_type_prefers_the_detail_in_brackets(monkeypatch):
     kinds = {"A1": "현금", "A2": "현금(융자)", "A3": "현금(감면)", "A4": "서비스(의료)", "A5": "기타(상담)"}
     pages = {"serviceList": [[service(key, "경기도 오산시", 지원유형=kind) for key, kind in kinds.items()]], "supportConditions": [[]]}
 
-    items = {raw.source_post_id: normalize(raw, {}, NOW).primary_type for raw in collector(FakeClient(pages), monkeypatch).collect(NOW)}
+    items = {raw.source_post_id: normalize(raw, NOW).primary_type for raw in collector(FakeClient(pages), monkeypatch).collect(NOW)}
 
     assert items == {"A1": "cash", "A2": "loan", "A3": "reduction", "A4": "service", "A5": "other"}
 
@@ -153,7 +153,7 @@ def test_normalize_maps_category_and_type(monkeypatch):
     pages = {"serviceList": [[service("A1", "경기도 오산시", 서비스분야="임신·출산", 지원유형="현금(감면)")]], "supportConditions": [[]]}
     raw = collector(FakeClient(pages), monkeypatch).collect(NOW)[0]
 
-    item = normalize(raw, load_taxonomy(), NOW)
+    item = normalize(raw, NOW)
 
     assert item.domain == "pregnancy"
     assert item.primary_type == "reduction"
