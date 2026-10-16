@@ -29,7 +29,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: questboard-pages
+  group: osan-on-pages
   cancel-in-progress: false
 
 jobs:
@@ -110,7 +110,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "Generated data did not change."
           else
-            git config user.name "questboard-bot"
+            git config user.name "osan-on-bot"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git commit -m "data: refresh ${{ steps.mode.outputs.mode }} sources"
             # main may have moved while collecting; replay the data commit on top and retry.

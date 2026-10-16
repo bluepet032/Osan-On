@@ -1,7 +1,7 @@
 [project]
-name = "questboard-pipeline"
+name = "osan-on-pipeline"
 version = "1.0.0"
-description = "QuestBoard opportunity collection and normalization pipeline"
+description = "Osan-On benefit collection and normalization pipeline"
 requires-python = ">=3.12"
 dependencies = [
   "PyYAML>=6.0.2,<7",
@@ -17,7 +17,7 @@ dev = [
 ]
 
 [project.scripts]
-questboard = "pipeline.cli:main"
+osan-on = "pipeline.cli:main"
 
 [build-system]
 requires = ["setuptools>=75"]

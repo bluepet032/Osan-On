@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://questboard.local/schemas/opportunities.schema.json",
+  "$id": "https://osan-on.local/schemas/opportunities.schema.json",
   "title": "오산온 benefits payload",
   "type": "object",
   "required": ["schema_version", "generated_at", "items"],

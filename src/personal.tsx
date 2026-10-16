@@ -243,10 +243,10 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
       })
     }
     load()
-    window.addEventListener('questboard-data-refresh', load)
+    window.addEventListener('osanon-data-refresh', load)
     return () => {
       active = false
-      window.removeEventListener('questboard-data-refresh', load)
+      window.removeEventListener('osanon-data-refresh', load)
     }
   }, [userId, dataUserId, storeReady])
 
