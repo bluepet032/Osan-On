@@ -1,20 +1,20 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-16T23:10:55+09:00",
+  "generated_at": "2026-10-16T23:51:33+09:00",
   "items": [
     {
       "source_id": "gov24",
       "source_name": "정부24",
       "status": "success",
-      "started_at": "2026-10-16T23:10:56+09:00",
-      "finished_at": "2026-10-16T23:11:22+09:00",
+      "started_at": "2026-10-16T23:51:33+09:00",
+      "finished_at": "2026-10-16T23:52:23+09:00",
       "collected_count": 1279,
       "published_count": 1279,
       "review_count": 0,
       "new_count": 15,
       "changed_count": 0,
       "consecutive_failures": 0,
-      "last_success_at": "2026-10-16T23:10:55+09:00",
+      "last_success_at": "2026-10-16T23:51:33+09:00",
       "error": null,
       "previous_collected_count": 1279,
       "facet_coverage": {
@@ -28,21 +28,23 @@
       "source_id": "bokjiro",
       "source_name": "복지로",
       "status": "success",
-      "started_at": "2026-10-16T23:11:22+09:00",
-      "finished_at": "2026-10-16T23:13:16+09:00",
+      "started_at": "2026-10-16T23:52:23+09:00",
+      "finished_at": "2026-10-16T23:54:45+09:00",
       "collected_count": 103,
       "published_count": 103,
       "review_count": 0,
-      "new_count": 72,
+      "new_count": 0,
       "changed_count": 0,
       "consecutive_failures": 0,
-      "last_success_at": "2026-10-16T23:10:55+09:00",
+      "last_success_at": "2026-10-16T23:51:33+09:00",
       "error": null,
-      "previous_collected_count": null,
+      "previous_collected_count": 103,
       "facet_coverage": {
         "apply": 0.748
       },
-      "previous_facet_coverage": null
+      "previous_facet_coverage": {
+        "apply": 0.748
+      }
     }
   ]
 }
