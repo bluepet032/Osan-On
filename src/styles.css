@@ -69,7 +69,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .site-header { position: sticky; top: 0; z-index: 20; border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(16px); }
 .header-inner { width: min(1480px, calc(100% - 48px)); height: 72px; margin: 0 auto; display: flex; align-items: center; gap: 28px; }
 .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; }
-.brand > span { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; color: var(--on-brand); font-weight: 700; font-size: 18px; background: var(--brand); }
+.brand-mark { flex: none; width: 38px; height: 38px; }
 .brand div { display: flex; flex-direction: column; }
 .brand strong { font-size: 19px; font-weight: 700; color: var(--brand); letter-spacing: -.02em; }
 .brand small { color: var(--muted); font-size: 12px; margin-top: 1px; }

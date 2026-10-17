@@ -1,6 +1,7 @@
 import { HashRouter, Navigate, NavLink, Route, Routes } from 'react-router-dom'
 import { AccountProvider, useAccount } from './account'
 import { isAdmin } from './admin'
+import { BrandMark } from './components/BrandMark'
 import { AccountDialogs, AccountToolbar } from './AccountControls'
 import { ThemeControl } from './components/ThemeControl'
 import { NoticePage } from './pages/NoticePage'
@@ -35,7 +36,7 @@ function AppContent() {
     <>
       <header className="site-header">
         <div className="header-inner">
-          <NavLink className="brand" to="/"><span>오</span><div><strong>오산온</strong><small>오산시민 맞춤 혜택 찾기</small></div></NavLink>
+          <NavLink className="brand" to="/"><BrandMark /><div><strong>오산온</strong><small>오산시민 맞춤 혜택 찾기</small></div></NavLink>
           <nav aria-label="주 메뉴">
             <NavLink to="/" end>혜택</NavLink>
             <NavLink to="/weekly">주간 요약</NavLink>
