@@ -210,6 +210,22 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .detail-links { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; font-size: 14px; }
 .detail-links a { color: var(--brand); font-weight: 700; }
 .detail-links .button-link { padding: 10px 18px; border-radius: 999px; background: var(--brand); color: var(--on-brand); text-decoration: none; }
+.report-start { margin: 4px 0 0; font-size: 14px; }
+.report-start small { color: var(--muted); }
+.report-form { display: grid; gap: 10px; margin-top: 4px; padding: 14px; border: 1px solid var(--border); border-radius: 12px; font-size: 15px; }
+.report-form fieldset { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0; padding: 0; border: 0; }
+.report-form legend { margin-bottom: 6px; font-weight: 700; }
+.report-form fieldset label { display: inline-flex; align-items: center; gap: 6px; }
+.report-note { display: grid; gap: 6px; }
+.report-note textarea { min-height: 72px; padding: 10px; border: 1px solid var(--border); border-radius: 8px; font: inherit; color: inherit; background: transparent; }
+.report-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.admin-reports { margin: 16px 0; }
+.admin-reports h2 span { color: var(--muted); font-size: 15px; font-weight: 600; }
+.report-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.report-list li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; }
+.report-list li > div:first-child { display: grid; gap: 4px; min-width: 0; }
+.report-list span { color: var(--muted); font-size: 14px; }
+.report-list p { margin: 0; white-space: pre-line; }
 
 .message { display: flex; min-height: 170px; flex-direction: column; justify-content: center; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); text-align: center; }
 .message strong { color: var(--text); }

@@ -6,6 +6,7 @@ import type { Opportunity, PersonalState } from '../types'
 import { kindOf, SOURCE_KINDS, sourceTrust } from '../sourceTrust'
 import { dDayLabel, formatDate, isNew, isUpdated } from '../utils'
 import { DomainIcon } from './DomainIcon'
+import { ReportForm } from './ReportForm'
 
 interface Props {
   item: Opportunity
@@ -84,6 +85,7 @@ export function OpportunityRow({ item, personal, onToggle, defaultExpanded = fal
             {item.document_url && <a href={item.document_url} target="_blank" rel="noopener noreferrer">첨부파일</a>}
             <a href={`#/notice/${item.id}`}>공유용 링크</a>
           </div>
+          <ReportForm item={item} />
         </div>
       )}
       <div className="opportunity-foot">
