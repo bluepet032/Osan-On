@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useAccount } from '../account'
 import { favoritesCalendar } from '../calendar'
 import { usePersonalState, type SavedOpportunity } from '../personal'
+import type { Opportunity } from '../types'
 
 function downloadCalendar(favorites: SavedOpportunity[]) {
   const url = URL.createObjectURL(new Blob([favoritesCalendar(favorites)], { type: 'text/calendar;charset=utf-8' }))
@@ -14,6 +15,9 @@ function downloadCalendar(favorites: SavedOpportunity[]) {
   // Revoked on the next tick so the browser has started the download first.
   setTimeout(() => URL.revokeObjectURL(url), 0)
 }
+
+const deadlineText = (item: Opportunity) =>
+  item.date_kind === 'exact' ? (item.recruit_end || '일정 없음') : item.date_kind === 'ongoing' ? '상시 신청' : '정확한 날짜 없음'
 
 export function PersonalPage() {
   const account = useAccount()
@@ -74,12 +78,34 @@ export function PersonalPage() {
   }
 
   if (!account.user) {
+    const saved: SavedOpportunity[] = personal.localFavoriteItems.map(item => ({ id: item.id, item, remindersEnabled: true, resultDate: '', note: '' }))
+    // Favorites whose notice left the public list (closed and removed) cannot be shown.
+    const missing = personal.loading ? 0 : personal.localFavoriteCount - saved.length
     return (
       <main id="main-content" className="container personal-page">
-        <div className="page-heading"><div><p className="eyebrow">찜·알림·키워드</p><h1>내 혜택함</h1><p>찜한 혜택의 신청 일정, 내 조건에 맞는 새 혜택 알림, 맞춤 키워드를 한곳에서 관리합니다.</p></div></div>
+        <div className="page-heading"><div><p className="eyebrow">찜·알림·키워드</p><h1>내 혜택함</h1><p>로그인 없이 찜한 혜택은 이 브라우저에 저장됩니다.</p></div></div>
+        <section className="personal-section" aria-labelledby="favorites-title">
+          <div className="section-heading"><div><h2 id="favorites-title">찜한 혜택</h2><p>이 브라우저에 저장되어 있어 다른 기기에서는 보이지 않고, 브라우저 데이터를 지우면 함께 사라집니다.</p></div>
+            {saved.length > 0 && <button type="button" className="text-button" onClick={() => downloadCalendar(saved)}>캘린더로 내보내기(.ics)</button>}
+          </div>
+          {personal.loading ? <p role="status">찜한 혜택을 불러오는 중입니다…</p> : saved.length === 0 ? <p className="empty-personal">아직 찜한 혜택이 없습니다.</p> : (
+            <div className="saved-list">
+              {saved.map(favorite => (
+                <article className="saved-card" key={favorite.id}>
+                  <div className="saved-card-title">
+                    <div><a href={favorite.item.source_url} target="_blank" rel="noopener noreferrer">{favorite.item.title}</a><span>{favorite.item.organizer}</span></div>
+                    <button type="button" className="text-button muted" onClick={() => personal.toggle('favorites', favorite.id, favorite.item)}>찜 해제</button>
+                  </div>
+                  <small>신청 마감: {deadlineText(favorite.item)}</small>
+                </article>
+              ))}
+            </div>
+          )}
+          {missing > 0 && <p className="empty-personal">공개 목록에서 내려간 찜 {missing}개는 표시하지 않습니다.</p>}
+        </section>
         <section className="personal-section sign-in-prompt">
-          <h2>Google 로그인이 필요합니다</h2>
-          <p>혜택 검색과 맞춤 판정은 로그인 없이 이용할 수 있으며, 찜·일정 알림·새 혜택 알림·키워드는 계정에 저장됩니다.</p>
+          <h2>로그인하면 더 할 수 있어요</h2>
+          <p>Google 계정에 저장하면 다른 기기에서도 찜을 보고, 신청 일정 알림, 선정 발표일·메모, 맞춤 키워드와 새 혜택 알림을 쓸 수 있습니다. 로그인하면 이 브라우저의 찜을 계정에 합칠 수 있습니다.</p>
           <button type="button" className="primary-button" onClick={account.openLogin}>로그인 또는 가입</button>
         </section>
       </main>
@@ -142,7 +168,7 @@ export function PersonalPage() {
                   <label>선정 발표일 <input type="date" value={favoriteDrafts[favorite.id]?.resultDate ?? favorite.resultDate} onFocus={event => focusedDetails.current.set(favorite.id + ':resultDate', event.currentTarget.value)} onChange={event => changeFavoriteDetail(favorite.id, 'resultDate', event.currentTarget.value)} onBlur={event => saveFavoriteDetail(favorite.id, 'resultDate', event.currentTarget.value, favorite.resultDate)} /></label>
                   <label>메모 <textarea maxLength={500} value={favoriteDrafts[favorite.id]?.note ?? favorite.note} onFocus={event => focusedDetails.current.set(favorite.id + ':note', event.currentTarget.value)} onChange={event => changeFavoriteDetail(favorite.id, 'note', event.currentTarget.value)} onBlur={event => saveFavoriteDetail(favorite.id, 'note', event.currentTarget.value, favorite.note)} placeholder="선택 입력" /></label>
                 </div>
-                <small>신청 마감: {favorite.item.date_kind === 'exact' ? (favorite.item.recruit_end || '일정 없음') : favorite.item.date_kind === 'ongoing' ? '상시 신청' : '정확한 날짜 없음'}</small>
+                <small>신청 마감: {deadlineText(favorite.item)}</small>
               </article>
             ))}
           </div>

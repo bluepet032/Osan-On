@@ -14,13 +14,14 @@ const mocks = vi.hoisted(() => ({
   user: { uid: 'test-user' } as { uid: string } | null,
   profile: {} as Record<string, unknown>,
   since: '',
+  openLogin: vi.fn(),
 }))
 vi.mock('./profileContext', () => ({ useProfile: () => ({ profile: mocks.profile, since: mocks.since }) }))
 
 // Firebase arrives through the account context once loaded; here it is the mocked Firestore below.
 // One stable object, like the provider's state, so effects that depend on it do not re-run every render.
 const services = { db: {}, firestore }
-vi.mock('./account', () => ({ useAccount: () => ({ user: mocks.user, ready: true, openLogin: vi.fn(), firebase: services }) }))
+vi.mock('./account', () => ({ useAccount: () => ({ user: mocks.user, ready: true, openLogin: mocks.openLogin, firebase: services }) }))
 vi.mock('firebase/firestore', () => ({
   collection: (_db: unknown, ...path: string[]) => path.join('/'),
   doc: (_db: unknown, ...path: string[]) => path.join('/'),
@@ -51,7 +52,8 @@ const savedItem: Opportunity = {
 function Probe() {
   const personal = usePersonalState()
   return <>
-    <pre data-testid="personal">{JSON.stringify({ favorites: personal.favorites, favoriteIds: personal.state.favorites, read: personal.state.read, hidden: personal.state.hidden, loading: personal.loading })}</pre>
+    <pre data-testid="personal">{JSON.stringify({ favorites: personal.favorites, favoriteIds: personal.state.favorites, read: personal.state.read, hidden: personal.state.hidden, loading: personal.loading, localFavoriteIds: personal.localFavoriteItems.map(item => item.id) })}</pre>
+    <button onClick={() => personal.toggle('favorites', savedItem.id, savedItem)}>찜</button>
     <button onClick={() => personal.toggle('read', 'notice-1')}>원문 열기</button>
     <button onClick={() => personal.toggle('hidden', 'notice-1')}>숨김</button>
     <button onClick={() => {
@@ -73,6 +75,7 @@ describe('personal data connections', () => {
     mocks.transactions.mockReset()
     mocks.profile = {}
     mocks.since = ''
+    mocks.openLogin.mockReset()
     mocks.records = {
       favorites: [{ id: 'notice-1', data: () => ({ item: savedItem, remindersEnabled: true, note: '내 메모', resultDate: '2030-11-01' }) }],
       keywords: [], notifications: [],
@@ -187,6 +190,26 @@ describe('personal data connections', () => {
     } finally {
       Object.defineProperty(window, 'localStorage', original)
     }
+  })
+
+  it('keeps favorites in this browser without an account', () => {
+    mocks.user = null
+    render(<PersonalProvider><Probe /></PersonalProvider>)
+    fireEvent.click(screen.getByRole('button', { name: '찜' }))
+    expect(readState().favoriteIds).toEqual(['notice-1'])
+    expect(JSON.parse(localStorage.getItem('osanon.personal.v1')!).favorites).toEqual(['notice-1'])
+    expect(mocks.openLogin).not.toHaveBeenCalled()
+    expect(mocks.transactions).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: '찜' }))
+    expect(readState().favoriteIds).toEqual([])
+  })
+
+  it('loads the public list to show browser favorites while signed out', async () => {
+    mocks.user = null
+    localStorage.setItem('osanon.personal.v1', JSON.stringify({ version: 1, favorites: ['notice-1', 'gone'], read: [], hidden: [] }))
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ schema_version: 1, items: [savedItem] }) }))
+    render(<PersonalProvider><Probe /></PersonalProvider>)
+    await waitFor(() => expect(readState().localFavoriteIds).toEqual(['notice-1']))
   })
 
   it('opening a notice twice keeps it read while hide still toggles', () => {
