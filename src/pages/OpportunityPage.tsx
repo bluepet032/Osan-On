@@ -27,7 +27,7 @@ export function OpportunityPage({ dataset, title, description }: Props) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [reloadKey, setReloadKey] = useState(0)
-  const { profile, setProfile, synced, error: profileError } = useProfile()
+  const { profile, setProfile, saveState, retry, error: profileError } = useProfile()
   const [params, setParams] = useSearchParams()
   const { state: personal, toggle, restoreHidden } = usePersonalState()
 
@@ -58,6 +58,8 @@ export function OpportunityPage({ dataset, title, description }: Props) {
     setParams(copy, { replace: true })
   }
   const update = (key: string, next: string) => updateMany({ [key]: next })
+  // Clears search, tabs and detail filters but keeps the chosen 맞춤 판정 tab.
+  const resetFilters = () => setParams(value('match') ? { match: value('match') } : {}, { replace: true })
   const filters = {
     place: value('place', 'all'), domain: value('domain', DEFAULT_DOMAIN), type: value('type', 'all'), advanced: readAdvanced(params), quick: value('quick'), search: value('q'), status: value('status'),
     sort: value('sort', 'local') as Sort, page: Math.max(1, Number(value('page', '1')) || 1),
@@ -99,7 +101,7 @@ export function OpportunityPage({ dataset, title, description }: Props) {
         <div className="summary-cards" aria-label="혜택 요약"><span><strong>{summaryCount(item => item.jurisdiction === 'osan')}</strong> 오산시</span><span><strong>{summaryCount(item => item.jurisdiction === 'gyeonggi')}</strong> 경기도</span><span><strong>{summaryCount(isDeadlineSoon)}</strong> 마감임박</span></div>
       </div>
       {/* Remounts when the account copy arrives, so the card shows what was saved there. */}
-      {dataset === 'benefits' && <ProfileCard key={JSON.stringify(profile)} profile={profile} onChange={changeProfile} synced={synced} error={profileError}
+      {dataset === 'benefits' && <ProfileCard key={JSON.stringify(profile)} profile={profile} onChange={changeProfile} saveState={saveState} onRetry={retry} error={profileError}
         matchCount={loading ? undefined : payload.items.filter(item => !hidden.has(item.id) && judgements.get(item.id)?.verdict === 'eligible').length} />}
       <div className="match-tabs" role="group" aria-label="맞춤 판정">
         {MATCH_TABS.map(([match, label]) => <button key={match} className={`match-${match} ${filters.match === match ? 'active' : ''}`} aria-pressed={filters.match === match} onClick={() => update('match', match)}>{label} <span>{verdictCount(match)}</span></button>)}
@@ -110,11 +112,11 @@ export function OpportunityPage({ dataset, title, description }: Props) {
         <p><strong>{visible.length}개</strong> 혜택 · {payload.generated ? `${new Date(payload.generated).toLocaleString('ko-KR')} 갱신` : '갱신 정보 없음'} · 자동 갱신 {AUTO_REFRESH_LABEL}<button type="button" className="text-button" onClick={reload} disabled={loading}>다시 불러오기</button> · <a href={`${import.meta.env.BASE_URL}data/${filters.domain === 'all' ? 'feed' : `feed-${filters.domain}`}.xml`} title="이 분야의 새 혜택을 RSS로 구독">RSS</a></p>
         <label>정렬 <select aria-label="정렬" value={filters.sort} onChange={event => update('sort', event.target.value)}><option value="local">오산 우선</option><option value="deadline">마감임박순</option><option value="newest">신규등록순</option><option value="updated">최근갱신순</option></select></label>
       </div>
-      <p className="legend" aria-label="판정 안내"><span><b className="badge verdict verdict-eligible">가능성 높음</b> 입력한 조건이 정부24 지원조건을 모두 충족</span><span><b className="badge verdict verdict-check">확인 필요</b> 입력하지 않은 조건이 있거나 조건 정보 없음</span><span>최종 자격은 반드시 원문에서 확인하세요.</span></p>
+      <p className="legend" aria-label="판정 안내"><span><b className="badge verdict verdict-eligible">가능성 높음</b> 나이·성별·특수 대상 등 지원 대상을 정하는 조건이 입력과 일치</span><span><b className="badge verdict verdict-check">확인 필요</b> 입력하지 않은 조건이 있거나, 대상 자격을 원문에서 확인해야 함</span><span>최종 자격은 반드시 원문에서 확인하세요.</span></p>
       {fuzzy && visible.length > 0 && <p className="search-hint" role="status">‘{filters.search}’와 정확히 일치하는 혜택이 없어 철자가 비슷한 혜택을 보여 드립니다.</p>}
       {loading && <div className="message" role="status">혜택 데이터를 불러오는 중입니다…</div>}
-      {error && <div className="message error" role="alert"><strong>데이터 로드 실패</strong><span>{error}</span><small>먼저 <code>python -m pipeline.cli</code>를 실행해 데이터를 생성하세요.</small></div>}
-      {!loading && !error && pageItems.length === 0 && <div className="message"><strong>조건에 맞는 혜택이 없습니다.</strong><span>{filters.match === 'eligible' ? "'확인 필요' 탭에서 조건을 더 입력하면 해당할 수 있는 혜택이 보입니다." : '필터를 줄이거나 수집 파이프라인을 실행해 보세요.'}</span></div>}
+      {error && <div className="message error" role="alert"><strong>데이터 로드 실패</strong><span>{error}</span><small>잠시 후 다시 시도해 주세요.</small><button type="button" className="text-button" onClick={reload}>다시 시도</button></div>}
+      {!loading && !error && pageItems.length === 0 && <div className="message"><strong>조건에 맞는 혜택이 없습니다.</strong><span>{filters.match === 'eligible' ? "'확인 필요' 탭에서 조건을 더 입력하면 해당할 수 있는 혜택이 보입니다." : '검색어나 필터를 줄여 보세요.'}</span><button type="button" className="text-button" onClick={resetFilters}>필터 초기화</button></div>}
       <section className="opportunity-list" aria-label="혜택 목록">{pageItems.map(item => <OpportunityRow key={item.id} item={item} personal={personal} onToggle={toggle} judgement={judgements.get(item.id)} />)}</section>
       {totalPages > 1 && <nav className="pagination" aria-label="페이지 이동"><button disabled={page <= 1} onClick={() => update('page', String(page - 1))}>이전</button><span>{page} / {totalPages}</span><button disabled={page >= totalPages} onClick={() => update('page', String(page + 1))}>다음</button></nav>}
       {personal.hidden.length > 0 && <button className="restore-hidden" onClick={restoreHidden}>숨긴 혜택 {personal.hidden.length}개 모두 복원</button>}

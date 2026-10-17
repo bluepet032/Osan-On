@@ -14,6 +14,20 @@ describe('ProfileCard', () => {
     expect(onChange).toHaveBeenCalledWith({ gender: 'female', age: 28 })
   })
 
+  it('never promises an account copy that failed to save, and offers a retry', () => {
+    const onRetry = vi.fn()
+    const basics = { gender: 'female', age: 28 } as const
+    const { rerender } = render(<ProfileCard profile={basics} onChange={vi.fn()} saveState="saved" />)
+    expect(screen.getByText(/다른 기기에서도 이어집니다/)).toBeInTheDocument()
+    rerender(<ProfileCard profile={basics} onChange={vi.fn()} saveState="syncing" />)
+    expect(screen.getByText(/계정과 동기화하는 중/)).toBeInTheDocument()
+    rerender(<ProfileCard profile={basics} onChange={vi.fn()} saveState="failed" error="맞춤 조건을 계정에 저장하지 못했습니다." onRetry={onRetry} />)
+    expect(screen.queryByText(/다른 기기에서도 이어집니다/)).toBeNull()
+    expect(screen.getByText(/이 브라우저에는 저장되어 있습니다/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '다시 시도' }))
+    expect(onRetry).toHaveBeenCalled()
+  })
+
   it('does not submit without both answers', () => {
     const onChange = vi.fn()
     render(<ProfileCard profile={{}} onChange={onChange} />)

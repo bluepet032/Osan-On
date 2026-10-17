@@ -36,12 +36,13 @@ export const HOUSEHOLD_OPTIONS: Record<string, string> = {
 
 export const hasBasics = (profile: Profile) => Boolean(profile.gender) && profile.age != null
 
-interface Group { prefix: string; none?: string; answer: (profile: Profile) => string[] | undefined; labels: Record<string, string> }
+/** confirms: false for a means test, which screens applicants without saying who the benefit is for. */
+interface Group { prefix: string; none?: string; answer: (profile: Profile) => string[] | undefined; labels: Record<string, string>; confirms?: false }
 
 // Within a group any listed code qualifies; every constrained group must qualify.
 // shortcut: JA12xx (소상공인 업종) is ignored; upgrade if business users are added.
 const GROUPS: Group[] = [
-  { prefix: 'JA020', answer: profile => profile.income && [profile.income], labels: INCOME_OPTIONS },
+  { prefix: 'JA020', answer: profile => profile.income && [profile.income], labels: INCOME_OPTIONS, confirms: false },
   { prefix: 'JA03', none: 'JA0322', answer: profile => profile.traits, labels: TRAIT_OPTIONS },
   { prefix: 'JA04', none: 'JA0410', answer: profile => profile.household, labels: HOUSEHOLD_OPTIONS },
   { prefix: 'JA110', answer: profile => profile.traits, labels: TRAIT_OPTIONS },
@@ -72,16 +73,42 @@ export function textAgeRanges(text: string, title = ''): { label: string; min: n
   return ranges.map(range => ({ ...range, label: range.label.replace(/\s+/g, ' ').replace(/세\s*(이상|초과|이하|미만)/g, '세 $1').trim() }))
 }
 
+// 정부24 puts 19세 이상 or 19~64세 on nearly everything; only a life stage (청년 15~39 and 중장년 40~64 span
+// about 25 years), a child range or a senior one names who the benefit is for.
+const targetsAge = (min: number | null, max: number | null) => max != null ? max - (min ?? 0) <= 25 : (min ?? 0) >= 40
+
+// "국민 누구나", "전 국민", "모든 시민": the text opens the benefit to anyone, unless it then lists requirements.
+const EVERYONE_RE = /(?:국민|시민|도민|주민|이면)\s*(?:이면\s*)?누구(?:나|든지)|(?:^|○\s*|\()누구나|전\s?국민|모든\s?(?:국민|시민|도민)|(?:^|○\s*)제한\s?없음|별도\s*(?:신청\s*)?자격\s*(?:제한\s*)?없음/m
+const REQUIREMENT_RE = /충족|요건/
+// Statuses the profile asks nothing about: when the text names one, only the notice can settle it.
+// 수급자격 is the right to a benefit, not a status.
+const STATUS_RE = /피해(?:자|노인|아동|장애인|청년)|학대피해|유족|유가족|수급자(?!격)|수급권자|차상위|퇴소|입소|보호시설|노숙|난민|중독자|의사상자|경력단절|채무자|복무|장병|전역|군인/g
+// A status in an exclusion, exemption, priority or age-extension clause, or in a footnote (※, *), is not the target.
+const ASIDE_RE = /^\s*[※*]|제외|면제|우선|가점|연장|가산/
+// Clauses start at a bullet or footnote mark, which the lookahead keeps for ASIDE_RE.
+const CLAUSE_RE = /(?=[\n○/※*①-⑳])|\s-\s/
+
+/** Status words the text (or title) makes a requirement, in order of appearance. */
+export function statusWords(text: string, title = ''): string[] {
+  const clauses = [title, ...text.split(CLAUSE_RE)].filter(clause => clause && !ASIDE_RE.test(clause))
+  return [...new Set(clauses.flatMap(clause => clause.match(STATUS_RE) ?? []))]
+}
+
 export function judge(item: { conditions?: Conditions | null; eligibility?: string | null; title?: string }, profile: Profile): { verdict: Verdict; reasons: Reason[] } {
   const conditions = item.conditions
   if (!conditions) return { verdict: 'check', reasons: [{ label: '지원조건 정보 없음, 원문에서 확인하세요', ok: null }] }
   const reasons: Reason[] = []
   const codes = new Set(conditions.codes)
+  const text = item.eligibility ?? ''
+  // Whether a condition that narrows the target (not a default) was met; without one the codes say nothing about who qualifies.
+  let confirmed = false
 
   const genders = (['JA0101', 'JA0102'] as const).filter(code => codes.has(code))
   if (genders.length === 1) {
     const wanted = genders[0] === 'JA0101' ? 'male' : 'female'
-    reasons.push(answered(wanted === 'male' ? '남성 대상' : '여성 대상', profile.gender ? profile.gender === wanted : null))
+    const ok = profile.gender ? profile.gender === wanted : null
+    reasons.push(answered(wanted === 'male' ? '남성 대상' : '여성 대상', ok))
+    confirmed ||= ok === true
   }
 
   const min = conditions.age_min
@@ -90,12 +117,20 @@ export function judge(item: { conditions?: Conditions | null; eligibility?: stri
   const age = profile.age
   if (min != null || max != null) {
     const label = conditions.life ? `${conditions.life.join('·')}(${ageLabel(min, max)})` : ageLabel(min, max)
-    reasons.push(answered(label, age == null ? null : (min == null || age >= min) && (max == null || age <= max)))
+    const ok = age == null ? null : (min == null || age >= min) && (max == null || age <= max)
+    reasons.push(answered(label, ok))
+    confirmed ||= ok === true && targetsAge(min, max)
   } else if (age != null) {
     // Without a coded age, an age outside everything the text mentions needs a look (the text may describe a child).
-    const ranges = textAgeRanges(item.eligibility ?? '', item.title)
-    if (ranges.length && !ranges.some(range => (range.min == null || age >= range.min) && (range.max == null || age <= range.max))) {
+    const ranges = textAgeRanges(text, item.title)
+    const fits = ranges.filter(range => (range.min == null || age >= range.min) && (range.max == null || age <= range.max))
+    if (ranges.length && !fits.length) {
       reasons.push({ label: `원문의 나이 조건 확인(${[...new Set(ranges.map(range => range.label))].join(', ')})`, ok: null })
+    }
+    const target = fits.find(range => targetsAge(range.min, range.max))
+    if (target) {
+      reasons.push({ label: `원문 나이 ${target.label}`, ok: true })
+      confirmed = true
     }
   }
 
@@ -105,13 +140,25 @@ export function judge(item: { conditions?: Conditions | null; eligibility?: stri
     // Every option checked (e.g. all five income bands) means the group does not restrict anyone.
     if (!wanted.length || wanted.length === options.length || (group.none && codes.has(group.none))) continue
     const answer = group.answer(profile)
-    reasons.push(answered(wanted.map(code => group.labels[code]).join('·') + ' 대상', answer ? wanted.some(code => answer.includes(code)) : null))
+    const ok = answer ? wanted.some(code => answer.includes(code)) : null
+    reasons.push(answered(wanted.map(code => group.labels[code]).join('·') + ' 대상', ok))
+    confirmed ||= ok === true && group.confirms !== false
+  }
+
+  if (EVERYONE_RE.test(text) && !REQUIREMENT_RE.test(text)) {
+    reasons.push({ label: '원문상 누구나 대상', ok: true })
+    confirmed = true
   }
 
   // An individual's profile cannot say whether a benefit for businesses or institutions (JA2xxx) fits them.
   if (conditions.codes.some(code => code.startsWith('JA2'))) reasons.push({ label: '사업자·기관 대상 포함', ok: null })
-  // 복지로 life stages are a category, not the full eligibility, so they never make a sure match.
+  // 복지로 life stages and target categories are coarse, not the full eligibility, so they never make a sure match.
   if (conditions.life) reasons.push({ label: '세부 대상은 원문 확인', ok: null })
+  if (conditions.inferred) reasons.push({ label: `${conditions.inferred.join('·')} 기준은 원문 확인`, ok: null })
+  const statuses = statusWords(text, item.title)
+  if (statuses.length) reasons.push({ label: `원문 자격 확인: ${statuses.join(', ')}`, ok: null })
+
+  if (!confirmed && reasons.every(reason => reason.ok === true)) reasons.push({ label: '지원 대상 자격은 원문 확인', ok: null })
 
   const verdict: Verdict = reasons.some(reason => reason.ok === false) ? 'ineligible'
     : reasons.some(reason => reason.ok === null) ? 'check' : 'eligible'

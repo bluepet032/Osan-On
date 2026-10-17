@@ -42,6 +42,33 @@ describe('오산온', () => {
     expect(JSON.parse(localStorage.getItem('osanon.profile')!)).toEqual({ gender: 'female', age: 28 })
   })
 
+  it('offers a retry instead of developer steps when the data fails to load', async () => {
+    const fetch = vi.fn().mockRejectedValueOnce(new Error('Failed to fetch')).mockResolvedValue({ ok: true, json: async () => payload })
+    vi.stubGlobal('fetch', fetch)
+    render(<App />)
+    const alert = await screen.findByRole('alert')
+    expect(alert).not.toHaveTextContent('pipeline')
+    fireEvent.click(screen.getByRole('button', { name: '다시 시도' }))
+    await waitFor(() => expect(screen.queryByRole('alert')).toBeNull())
+    expect(screen.getByText('조건에 맞는 혜택이 없습니다.')).toBeInTheDocument()
+  })
+
+  it('offers to reset the filters when nothing matches them', async () => {
+    const item = {
+      id: 'one', title: '혜택 one', source_name: '정부24', source_url: 'https://www.gov.kr/one', organizer: '경기도 오산시',
+      summary: '요약', primary_type: 'cash', field_tags: [], audience_tags: [], status: 'ongoing', date_kind: 'ongoing',
+      relevance: { score: 100, reasons: [], decision: 'publish' }, first_seen_at: '2026-07-01T00:00:00+09:00', last_seen_at: '2026-07-30T00:00:00+09:00',
+      sources: [], jurisdiction: 'osan', conditions: null,
+    }
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url: string) => ({ ok: true, json: async () => url.includes('active') ? { ...payload, items: [item] } : payload })))
+    window.location.hash = '#/?q=없는검색어&type=loan'
+    render(<App />)
+    const empty = await screen.findByText('조건에 맞는 혜택이 없습니다.')
+    expect(empty.parentElement).not.toHaveTextContent('파이프라인')
+    fireEvent.click(screen.getByRole('button', { name: '필터 초기화' }))
+    expect(await screen.findByRole('link', { name: '혜택 one' })).toBeInTheDocument()
+  })
+
   it('keeps the collection status for admins only', async () => {
     render(<App />)
     expect(screen.queryByRole('link', { name: '수집 상태' })).toBeNull()

@@ -1,8 +1,17 @@
 import { useState, type FormEvent } from 'react'
 import { IconGenderFemale, IconGenderMale } from '@tabler/icons-react'
 import { hasBasics, HOUSEHOLD_OPTIONS, INCOME_OPTIONS, TRAIT_OPTIONS, type IncomeCode, type Profile } from '../eligibility'
+import type { SaveState } from '../profileContext'
 
-interface Props { profile: Profile; onChange: (profile: Profile) => void; synced?: boolean; error?: string; matchCount?: number }
+interface Props { profile: Profile; onChange: (profile: Profile) => void; saveState?: SaveState; onRetry?: () => void; error?: string; matchCount?: number }
+
+// The note follows what actually happened to the account copy, so a failed save never reads as saved.
+const STORAGE_NOTES: Record<SaveState, string> = {
+  local: '입력한 정보는 이 브라우저에만 저장됩니다. 로그인하면 계정에 저장해 다른 기기에서도 쓸 수 있습니다.',
+  syncing: '계정과 동기화하는 중입니다…',
+  saved: '로그인한 계정에 저장되어 다른 기기에서도 이어집니다. 본인만 읽을 수 있습니다.',
+  failed: '이 브라우저에는 저장되어 있습니다.',
+}
 
 const TRAIT_GROUPS: [string, string[]][] = [
   ['임신·출산', ['JA0301', 'JA0302', 'JA0303']],
@@ -12,7 +21,7 @@ const TRAIT_GROUPS: [string, string[]][] = [
 
 const toggle = (list: string[], code: string) => list.includes(code) ? list.filter(value => value !== code) : [...list, code]
 
-export function ProfileCard({ profile, onChange, synced = false, error = '', matchCount }: Props) {
+export function ProfileCard({ profile, onChange, saveState = 'local', onRetry, error = '', matchCount }: Props) {
   const [editing, setEditing] = useState(!hasBasics(profile))
   const [details, setDetails] = useState(false)
   const [gender, setGender] = useState(profile.gender)
@@ -39,9 +48,10 @@ export function ProfileCard({ profile, onChange, synced = false, error = '', mat
     <label key={code} className="profile-check"><input type="checkbox" checked={list.includes(code)} onChange={() => set(toggle(list, code))} />{label}</label>
   )
 
-  const storageNote = synced
-    ? '로그인한 계정에 저장되어 다른 기기에서도 이어집니다. 본인만 읽을 수 있습니다.'
-    : '입력한 정보는 이 브라우저에만 저장됩니다. 로그인하면 계정에 저장해 다른 기기에서도 쓸 수 있습니다.'
+  const storage = <>
+    <small>{STORAGE_NOTES[saveState]}</small>
+    {error && <p className="message-inline error" role="alert">{error}{saveState === 'failed' && onRetry && <button type="button" className="text-button" onClick={onRetry}>다시 시도</button>}</p>}
+  </>
 
   if (editing) {
     return (
@@ -55,8 +65,7 @@ export function ProfileCard({ profile, onChange, synced = false, error = '', mat
           <label className="profile-age">만 나이<input type="number" inputMode="numeric" min={0} max={120} value={age} onChange={event => setAge(event.target.value)} /></label>
           <button type="submit" className="primary-button" disabled={!gender || !validAge}>맞춤 혜택 보기</button>
         </div>
-        <small>{storageNote}</small>
-        {error && <p className="message-inline error" role="alert">{error}</p>}
+        {storage}
       </form>
     )
   }
@@ -71,8 +80,7 @@ export function ProfileCard({ profile, onChange, synced = false, error = '', mat
         <button type="button" className="text-button" onClick={() => setEditing(true)}>수정</button>
         <button type="button" className="account-button" onClick={() => setDetails(value => !value)} aria-expanded={details}>더 정확하게</button>
       </div>
-      <small>{storageNote}</small>
-      {error && <p className="message-inline error" role="alert">{error}</p>}
+      {storage}
       {details && (
         <form className="profile-details" onSubmit={submitDetails}>
           <label className="profile-income">소득 수준

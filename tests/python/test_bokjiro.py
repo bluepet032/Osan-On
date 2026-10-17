@@ -126,6 +126,12 @@ def test_targets_become_conditions_only_within_one_group(targets, expected):
     assert (result and result["codes"]) == expected
 
 
+def test_income_guessed_from_a_category_is_marked_inferred():
+    # 저소득 has no single threshold, so src/eligibility.ts must not call the band a sure match.
+    assert conditions_of("저소득") == {"codes": ["JA0201", "JA0202", "JA0203"], "age_min": None, "age_max": None, "inferred": ["저소득"]}
+    assert "inferred" not in conditions_of("장애인")
+
+
 @pytest.mark.parametrize(("stages", "expected"), [
     ("청년", ([], 19, 39)),
     ("노년, 청년, 중장년", ([], 19, None)),
