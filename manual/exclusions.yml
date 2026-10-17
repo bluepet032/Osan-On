@@ -1,4 +1,6 @@
 schema_version: 1
 ids: []
-source_urls: []
+# 정부24 test placeholder "온라인 신청 시연 테스트(운영)" (행정안전부 행정서비스통합추진단), found 2026-10-17.
+source_urls:
+  - https://www.gov.kr/portal/rcvfvrSvc/dtlEx/174100000034
 

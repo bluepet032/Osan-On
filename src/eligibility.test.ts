@@ -181,6 +181,17 @@ describe('judge: core eligibility must be confirmed', () => {
     expect(judge(gov24('학대피해노인 및 그 가족', 65, 120), senior).reasons).toContainEqual({ label: '원문 자격 확인: 학대피해', ok: null })
   })
 
+  it('asks for a check when a national service names another region in its title', () => {
+    const national = (title: string) => ({ ...gov24('국민 누구나', 19), title, jurisdiction: 'national' as const })
+    expect(judge(national('발전소 시설 견학(울산)'), woman30).reasons).toContainEqual({ label: '다른 지역 대상(울산)', ok: null })
+    expect(judge(national('의료 서비스(대구보훈병원)'), woman30).verdict).toBe('check')
+    // Gyeonggi, nationwide or non-place words in brackets leave it alone.
+    expect(judge(national('국민내일배움카드(전국)'), woman30).verdict).toBe('eligible')
+    expect(judge(national('청년 월세(경기)'), woman30).verdict).toBe('eligible')
+    expect(judge(national('무료 소송대리 서비스(예술인)'), woman30).reasons.some(reason => reason.label.startsWith('다른 지역'))).toBe(false)
+    expect(judge({ ...national('발전소 시설 견학(울산)'), jurisdiction: 'osan' as const }, woman30).verdict).toBe('eligible')
+  })
+
   it('never calls an income band guessed from a 복지로 category a sure match', () => {
     // Real 복지로 record: 저소득 became 중위소득 100% 이하, but the text wants 수급자·차상위.
     const meals = { conditions: { codes: ['JA0201', 'JA0202', 'JA0203'], age_min: null, age_max: null, inferred: ['저소득'] }, eligibility: '60세이상 거동이 불편한 저소득 재가노인' }

@@ -102,3 +102,24 @@ items:
 
     assert item.jurisdiction == "osan"
     assert item.conditions == {"codes": ["JA0412"], "age_min": 19, "age_max": 39}
+
+
+def test_override_corrects_application_wording(tmp_path: Path):
+    # A report that the period is wrong is fixed by patching the wording shown on the page.
+    now = datetime(2026, 7, 30, tzinfo=ZoneInfo("Asia/Seoul"))
+    (tmp_path / "overrides.yml").write_text("items:\n  - source_url: https://official.example/post/1\n    apply_period: 매년 3월·9월 모집\n", encoding="utf-8")
+
+    [result] = apply_overrides([merged_item(now)], tmp_path, now)
+
+    assert result.apply_period == "매년 3월·9월 모집"
+
+
+def test_the_published_exclusions_drop_the_gov24_test_service():
+    # 정부24 lists "온라인 신청 시연 테스트(운영)", a 행정안전부 placeholder, among real services.
+    now = datetime(2026, 10, 17, tzinfo=ZoneInfo("Asia/Seoul"))
+    test_service = normalize(RawOpportunity(
+        source_id="gov24", source_name="정부24", source_url="https://www.gov.kr/portal/rcvfvrSvc/dtlEx/174100000034",
+        title="온라인 신청 시연 테스트(운영)", date_kind="ongoing",
+    ), now)
+
+    assert apply_overrides([test_service], now=now) == []
