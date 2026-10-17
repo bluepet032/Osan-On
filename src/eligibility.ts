@@ -90,7 +90,8 @@ const CLAUSE_RE = /(?=[\n○/※*①-⑳])|\s-\s/
 
 // A national service whose title names another region, such as "발전소 시설 견학(울산)" or
 // "의료 서비스(대구보훈병원)", is for people there; Gyeonggi places are 경기도·오산시 items already.
-const OTHER_REGION_RE = /\((서울|부산|대구|인천|광주|대전|울산|세종|강원|충북|충남|충청|전북|전남|전라|경북|경남|경상|제주|당진|동해|서천|보령|태안|삼척|하동|여수|영흥)/
+// The place may follow a prefix inside the brackets: "(신서천)", "(서인천발전본부)".
+const OTHER_REGION_RE = /\([^)]*?(서울|부산|대구|인천|광주|대전|울산|세종|강원|충북|충남|충청|전북|전남|전라|경북|경남|경상|제주|당진|동해|서천|보령|태안|삼척|하동|여수|영흥)/
 
 /** Status words the text (or title) makes a requirement, in order of appearance. */
 export function statusWords(text: string, title = ''): string[] {

@@ -112,6 +112,31 @@ def test_override_corrects_application_wording(tmp_path: Path):
     [result] = apply_overrides([merged_item(now)], tmp_path, now)
 
     assert result.apply_period == "매년 3월·9월 모집"
+    # The old August deadline no longer holds, so it must not keep the D-day or close the item.
+    assert (result.recruit_start, result.recruit_end, result.date_kind, result.status) == (None, None, "inquiry", "unknown")
+
+
+def test_override_of_ongoing_wording_reads_as_ongoing(tmp_path: Path):
+    now = datetime(2026, 7, 30, tzinfo=ZoneInfo("Asia/Seoul"))
+    patch = "items:\n  - source_url: https://official.example/post/1\n    apply_period: 상시 접수\n"
+    (tmp_path / "overrides.yml").write_text(patch, encoding="utf-8")
+
+    [result] = apply_overrides([merged_item(now)], tmp_path, now)
+
+    assert (result.recruit_end, result.date_kind, result.status) == (None, "ongoing", "ongoing")
+
+
+def test_override_keeps_dates_patched_with_the_wording(tmp_path: Path):
+    now = datetime(2026, 7, 30, tzinfo=ZoneInfo("Asia/Seoul"))
+    patch = (
+        "items:\n  - source_url: https://official.example/post/1\n    apply_period: 2026.9.1 ~ 2026.9.30\n"
+        "    recruit_end: '2026-09-30'\n    date_kind: exact\n"
+    )
+    (tmp_path / "overrides.yml").write_text(patch, encoding="utf-8")
+
+    [result] = apply_overrides([merged_item(now)], tmp_path, now)
+
+    assert (result.recruit_end, result.date_kind, result.status) == ("2026-09-30", "exact", "open")
 
 
 def test_the_published_exclusions_drop_the_gov24_test_service():

@@ -185,6 +185,9 @@ describe('judge: core eligibility must be confirmed', () => {
     const national = (title: string) => ({ ...gov24('국민 누구나', 19), title, jurisdiction: 'national' as const })
     expect(judge(national('발전소 시설 견학(울산)'), woman30).reasons).toContainEqual({ label: '다른 지역 대상(울산)', ok: null })
     expect(judge(national('의료 서비스(대구보훈병원)'), woman30).verdict).toBe('check')
+    // The place can come after a prefix inside the brackets.
+    expect(judge(national('발전소 주변지역 장학금 지원(신서천)'), woman30).reasons).toContainEqual({ label: '다른 지역 대상(서천)', ok: null })
+    expect(judge(national('발전소 주변지역 육영사업 지원(서인천발전본부)'), woman30).verdict).toBe('check')
     // Gyeonggi, nationwide or non-place words in brackets leave it alone.
     expect(judge(national('국민내일배움카드(전국)'), woman30).verdict).toBe('eligible')
     expect(judge(national('청년 월세(경기)'), woman30).verdict).toBe('eligible')
