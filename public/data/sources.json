@@ -1,20 +1,20 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-17T06:04:19+09:00",
+  "generated_at": "2026-10-17T15:14:18+09:00",
   "items": [
     {
       "source_id": "gov24",
       "source_name": "정부24",
       "status": "success",
-      "started_at": "2026-10-17T06:04:19+09:00",
-      "finished_at": "2026-10-17T06:05:02+09:00",
+      "started_at": "2026-10-17T15:14:18+09:00",
+      "finished_at": "2026-10-17T15:15:22+09:00",
       "collected_count": 1279,
       "published_count": 1279,
       "review_count": 0,
       "new_count": 16,
-      "changed_count": 3,
+      "changed_count": 0,
       "consecutive_failures": 0,
-      "last_success_at": "2026-10-17T06:04:19+09:00",
+      "last_success_at": "2026-10-17T15:14:18+09:00",
       "error": null,
       "previous_collected_count": 1279,
       "facet_coverage": {
@@ -27,19 +27,21 @@
     {
       "source_id": "bokjiro",
       "source_name": "복지로",
-      "status": "failed",
-      "started_at": "2026-10-17T06:05:02+09:00",
-      "finished_at": "2026-10-17T06:06:04+09:00",
-      "collected_count": 0,
-      "published_count": 0,
+      "status": "success",
+      "started_at": "2026-10-17T15:15:22+09:00",
+      "finished_at": "2026-10-17T15:17:16+09:00",
+      "collected_count": 87,
+      "published_count": 87,
       "review_count": 0,
       "new_count": 0,
-      "changed_count": 0,
-      "consecutive_failures": 1,
-      "last_success_at": "2026-10-17T02:19:06+09:00",
-      "error": "요청 실패 (https://apis.data.go.kr/B554287/LocalGovernmentWelfareInformations/LcgvWelfarelist?serviceKey=***&pageNo=1&numOfRows=500): <urlopen error timed out>",
+      "changed_count": 2,
+      "consecutive_failures": 0,
+      "last_success_at": "2026-10-17T15:14:18+09:00",
+      "error": null,
       "previous_collected_count": 87,
-      "facet_coverage": null,
+      "facet_coverage": {
+        "apply": 0.736
+      },
       "previous_facet_coverage": {
         "apply": 0.736
       }
