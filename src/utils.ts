@@ -25,7 +25,8 @@ export function dDayLabel(item: Opportunity) {
 
 export function formatDate(value?: string | null) {
   if (!value) return '미정'
-  return new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(`${value.slice(0, 10)}T00:00:00+09:00`))
+  // The date is a KST calendar day, so format it in KST rather than the browser's zone.
+  return new Intl.DateTimeFormat('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'Asia/Seoul' }).format(new Date(`${value.slice(0, 10)}T00:00:00+09:00`))
 }
 
 export function matchesQuickTag(item: Opportunity, tag: string) {

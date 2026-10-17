@@ -100,6 +100,7 @@ def normalize(raw: RawOpportunity, now: datetime) -> Opportunity:
         event_start=raw.event_start,
         event_end=raw.event_end,
         date_kind=raw.date_kind,
+        apply_period=raw.apply_period,
         d_day=d_day,
         eligibility=raw.eligibility[:500],
         benefits=raw.benefits[:500],

@@ -17,6 +17,11 @@ interface Props {
 
 const VERDICT_LABELS: Record<Verdict, string> = { eligible: '가능성 높음', check: '확인 필요', ineligible: '해당 없음' }
 // The verdict is a likelihood, so the boxes explain conditions without promising the benefit.
+// "상시신청" already reads as the 상시 label; a dated range already shows as dates.
+const PLAIN_ONGOING_RE = /^\s*(상시|수시|연중)\s*(신청|접수)?\s*$/
+const periodNote = (item: Opportunity) =>
+  item.apply_period && item.date_kind !== 'exact' && !PLAIN_ONGOING_RE.test(item.apply_period) ? item.apply_period : ''
+
 const REASON_BOXES: [Reason['ok'], string, string][] = [
   [true, 'ok', '이래서 해당될 수 있어요'],
   [null, 'unknown', '이건 확인해 보세요'],
@@ -67,6 +72,7 @@ export function OpportunityRow({ item, personal, onToggle, defaultExpanded = fal
           <dl>
             <div><dt>지원 대상</dt><dd className="pre-line">{item.eligibility || '원문 확인 필요'}</dd></div>
             <div><dt>지원 내용</dt><dd className="pre-line">{item.benefits || '원문 확인 필요'}</dd></div>
+            <div><dt>신청 기간</dt><dd className="pre-line">{item.apply_period || ((item.recruit_start || item.recruit_end) ? `${formatDate(item.recruit_start)} ~ ${formatDate(item.recruit_end)}` : '원문 확인 필요')}</dd></div>
             <div><dt>신청·문의</dt><dd>{item.location || '원문 확인 필요'}</dd></div>
             <div><dt>소관 기관</dt><dd>{item.organizer}{item.jurisdiction && ` (${JURISDICTION_LABELS[item.jurisdiction]})`}</dd></div>
             <div><dt>출처</dt><dd>{item.sources.map(source => `${source.source_name}(${SOURCE_KINDS[kindOf(source)].label})`).join(', ')}</dd></div>
@@ -84,6 +90,7 @@ export function OpportunityRow({ item, personal, onToggle, defaultExpanded = fal
         <div className="date-cell">
           <strong>{dDayLabel(item)}</strong>
           {(item.recruit_start || item.recruit_end) && <span>{formatDate(item.recruit_start)} ~ {formatDate(item.recruit_end)}</span>}
+          {periodNote(item) && <span className="period-note" title={item.apply_period}>{periodNote(item)}</span>}
         </div>
         {/* 상시·미정 already read as the date label, so the status pill would only repeat it. */}
         {item.status !== 'ongoing' && item.status !== 'unknown' && <span className={`status status-${item.status}`}>{STATUS_LABELS[item.status]}</span>}

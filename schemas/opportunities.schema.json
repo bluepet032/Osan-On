@@ -21,6 +21,7 @@
           "summary": { "type": "string", "minLength": 60, "maxLength": 180 },
           "status": { "enum": ["upcoming", "open", "urgent", "today", "closed", "ongoing", "unknown"] },
           "date_kind": { "enum": ["exact", "ongoing", "first_come", "budget", "unknown", "inquiry"] },
+          "apply_period": { "type": "string", "description": "출처의 신청기간 원문(날짜로 해석되지 않아도 보존)" },
           "primary_type": { "enum": ["cash", "in_kind", "service", "voucher", "loan", "reduction", "other"], "description": "지원 형태" },
           "domain": { "enum": ["living", "housing", "childcare", "jobs", "health", "admin", "pregnancy", "care", "culture", "agriculture"], "description": "혜택 분야 탭(정부24 서비스분야)" },
           "jurisdiction": { "enum": ["osan", "gyeonggi", "national"], "description": "소관: 오산시, 경기도, 중앙행정기관" },

@@ -123,6 +123,8 @@ def test_application_period(monkeypatch):
 
     assert items["A1"].date_kind == "ongoing"
     assert (items["A2"].recruit_end, items["A2"].date_kind) == ("2026-12-31", "exact")
+    # The text is kept whether or not it reads as dates, so "예산 소진 시까지" still reaches the page.
+    assert [items[key].apply_period for key in ("A1", "A2", "A3")] == ["상시신청", "2026.03.02 ~ 2026.12.31", "예산 소진 시까지"]
     assert items["A3"].date_kind == "inquiry"
 
 

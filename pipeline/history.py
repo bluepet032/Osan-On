@@ -15,12 +15,24 @@ IMPORTANT_FIELDS = (
     "event_start",
     "event_end",
     "date_kind",
+    "apply_period",
     "eligibility",
     "benefits",
     "location",
     "application_url",
     "document_url",
 )
+
+# Fields added after data was first collected: going from empty to a value is the field
+# being filled in, not the notice changing.
+FILLED_IN_FIELDS = {"apply_period"}
+
+
+def changed_fields(item: Opportunity, old: Opportunity) -> list[str]:
+    return [
+        name for name in IMPORTANT_FIELDS
+        if getattr(item, name) != getattr(old, name) and not (name in FILLED_IN_FIELDS and not getattr(old, name))
+    ]
 
 
 def identity_keys(item: Opportunity) -> set[str]:
@@ -80,7 +92,7 @@ def reconcile_history(items: list[Opportunity], previous: list[Opportunity], now
             continue
         item.id = old.id
         item.first_seen_at = old.first_seen_at
-        changed = [name for name in IMPORTANT_FIELDS if getattr(item, name) != getattr(old, name)]
+        changed = changed_fields(item, old)
         if changed and item.last_seen_at == timestamp:
             item.last_changed_at = timestamp
             item.change_flags = changed

@@ -92,6 +92,7 @@ def merge(left: Opportunity, right: Opportunity) -> Opportunity:
     winner.application_url = winner.application_url or other.application_url
     winner.document_url = winner.document_url or other.document_url
     winner.eligibility = winner.eligibility or other.eligibility
+    winner.apply_period = winner.apply_period or other.apply_period
     winner.benefits = winner.benefits or other.benefits
     winner.location = winner.location or other.location
     winner.field_tags = sorted(set(winner.field_tags + other.field_tags))
