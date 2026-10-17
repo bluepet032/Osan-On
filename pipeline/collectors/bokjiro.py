@@ -155,7 +155,9 @@ class BokjiroCollector(Collector):
         how = text(detail.findtext("aplyMtdCn")) or row.get("aplyMtdNm", "")
         start, end = ymd(detail.findtext("enfcBgngYmd")), ymd(detail.findtext("enfcEndYmd"))
         # 시행기간 is how long the service runs (2010~2026, 2022~2050), taking applications throughout:
-        # it is not an application deadline until it has passed. 9999-12-31 is the source's "no end".
+        # not an application deadline until it has passed, and not event dates either (the calendar
+        # and reminders would show a years-long 행사), so it only reaches the page as wording.
+        # 9999-12-31 is the source's "no end".
         if end is not None and end.startswith("9999"):
             end = None
         ended = end is not None and end < now.date().isoformat()
@@ -176,8 +178,6 @@ class BokjiroCollector(Collector):
             application_url=url,
             recruit_start=start if ended else None,
             recruit_end=end if ended else None,
-            event_start=start if end else None,
-            event_end=end,
             date_kind="exact" if ended else "ongoing",
             apply_period=span,
             eligibility="\n".join(part for part in dict.fromkeys((target, criteria)) if part),

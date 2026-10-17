@@ -112,12 +112,13 @@ def test_the_enforcement_period_is_the_program_span_not_a_deadline(monkeypatch):
 
     running = items["O1"]
     assert (running.recruit_start, running.recruit_end, running.date_kind) == (None, None, "ongoing")
-    assert (running.event_start, running.event_end) == ("2026-01-01", "2026-12-31")
+    # Not event dates either: the calendar and reminders would show a years-long "행사".
+    assert (running.event_start, running.event_end) == (None, None)
     assert running.apply_period == "사업기간 2026.01.01 ~ 2026.12.31"
     # A program that already ended takes no more applications.
     assert (items["O2"].recruit_end, items["O2"].date_kind) == ("2026-03-01", "exact")
     # 9999-12-31 is the source's "no end".
-    assert (items["O3"].event_end, items["O3"].apply_period, items["O3"].date_kind) == (None, "", "ongoing")
+    assert (items["O3"].apply_period, items["O3"].date_kind) == ("", "ongoing")
 
 
 @pytest.mark.parametrize(("targets", "expected"), [

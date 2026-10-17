@@ -11,7 +11,7 @@ OLD = datetime(2026, 7, 27, 9, 0, tzinfo=KST)
 NOW = OLD + timedelta(days=3)
 
 
-def make(now: datetime, *, end: str = "2026-08-31"):
+def make(now: datetime, *, end: str = "2026-08-31", period: str = ""):
     return normalize(RawOpportunity(
         source_id="fixture",
         source_name="테스트",
@@ -22,6 +22,7 @@ def make(now: datetime, *, end: str = "2026-08-31"):
         summary="인디게임 개발팀을 대상으로 제작비와 멘토링을 지원하는 공모 사업입니다.",
         recruit_end=end,
         date_kind="exact",
+        apply_period=period,
         collected_at=now.isoformat(timespec="seconds"),
     ), now)
 
@@ -66,3 +67,14 @@ def test_previous_item_is_claimed_once_and_exact_id_wins():
     assert exact_item.first_seen_at == old.first_seen_at
     assert split_item.id == "new-split-item-id"
     assert len({item.id for item in results}) == 2
+
+
+def test_changed_application_wording_marks_the_item_updated():
+    [result] = reconcile_history([make(NOW, period="분기별 모집")], [make(OLD, period="예산 소진 시까지")], NOW)
+    assert result.change_flags == ["apply_period"]
+
+
+def test_wording_filled_in_for_the_first_time_is_not_a_change():
+    # Data collected before apply_period existed has it empty; the first fill must not mark every item UPDATED.
+    [result] = reconcile_history([make(NOW, period="예산 소진 시까지")], [make(OLD)], NOW)
+    assert result.change_flags == []
