@@ -19,7 +19,7 @@ export function ReportForm({ item }: { item: Opportunity }) {
     const { db, firestore: fs } = firebase
     setState('sending')
     try {
-      await fs.addDoc(fs.collection(db, 'reports'), reportDocument(item, reason, note, user.uid))
+      await fs.addDoc(fs.collection(db, 'reports'), reportDocument(item, reason, note, user.uid, fs.serverTimestamp()))
       setState('sent')
     } catch {
       setState('failed')

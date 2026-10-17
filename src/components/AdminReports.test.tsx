@@ -31,8 +31,11 @@ describe('AdminReports', () => {
     expect(screen.getByRole('link', { name: '경기청년 사다리' })).toHaveAttribute('href', '#/notice/gov24-1')
     expect(screen.getByText(/신청 기간이 달라요/)).toBeInTheDocument()
     expect(screen.getByText('11월 마감')).toBeInTheDocument()
+    // Resolving reloads the newest reports, so one beyond the first batch takes its place.
+    mocks.getDocs.mockResolvedValue({ docs: [{ id: 'r2', data: () => ({ ...report, note: '링크 오류' }) }] })
     await act(async () => fireEvent.click(screen.getByRole('button', { name: '처리 완료' })))
     expect(mocks.deleteDoc).toHaveBeenCalledWith('reports/r1')
     expect(screen.queryByText('11월 마감')).toBeNull()
+    expect(screen.getByText('링크 오류')).toBeInTheDocument()
   })
 })

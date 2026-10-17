@@ -22,14 +22,15 @@ export interface ErrorReport {
   createdAt: string
 }
 
-export const reportDocument = (item: Opportunity, reason: ReportReason, note: string, uid: string) => ({
+/** createdAt is Firestore's serverTimestamp(); the rules require it, so no client can reorder the admin's list. */
+export const reportDocument = (item: Opportunity, reason: ReportReason, note: string, uid: string, createdAt: unknown) => ({
   opportunityId: item.id.slice(0, 100),
   title: item.title.slice(0, 200),
   sourceUrl: item.source_url.slice(0, 2000),
   reason,
   note: note.trim().slice(0, 500),
   uid,
-  createdAt: new Date().toISOString(),
+  createdAt,
 })
 
 export function reportFromDocument(id: string, data: DocumentData): ErrorReport | null {
@@ -41,6 +42,6 @@ export function reportFromDocument(id: string, data: DocumentData): ErrorReport 
     sourceUrl: typeof data.sourceUrl === 'string' && data.sourceUrl.startsWith('https://') ? data.sourceUrl : '',
     reason: data.reason,
     note: typeof data.note === 'string' ? data.note : '',
-    createdAt: typeof data.createdAt === 'string' ? data.createdAt : '',
+    createdAt: typeof data.createdAt?.toDate === 'function' ? data.createdAt.toDate().toISOString() : '',
   }
 }

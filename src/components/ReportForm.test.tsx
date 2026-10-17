@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   openLogin: vi.fn(),
   addDoc: vi.fn(async () => ({ id: 'r1' })),
 }))
-const firestore = { collection: (_db: unknown, ...path: string[]) => path.join('/'), addDoc: mocks.addDoc }
+const firestore = { collection: (_db: unknown, ...path: string[]) => path.join('/'), addDoc: mocks.addDoc, serverTimestamp: () => 'SERVER_TIME' }
 // One stable object, like the provider's, so effects that depend on it do not re-run every render.
 const services = { db: {}, firestore }
 vi.mock('../account', () => ({ useAccount: () => ({ user: mocks.user, openLogin: mocks.openLogin, firebase: services }) }))
@@ -39,7 +39,7 @@ describe('ReportForm', () => {
     fireEvent.click(screen.getByRole('radio', { name: '신청 기간이 달라요' }))
     fireEvent.change(screen.getByLabelText('자세한 내용 (선택)'), { target: { value: '11월 마감' } })
     await act(async () => fireEvent.click(send))
-    expect(mocks.addDoc).toHaveBeenCalledWith('reports', expect.objectContaining({ opportunityId: 'gov24-1', reason: 'period', note: '11월 마감', uid: 'u1' }))
+    expect(mocks.addDoc).toHaveBeenCalledWith('reports', expect.objectContaining({ opportunityId: 'gov24-1', reason: 'period', note: '11월 마감', uid: 'u1', createdAt: 'SERVER_TIME' }))
     expect(screen.getByRole('status')).toHaveTextContent('신고가 접수되었습니다')
   })
 

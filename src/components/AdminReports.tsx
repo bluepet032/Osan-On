@@ -10,6 +10,8 @@ export function AdminReports() {
   const [reports, setReports] = useState<ErrorReport[]>([])
   const [loaded, setLoaded] = useState(false)
   const [error, setError] = useState('')
+  // Bumped after resolving a report, so the newest batch is read again and older reports fill in.
+  const [round, setRound] = useState(0)
 
   useEffect(() => {
     if (!firebase) return
@@ -23,7 +25,7 @@ export function AdminReports() {
       })
       .catch(() => { if (active) { setError('신고를 불러오지 못했습니다. Firestore 규칙의 관리자 UID를 확인하세요.'); setLoaded(true) } })
     return () => { active = false }
-  }, [firebase])
+  }, [firebase, round])
 
   const resolve = async (id: string) => {
     if (!firebase) return
@@ -31,6 +33,7 @@ export function AdminReports() {
     try {
       await fs.deleteDoc(fs.doc(db, 'reports', id))
       setReports(current => current.filter(report => report.id !== id))
+      setRound(value => value + 1)
     } catch {
       setError('신고를 처리 완료로 바꾸지 못했습니다.')
     }

@@ -196,7 +196,7 @@ export function PersonalPage() {
 
       <section className="personal-section account-settings">
         <h2>계정</h2>
-        <p>계정 삭제 시 Firestore에 저장된 이 계정의 맞춤 조건·찜·키워드·알림을 함께 지웁니다.</p>
+        <p>계정 삭제 시 Firestore에 저장된 이 계정의 맞춤 조건·찜·키워드·알림과 보낸 정보 오류 신고를 함께 지웁니다.</p>
         <button type="button" className="danger-button" onClick={() => void deleteAccount()}>계정과 데이터 삭제</button>
       </section>
     </main>
