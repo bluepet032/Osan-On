@@ -28,10 +28,11 @@ vi.mock('firebase/firestore', () => ({
 }))
 
 function Probe() {
-  const { profile, setProfile, saveState, retry } = useProfile()
+  const { profile, setProfile, saveState, retry, since } = useProfile()
   return <div>
     <output>{JSON.stringify(profile)}</output>
     <span data-testid="state">{saveState}</span>
+    <span data-testid="since">{since}</span>
     <button onClick={() => setProfile({ gender: 'male', age: 40 })}>change</button>
     <button onClick={retry}>retry</button>
   </div>
@@ -142,6 +143,24 @@ describe('ProfileProvider', () => {
     expect(screen.getByTestId('state')).toHaveTextContent('failed')
     await act(async () => screen.getByRole('button', { name: 'retry' }).click())
     expect(mocks.setDoc).toHaveBeenLastCalledWith('users/u1/profile/main', expect.objectContaining({ gender: 'male', age: 40 }))
+  })
+
+  it('starts new-benefit alerts from the first upload of browser answers', () => {
+    localStorage.setItem('osanon.profile', JSON.stringify({ gender: 'female', age: 28 }))
+    render(<ProfileProvider><Probe /></ProfileProvider>)
+    expect(screen.getByTestId('since').textContent).not.toBe('')
+  })
+
+  it('retries a failed write before a failed read, so new answers are not replaced', async () => {
+    mocks.failRead = true
+    mocks.remote = { gender: 'female', age: 28, updatedAt: '2026-10-16T00:00:00Z' }
+    mocks.setDoc.mockRejectedValueOnce(new Error('unavailable'))
+    render(<ProfileProvider><Probe /></ProfileProvider>)
+    await act(async () => screen.getByRole('button', { name: 'change' }).click())
+    mocks.failRead = false
+    await act(async () => screen.getByRole('button', { name: 'retry' }).click())
+    expect(mocks.setDoc).toHaveBeenLastCalledWith('users/u1/profile/main', expect.objectContaining({ gender: 'male', age: 40 }))
+    expect(screen.getByRole('status')).toHaveTextContent('{"gender":"male","age":40}')
   })
 
   it('reports a failed account read and retries by reading again', async () => {

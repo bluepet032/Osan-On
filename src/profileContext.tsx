@@ -80,7 +80,8 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       const local = loadProfile()
       if (!hasBasics(local)) { setSaveState('saved'); return }
       saveProfile(local, uid)
-      write(local)
+      const data = write(local)
+      if (data) setSince(data.updatedAt as string)
     }, () => {
       if (!active) return
       failedRead.current = true
@@ -101,10 +102,12 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 
   const retry = useCallback(() => {
     setError('')
-    if (failedRead.current) {
+    // Unsaved answers go first: reading the account again would replace them with its older copy.
+    if (unsaved.current) write(unsaved.current)
+    else if (failedRead.current) {
       failedRead.current = false
       setAttempt(value => value + 1)
-    } else if (unsaved.current) write(unsaved.current)
+    }
   }, [write])
 
   return <ProfileContext.Provider value={{ profile, setProfile, saveState, retry, since, error }}>{children}</ProfileContext.Provider>
