@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from pipeline.collectors.gov24 import ONGOING_RE
 from pipeline.config import ROOT, load_yaml
 from pipeline.dates import status_for
 from pipeline.models import Opportunity, RawOpportunity
@@ -15,7 +16,7 @@ ALLOWED_FIELDS = {
     "recruit_end", "event_start", "event_end", "date_kind", "eligibility", "benefits",
     "location", "primary_type", "field_tags", "audience_tags", "apply_methods",
     "jurisdiction", "conditions",
-    "domain",
+    "domain", "apply_period",
 }
 KST = ZoneInfo("Asia/Seoul")
 
@@ -89,6 +90,10 @@ def apply_overrides(
         for key, value in patch.items():
             if key in ALLOWED_FIELDS:
                 setattr(target, key, value)
+        # Corrected wording alone means the dates parsed from the old wording no longer hold.
+        if "apply_period" in patch and not {"recruit_start", "recruit_end", "date_kind"} & patch.keys():
+            target.recruit_start = target.recruit_end = None
+            target.date_kind = "ongoing" if ONGOING_RE.search(patch["apply_period"] or "") else "inquiry"
         target.status, target.d_day = status_for(
             target.recruit_start,
             target.recruit_end,

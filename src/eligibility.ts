@@ -1,4 +1,4 @@
-import type { Conditions } from './types'
+import type { Conditions, Jurisdiction } from './types'
 
 export type IncomeCode = 'JA0201' | 'JA0202' | 'JA0203' | 'JA0204' | 'JA0205'
 
@@ -88,13 +88,18 @@ const ASIDE_RE = /^\s*[※*]|제외|면제|우선|가점|연장|가산/
 // Clauses start at a bullet or footnote mark, which the lookahead keeps for ASIDE_RE.
 const CLAUSE_RE = /(?=[\n○/※*①-⑳])|\s-\s/
 
+// A national service whose title names another region, such as "발전소 시설 견학(울산)" or
+// "의료 서비스(대구보훈병원)", is for people there; Gyeonggi places are 경기도·오산시 items already.
+// The place may follow a prefix inside the brackets: "(신서천)", "(서인천발전본부)".
+const OTHER_REGION_RE = /\([^)]*?(서울|부산|대구|인천|광주|대전|울산|세종|강원|충북|충남|충청|전북|전남|전라|경북|경남|경상|제주|당진|동해|서천|보령|태안|삼척|하동|여수|영흥)/
+
 /** Status words the text (or title) makes a requirement, in order of appearance. */
 export function statusWords(text: string, title = ''): string[] {
   const clauses = [title, ...text.split(CLAUSE_RE)].filter(clause => clause && !ASIDE_RE.test(clause))
   return [...new Set(clauses.flatMap(clause => clause.match(STATUS_RE) ?? []))]
 }
 
-export function judge(item: { conditions?: Conditions | null; eligibility?: string | null; title?: string }, profile: Profile): { verdict: Verdict; reasons: Reason[] } {
+export function judge(item: { conditions?: Conditions | null; eligibility?: string | null; title?: string; jurisdiction?: Jurisdiction | null }, profile: Profile): { verdict: Verdict; reasons: Reason[] } {
   const conditions = item.conditions
   if (!conditions) return { verdict: 'check', reasons: [{ label: '지원조건 정보 없음, 원문에서 확인하세요', ok: null }] }
   const reasons: Reason[] = []
@@ -157,6 +162,8 @@ export function judge(item: { conditions?: Conditions | null; eligibility?: stri
   if (conditions.inferred) reasons.push({ label: `${conditions.inferred.join('·')} 기준은 원문 확인`, ok: null })
   const statuses = statusWords(text, item.title)
   if (statuses.length) reasons.push({ label: `원문 자격 확인: ${statuses.join(', ')}`, ok: null })
+  const region = item.jurisdiction === 'national' ? OTHER_REGION_RE.exec(item.title ?? '') : null
+  if (region) reasons.push({ label: `다른 지역 대상(${region[1]})`, ok: null })
 
   if (!confirmed && reasons.every(reason => reason.ok === true)) reasons.push({ label: '지원 대상 자격은 원문 확인', ok: null })
 
