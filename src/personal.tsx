@@ -215,8 +215,10 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
   const currentKeywords = useMemo(() => currentUserData ? keywords : [], [currentUserData, keywords])
   const currentNotifications = useMemo(() => currentUserData ? notifications : [], [currentUserData, notifications])
 
+  // Signed out, browser favorites still need the public list to show what they are.
+  const guestNeedsData = !userId && local.favorites.length > 0
   useEffect(() => {
-    if (!userId || dataUserId !== userId || !storeReady) {
+    if (!guestNeedsData && (!userId || dataUserId !== userId || !storeReady)) {
       setPublishedItems([])
       setPublishedReady(false)
       return
@@ -236,6 +238,8 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
         for (const payload of payloads) for (const item of payload.items) unique.set(item.id, item)
         setPublishedItems([...unique.values()])
         setPublishedReady(true)
+        // Signed out, a load failure is the only error, so a successful retry clears it.
+        if (!userId) setError('')
       }).catch(reason => {
         if (active && currentRequest === request) {
           setError(reason instanceof Error ? reason.message : '혜택 데이터를 불러오지 못했습니다.')
@@ -249,7 +253,7 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
       active = false
       window.removeEventListener('osanon-data-refresh', load)
     }
-  }, [userId, dataUserId, storeReady])
+  }, [userId, dataUserId, storeReady, guestNeedsData])
 
   useEffect(() => {
     if (!userId || dataUserId !== userId || !storeReady || !publishedReady || local.favorites.length === 0) return
@@ -362,8 +366,12 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
       })
       return
     }
+    // Without an account a favorite stays in this browser; signing in offers to merge it into the account.
     if (!userId || !firebase) {
-      openLogin()
+      setLocal(current => ({
+        ...current,
+        favorites: current.favorites.includes(id) ? current.favorites.filter(value => value !== id) : [...current.favorites, id],
+      }))
       return
     }
     const { db, firestore: fs } = firebase
@@ -379,7 +387,7 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
       const saved = await transaction.get(reference)
       if (!saved.exists()) transaction.set(reference, value)
     }).catch(reason => setError(reason.message || '찜을 저장하지 못했습니다.'))
-  }, [userId, firebase, currentFavorites, openLogin])
+  }, [userId, firebase, currentFavorites])
 
   const restoreHidden = useCallback(() => setLocal(current => ({ ...current, hidden: [] })), [])
 
@@ -499,7 +507,7 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
     keywords: currentKeywords,
     notifications: currentNotifications,
     personalizedItems,
-    loading: !accountReady || (!!userId && (dataUserId !== userId || !storeReady || !publishedReady)),
+    loading: !accountReady || (!!userId && (dataUserId !== userId || !storeReady || !publishedReady)) || (guestNeedsData && !publishedReady),
     migrationOpen,
     migrationMessage,
     localFavoriteItems,

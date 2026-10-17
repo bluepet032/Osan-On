@@ -77,10 +77,39 @@ describe('오산온', () => {
     expect(screen.queryByText('출처별 상태')).toBeNull()
   })
 
-  it('requires Google login for personal features and explains stored data', async () => {
+  it('saves favorites without login and shows them in 내 혜택함', async () => {
+    const item = {
+      id: 'one', title: '혜택 one', source_name: '정부24', source_url: 'https://www.gov.kr/one', organizer: '경기도 오산시',
+      summary: '요약', primary_type: 'cash', field_tags: [], audience_tags: [], status: 'ongoing', date_kind: 'ongoing',
+      relevance: { score: 100, reasons: [], decision: 'publish' }, first_seen_at: '2026-07-01T00:00:00+09:00', last_seen_at: '2026-07-30T00:00:00+09:00',
+      sources: [], jurisdiction: 'osan', conditions: null,
+    }
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url: string) => ({ ok: true, json: async () => url.includes('active') ? { ...payload, items: [item] } : payload })))
+    render(<App />)
+    fireEvent.click(await screen.findByRole('button', { name: '관심 등록' }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.getByRole('button', { name: '관심 해제' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('link', { name: '내 혜택함' }))
+    expect(await screen.findByRole('link', { name: '혜택 one' })).toBeInTheDocument()
+    expect(screen.getByText('로그인 없이 찜한 혜택은 이 브라우저에 저장됩니다.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '찜 해제' }))
+    expect(await screen.findByText('아직 찜한 혜택이 없습니다.')).toBeInTheDocument()
+  })
+
+  it('says browser favorites could not be loaded instead of calling them gone', async () => {
+    localStorage.setItem('osanon.personal.v1', JSON.stringify({ version: 1, favorites: ['one'], read: [], hidden: [] }))
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Failed to fetch')))
     render(<App />)
     fireEvent.click(screen.getByRole('link', { name: '내 혜택함' }))
-    expect(await screen.findByRole('heading', { name: 'Google 로그인이 필요합니다' })).toBeInTheDocument()
+    expect(await screen.findByText(/찜한 혜택을 불러오지 못했습니다/)).toBeInTheDocument()
+    expect(screen.queryByText('아직 찜한 혜택이 없습니다.')).toBeNull()
+    expect(screen.queryByText(/공개 목록에서 내려간/)).toBeNull()
+  })
+
+  it('explains what an account adds and stored data', async () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('link', { name: '내 혜택함' }))
+    expect(await screen.findByRole('heading', { name: '로그인하면 더 할 수 있어요' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '로그인 또는 가입' }))
     expect(screen.getByRole('dialog', { name: '오산온 계정' })).toHaveTextContent('맞춤 조건(성별·나이')
     expect(screen.getByRole('checkbox')).toBeInTheDocument()
