@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useAccount } from '../account'
 import { favoritesCalendar } from '../calendar'
+import { clearDataCache } from '../data'
 import { usePersonalState, type SavedOpportunity } from '../personal'
 import type { Opportunity } from '../types'
 
@@ -79,8 +80,8 @@ export function PersonalPage() {
 
   if (!account.user) {
     const saved: SavedOpportunity[] = personal.localFavoriteItems.map(item => ({ id: item.id, item, remindersEnabled: true, resultDate: '', note: '' }))
-    // Favorites whose notice left the public list (closed and removed) cannot be shown.
-    const missing = personal.loading ? 0 : personal.localFavoriteCount - saved.length
+    // Favorites whose notice left the public list (closed and removed) cannot be shown; a failed load says nothing about that.
+    const missing = personal.loading || personal.error ? 0 : personal.localFavoriteCount - saved.length
     return (
       <main id="main-content" className="container personal-page">
         <div className="page-heading"><div><p className="eyebrow">찜·알림·키워드</p><h1>내 혜택함</h1><p>로그인 없이 찜한 혜택은 이 브라우저에 저장됩니다.</p></div></div>
@@ -88,7 +89,9 @@ export function PersonalPage() {
           <div className="section-heading"><div><h2 id="favorites-title">찜한 혜택</h2><p>이 브라우저에 저장되어 있어 다른 기기에서는 보이지 않고, 브라우저 데이터를 지우면 함께 사라집니다.</p></div>
             {saved.length > 0 && <button type="button" className="text-button" onClick={() => downloadCalendar(saved)}>캘린더로 내보내기(.ics)</button>}
           </div>
-          {personal.loading ? <p role="status">찜한 혜택을 불러오는 중입니다…</p> : saved.length === 0 ? <p className="empty-personal">아직 찜한 혜택이 없습니다.</p> : (
+          {personal.loading ? <p role="status">찜한 혜택을 불러오는 중입니다…</p>
+            : personal.error && saved.length === 0 ? <p className="message-inline error" role="alert">찜한 혜택을 불러오지 못했습니다. 찜은 이 브라우저에 그대로 있습니다. <button type="button" className="text-button" onClick={clearDataCache}>다시 시도</button></p>
+            : saved.length === 0 ? <p className="empty-personal">아직 찜한 혜택이 없습니다.</p> : (
             <div className="saved-list">
               {saved.map(favorite => (
                 <article className="saved-card" key={favorite.id}>

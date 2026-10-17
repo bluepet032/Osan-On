@@ -69,6 +69,16 @@ describe('오산온', () => {
     expect(await screen.findByText('아직 찜한 혜택이 없습니다.')).toBeInTheDocument()
   })
 
+  it('says browser favorites could not be loaded instead of calling them gone', async () => {
+    localStorage.setItem('osanon.personal.v1', JSON.stringify({ version: 1, favorites: ['one'], read: [], hidden: [] }))
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Failed to fetch')))
+    render(<App />)
+    fireEvent.click(screen.getByRole('link', { name: '내 혜택함' }))
+    expect(await screen.findByText(/찜한 혜택을 불러오지 못했습니다/)).toBeInTheDocument()
+    expect(screen.queryByText('아직 찜한 혜택이 없습니다.')).toBeNull()
+    expect(screen.queryByText(/공개 목록에서 내려간/)).toBeNull()
+  })
+
   it('explains what an account adds and stored data', async () => {
     render(<App />)
     fireEvent.click(screen.getByRole('link', { name: '내 혜택함' }))

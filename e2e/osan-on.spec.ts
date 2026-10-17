@@ -36,7 +36,7 @@ test('status route is for admins only', async ({ page }) => {
   await expect(page.getByText('출처별 상태')).toHaveCount(0)
 })
 
-test('requires login for favorites and restores URL and hidden state after reload', async ({ page }) => {
+test('keeps favorites without login and restores URL, favorite and hidden state after reload', async ({ page }) => {
   await page.route('**/data/active.json', route => route.fulfill({
     contentType: 'application/json',
     body: JSON.stringify({
@@ -54,8 +54,8 @@ test('requires login for favorites and restores URL and hidden state after reloa
   await expect(page.locator('.result-toolbar strong')).toHaveText('1개')
   await expect(page.getByRole('button', { name: '모든 분야 1' })).toBeVisible()
   await page.getByRole('button', { name: '관심 등록' }).click()
-  await expect(page.getByRole('dialog', { name: '오산온 계정' })).toBeVisible()
-  await page.getByRole('button', { name: '닫기' }).click()
+  await expect(page.getByRole('button', { name: '관심 해제' })).toBeVisible()
+  await expect(page.getByRole('dialog', { name: '오산온 계정' })).toHaveCount(0)
   await page.getByRole('button', { name: '숨김' }).click()
   await expect(page.getByRole('button', { name: '숨긴 혜택 1개 모두 복원' })).toBeVisible()
 
@@ -64,7 +64,7 @@ test('requires login for favorites and restores URL and hidden state after reloa
   await expect(page.getByLabel('통합 검색')).toHaveValue('인디')
   await expect(page.getByRole('button', { name: '숨긴 혜택 1개 모두 복원' })).toBeVisible()
   await page.getByRole('button', { name: '숨긴 혜택 1개 모두 복원' }).click()
-  await expect(page.getByRole('button', { name: '관심 등록' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '관심 해제' })).toBeVisible()
   await expect(page).toHaveURL(/q=%EC%9D%B8%EB%94%94/)
 })
 

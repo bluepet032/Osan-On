@@ -238,6 +238,8 @@ export function PersonalProvider({ children }: { children: ReactNode }) {
         for (const payload of payloads) for (const item of payload.items) unique.set(item.id, item)
         setPublishedItems([...unique.values()])
         setPublishedReady(true)
+        // Signed out, a load failure is the only error, so a successful retry clears it.
+        if (!userId) setError('')
       }).catch(reason => {
         if (active && currentRequest === request) {
           setError(reason instanceof Error ? reason.message : '혜택 데이터를 불러오지 못했습니다.')
