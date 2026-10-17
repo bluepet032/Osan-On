@@ -69,6 +69,27 @@ describe('오산온', () => {
     expect(await screen.findByRole('link', { name: '혜택 one' })).toBeInTheDocument()
   })
 
+  it('switches and remembers how the list is shown', async () => {
+    const item = {
+      id: 'one', title: '혜택 one', source_name: '정부24', source_url: 'https://www.gov.kr/one', organizer: '경기도 오산시',
+      summary: '요약 문장', primary_type: 'cash', field_tags: [], audience_tags: [], status: 'ongoing', date_kind: 'ongoing',
+      relevance: { score: 100, reasons: [], decision: 'publish' }, first_seen_at: '2026-07-01T00:00:00+09:00', last_seen_at: '2026-07-30T00:00:00+09:00',
+      sources: [], jurisdiction: 'osan', conditions: null,
+    }
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url: string) => ({ ok: true, json: async () => url.includes('active') ? { ...payload, items: [item] } : payload })))
+    const { unmount } = render(<App />)
+    expect(await screen.findByText(/요약 문장/)).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('보기'), { target: { value: 'list' } })
+    expect(screen.queryByText(/요약 문장/)).toBeNull()
+    expect(screen.getByLabelText('혜택 목록')).toHaveClass('view-list')
+    unmount()
+
+    render(<App />)
+    await screen.findByRole('link', { name: '혜택 one' })
+    expect(screen.getByLabelText('보기')).toHaveValue('list')
+    expect(screen.queryByText(/요약 문장/)).toBeNull()
+  })
+
   it('keeps the collection status for admins only', async () => {
     render(<App />)
     expect(screen.queryByRole('link', { name: '수집 상태' })).toBeNull()
