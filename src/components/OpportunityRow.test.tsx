@@ -1,7 +1,9 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { Opportunity, PersonalState } from '../types'
 import { OpportunityRow } from './OpportunityRow'
+
+vi.mock('../account', () => ({ useAccount: () => ({ user: null, firebase: null, openLogin: () => {} }) }))
 
 const base = {
   id: 'one', title: '혜택', source_name: '정부24', source_url: 'https://www.gov.kr/one', organizer: '경기도 오산시',

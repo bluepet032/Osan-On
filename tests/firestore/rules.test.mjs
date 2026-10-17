@@ -2,7 +2,7 @@
 // Requires JDK 21+, firebase-tools, @firebase/rules-unit-testing and firebase (not project dependencies).
 import { readFileSync } from 'node:fs'
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing'
-import { addDoc, collection, deleteDoc, doc, setDoc, updateDoc } from 'firebase/firestore'
+import { addDoc, collection, deleteDoc, doc, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
 
 const env = await initializeTestEnvironment({
   projectId: 'demo-osan-on',
@@ -39,6 +39,26 @@ await check('save profile', assertSucceeds(setDoc(doc(alice, 'users/alice/profil
 await check('replace profile without income', assertSucceeds(setDoc(doc(alice, 'users/alice/profile/main'), { gender: 'male', age: 40, updatedAt: new Date().toISOString() })))
 await check('delete profile', assertSucceeds(deleteDoc(doc(alice, 'users/alice/profile/main'))))
 await check('delete user document', assertSucceeds(deleteDoc(doc(alice, 'users/alice'))))
+
+// Wrong-information reports: anyone signed in sends, only the admin reads and clears.
+const admin = env.authenticatedContext('sfsE5vAcqfNhnw6ilBGnKyx04k23').firestore()
+const report = { opportunityId: 'abc', title: 'AI 게임 공모전', sourceUrl: 'https://example.com', reason: 'period', note: '', uid: 'alice', createdAt: serverTimestamp() }
+await check('send report', assertSucceeds(setDoc(doc(alice, 'reports/r1'), report)))
+await check('admin reads reports', assertSucceeds(getDocs(collection(admin, 'reports'))))
+await check('admin clears report', assertSucceeds(deleteDoc(doc(admin, 'reports/r1'))))
+await check('anonymous cannot report', assertFails(setDoc(doc(anon, 'reports/r2'), report)))
+await check('report as someone else', assertFails(setDoc(doc(bob, 'reports/r3'), report)))
+await check('unknown report reason', assertFails(setDoc(doc(alice, 'reports/r4'), { ...report, reason: 'spam' })))
+await check('report note over 500 chars', assertFails(setDoc(doc(alice, 'reports/r5'), { ...report, note: 'x'.repeat(501) })))
+await check('unknown report field', assertFails(setDoc(doc(alice, 'reports/r6'), { ...report, email: 'a@b.c' })))
+await setDoc(doc(alice, 'reports/r7'), report)
+await check('report with a client-chosen time', assertFails(setDoc(doc(alice, 'reports/r8'), { ...report, createdAt: 'zzzz' })))
+await check('reporter cannot read every report', assertFails(getDocs(collection(alice, 'reports'))))
+await check('other user cannot read a report', assertFails(getDocs(query(collection(bob, 'reports'), where('uid', '==', 'alice')))))
+await check('other user cannot delete a report', assertFails(deleteDoc(doc(bob, 'reports/r7'))))
+await check('reporter cannot edit report', assertFails(updateDoc(doc(alice, 'reports/r7'), { note: '변조' })))
+await check('reporter finds own reports when deleting the account', assertSucceeds(getDocs(query(collection(alice, 'reports'), where('uid', '==', 'alice')))))
+await check('reporter deletes own report with the account', assertSucceeds(deleteDoc(doc(alice, 'reports/r7'))))
 
 // Anything else must be denied.
 await check('other user cannot read', assertFails(setDoc(doc(bob, 'users/alice/favorites/f2'), favorite)))

@@ -67,6 +67,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         await batch.commit()
       }
     }
+    // Reports this user sent carry their UID and note; the rules let the sender delete their own.
+    const reports = await firestore.getDocs(firestore.query(firestore.collection(db, 'reports'), firestore.where('uid', '==', user.uid)))
+    for (let start = 0; start < reports.docs.length; start += 450) {
+      const batch = firestore.writeBatch(db)
+      for (const record of reports.docs.slice(start, start + 450)) batch.delete(record.ref)
+      await batch.commit()
+    }
     await firestore.deleteDoc(firestore.doc(db, 'users', user.uid))
     await authApi.deleteUser(user)
   }

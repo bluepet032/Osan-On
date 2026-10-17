@@ -3,6 +3,7 @@ import { AUTO_REFRESH_LABEL, COLLECT_WORKFLOW_URL, STALE_AFTER_MS } from '../con
 import { ADVANCED_LABELS, ADVANCED_PARAMS, coveragePercent, type AdvancedKey } from '../advancedFilters'
 import { clearDataCache, loadOpportunities, loadStatuses } from '../data'
 import type { CrawlStatus, Opportunity } from '../types'
+import { AdminReports } from '../components/AdminReports'
 
 export function StatusPage() {
   const [statuses, setStatuses] = useState<CrawlStatus[]>([])
@@ -32,6 +33,7 @@ export function StatusPage() {
     <main id="main-content" className="container status-page">
       <div className="page-heading"><div><p className="eyebrow">관리자</p><h1>수집 상태</h1><p>공개 수집기의 최근 실행과 수동 검토 대상을 확인합니다.</p></div></div>
       {error && <div className="message error" role="alert">{error}</div>}
+      <AdminReports />
       <p className="updated-at">마지막 상태 생성: {generated ? new Date(generated).toLocaleString('ko-KR') : '없음'} · 자동 갱신 {AUTO_REFRESH_LABEL}</p>
       <section className="manual-refresh" aria-labelledby="manual-refresh-title">
         <div>

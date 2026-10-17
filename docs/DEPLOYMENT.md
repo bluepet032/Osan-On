@@ -71,6 +71,8 @@ Variables를 바꾼 뒤에는 **Deploy site**를 수동 실행해야 사이트�
 
 `firestore.rules`를 고치면 PR의 CI가 `tests/firestore/rules.test.mjs`로 검사합니다. 통과를 확인한 뒤 Firebase Console에 같은 내용을 다시 게시하세요. 저장소 파일을 바꿔도 Firebase에 자동으로 반영되지 않습니다.
 
+관리자 UID는 두 곳에 있습니다. 저장소 변수 `VITE_ADMIN_UIDS`(관리자 메뉴 표시)와 `firestore.rules`의 `isAdmin()`(정보 오류 신고 읽기·삭제)입니다. 관리자를 바꾸면 둘을 함께 고치고 규칙을 다시 게시하세요.
+
 ## 수동 수집
 
 ```bash

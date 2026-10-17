@@ -16,6 +16,29 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
     }
 
+    // Same UIDs as the repository variable VITE_ADMIN_UIDS (src/admin.ts); update both together.
+    function isAdmin() {
+      return request.auth != null && request.auth.uid in ['sfsE5vAcqfNhnw6ilBGnKyx04k23'];
+    }
+
+    // Wrong-information reports (src/reports.ts). Any signed-in visitor may send one as
+    // themselves, stamped with the server time; the admin reads them and deletes them once
+    // handled, and a sender can find and delete their own when deleting their account.
+    match /reports/{reportId} {
+      allow read, delete: if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid);
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['opportunityId', 'title', 'sourceUrl', 'reason', 'note', 'uid', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.reason in ['period', 'target', 'link', 'other']
+        && request.resource.data.opportunityId is string
+        && request.resource.data.opportunityId.size() >= 1
+        && shortString(request.resource.data.opportunityId, 100)
+        && shortString(request.resource.data.title, 200)
+        && shortString(request.resource.data.sourceUrl, 2000)
+        && shortString(request.resource.data.note, 500)
+        && request.resource.data.createdAt == request.time;
+    }
+
     match /users/{uid} {
       // The app never writes this document; it only removes it when deleting the account.
       allow read, delete: if isOwner(uid);
