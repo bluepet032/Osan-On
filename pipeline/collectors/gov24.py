@@ -131,6 +131,7 @@ class Gov24Collector(Collector):
             recruit_start=start if date_kind == "exact" else None,
             recruit_end=end if date_kind == "exact" else None,
             date_kind=date_kind,  # type: ignore[arg-type]
+            apply_period=text("신청기한"),
             eligibility="\n".join(part for part in (text("지원대상"), text("선정기준")) if part),
             benefits=text("지원내용"),
             location=" · ".join(part for part in (text("신청방법"), text("접수기관"), text("전화문의")) if part),

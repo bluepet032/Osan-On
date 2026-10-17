@@ -154,8 +154,13 @@ class BokjiroCollector(Collector):
         ]
         how = text(detail.findtext("aplyMtdCn")) or row.get("aplyMtdNm", "")
         start, end = ymd(detail.findtext("enfcBgngYmd")), ymd(detail.findtext("enfcEndYmd"))
-        # 9999-12-31 is the source's "no end"; only a real end date is a deadline.
-        dated = end is not None and not end.startswith("9999")
+        # 시행기간 is how long the service runs (2010~2026, 2022~2050), taking applications throughout:
+        # it is not an application deadline until it has passed. 9999-12-31 is the source's "no end".
+        if end is not None and end.startswith("9999"):
+            end = None
+        ended = end is not None and end < now.date().isoformat()
+        dotted = lambda value: value.replace("-", ".")
+        span = f"사업기간 {dotted(start) + ' ' if start else ''}~ {dotted(end)}" if end else ""
         methods = row.get("aplyMtdNm", "")
         url = row.get("servDtlLink") or f"https://www.bokjiro.go.kr/ssis-tbu/twataa/wlfareInfo/moveTWAT52011M.do?wlfareInfoId={row['servId']}"
         return RawOpportunity(
@@ -169,9 +174,12 @@ class BokjiroCollector(Collector):
             source_kind=self.config.kind,
             source_priority=self.config.priority,
             application_url=url,
-            recruit_start=start if dated else None,
-            recruit_end=end if dated else None,
-            date_kind="exact" if dated else "ongoing",
+            recruit_start=start if ended else None,
+            recruit_end=end if ended else None,
+            event_start=start if end else None,
+            event_end=end,
+            date_kind="exact" if ended else "ongoing",
+            apply_period=span,
             eligibility="\n".join(part for part in dict.fromkeys((target, criteria)) if part),
             benefits=text(detail.findtext("alwServCn")),
             location=" · ".join(part for part in (how, *contacts) if part),

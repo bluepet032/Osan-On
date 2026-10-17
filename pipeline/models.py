@@ -48,6 +48,8 @@ class RawOpportunity:
     event_start: str | None = None
     event_end: str | None = None
     date_kind: DateKind = "unknown"
+    # The source's own words for the application period, kept even when they do not read as dates.
+    apply_period: str = ""
     eligibility: str = ""
     benefits: str = ""
     location: str = ""
@@ -92,6 +94,7 @@ class Opportunity:
     event_start: str | None = None
     event_end: str | None = None
     date_kind: DateKind = "unknown"
+    apply_period: str = ""
     d_day: int | None = None
     eligibility: str = ""
     benefits: str = ""

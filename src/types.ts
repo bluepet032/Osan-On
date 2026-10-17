@@ -53,6 +53,8 @@ export interface Opportunity {
   event_start?: string | null
   event_end?: string | null
   date_kind: DateKind
+  /** The source's own words for the application period, such as "예산 소진 시까지". */
+  apply_period?: string
   d_day?: number | null
   eligibility?: string
   benefits?: string

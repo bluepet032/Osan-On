@@ -104,12 +104,20 @@ def test_city_services_without_sgg_are_not_province_benefits(department, title, 
     assert place_of({"ctpvNm": "경기도", "bizChrDeptNm": department, "servNm": title}) == expected
 
 
-def test_a_dated_enforcement_period_becomes_the_deadline(monkeypatch):
-    client = FakeClient([list_row("O1")], ends={"O1": "20261231"})
+def test_the_enforcement_period_is_the_program_span_not_a_deadline(monkeypatch):
+    # Real rows run "2010.03.03 ~ 2026.12.31" or "2022 ~ 2050": the service's 시행기간, during which it takes applications.
+    client = FakeClient([list_row("O1"), list_row("O2"), list_row("O3")], ends={"O1": "20261231", "O2": "20260301"})
 
-    [item] = collector(client, monkeypatch).collect(NOW)
+    items = {item.source_post_id: item for item in collector(client, monkeypatch).collect(NOW)}
 
-    assert (item.recruit_start, item.recruit_end, item.date_kind) == ("2026-01-01", "2026-12-31", "exact")
+    running = items["O1"]
+    assert (running.recruit_start, running.recruit_end, running.date_kind) == (None, None, "ongoing")
+    assert (running.event_start, running.event_end) == ("2026-01-01", "2026-12-31")
+    assert running.apply_period == "사업기간 2026.01.01 ~ 2026.12.31"
+    # A program that already ended takes no more applications.
+    assert (items["O2"].recruit_end, items["O2"].date_kind) == ("2026-03-01", "exact")
+    # 9999-12-31 is the source's "no end".
+    assert (items["O3"].event_end, items["O3"].apply_period, items["O3"].date_kind) == (None, "", "ongoing")
 
 
 @pytest.mark.parametrize(("targets", "expected"), [
