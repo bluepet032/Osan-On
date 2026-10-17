@@ -157,6 +157,30 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .opportunity-summary { margin: 0; color: var(--text); font-size: 14px; line-height: 1.65; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .opportunity-meta { margin: 0; color: var(--muted); font-size: 13px; }
 .opportunity-meta span { font-weight: 600; }
+.toolbar-selects { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+/* 목록형: one slim line per benefit. An opened row wraps its card body and details below the line. */
+.opportunity-list.view-list { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.opportunity.view-list { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 16px; padding: 10px 16px; border-radius: 14px; }
+.view-list .opportunity-head { flex: 1 1 320px; align-items: center; min-width: 0; }
+.view-list .domain-icon { width: 32px; height: 32px; }
+.view-list .title-line a { font-size: 15px; }
+.view-list .opportunity-main { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.view-list .badge-line { margin-top: 0; }
+.view-list .opportunity-foot { flex: 0 1 auto; order: 1; margin: 0; padding: 0; border-top: 0; }
+.opportunity.view-list > :not(.opportunity-head):not(.opportunity-foot) { flex-basis: 100%; order: 2; }
+/* 제목만: small cards, three to a row; an opened one takes the whole row. */
+.opportunity-list.view-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.opportunity.view-compact { gap: 6px; padding: 12px 14px 8px; border-radius: 16px; }
+.view-compact .domain-icon { width: 28px; height: 28px; }
+.view-compact .domain-icon svg { width: 16px; height: 16px; }
+.view-compact .title-line a { font-size: 14px; line-height: 1.35; }
+.view-compact .opportunity-foot { padding-top: 6px; }
+.view-compact .date-cell strong { font-size: 13px; white-space: nowrap; }
+/* Closed, a small card keeps just D-day and the buttons; the range and status come back when opened. */
+.opportunity.view-compact:not(.is-expanded) .date-cell span, .opportunity.view-compact:not(.is-expanded) .status { display: none; }
+.view-compact .opportunity-foot { flex-wrap: nowrap; gap: 6px; }
+.view-compact .row-actions .text-button { padding: 4px; white-space: nowrap; }
+.opportunity.view-compact.is-expanded { grid-column: 1 / -1; }
 .opportunity-foot { display: flex; align-items: center; gap: 10px; margin-top: 2px; padding-top: 12px; border-top: 1px solid var(--border); }
 .date-cell { display: flex; align-items: baseline; gap: 8px; margin-right: auto; min-width: 0; }
 .date-cell strong { color: var(--warm); font-size: 15px; font-weight: 700; }
@@ -263,6 +287,7 @@ footer strong { color: var(--text); }
 
 @media (max-width: 1100px) {
   .opportunity-list { grid-template-columns: minmax(0, 1fr); }
+  .opportunity-list.view-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .header-inner { gap: 16px; }
   .brand small { display: none; }
   .status-grid { grid-template-columns: repeat(2, 1fr); }
@@ -275,6 +300,9 @@ footer strong { color: var(--text); }
 }
 
 @media (max-width: 780px) {
+  /* Phones are too narrow for one line, so a closed 목록형 row keeps title, key badges, D-day and buttons. */
+  .opportunity.view-list:not(.is-expanded) .date-cell span, .opportunity.view-list:not(.is-expanded) .status, .opportunity.view-list:not(.is-expanded) .trust { display: none; }
+  .opportunity.view-list .opportunity-foot { flex: 1 1 100%; flex-wrap: nowrap; }
   .container, .header-inner { width: min(100% - 28px, 1480px); }
   .brand small { display: none; }
   .site-header nav a { white-space: nowrap; }

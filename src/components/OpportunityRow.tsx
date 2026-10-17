@@ -7,12 +7,16 @@ import { kindOf, SOURCE_KINDS, sourceTrust } from '../sourceTrust'
 import { dDayLabel, formatDate, isNew, isUpdated } from '../utils'
 import { DomainIcon } from './DomainIcon'
 
+/** card: the full card. list: one slim line with badges. compact: small cards with only the title. */
+export type ListView = 'card' | 'list' | 'compact'
+
 interface Props {
   item: Opportunity
   personal: PersonalState
   onToggle: (bucket: 'favorites' | 'read' | 'hidden', id: string, item?: Opportunity) => void
   defaultExpanded?: boolean
   judgement?: { verdict: Verdict; reasons: Reason[] }
+  view?: ListView
 }
 
 const VERDICT_LABELS: Record<Verdict, string> = { eligible: '가능성 높음', check: '확인 필요', ineligible: '해당 없음' }
@@ -28,33 +32,38 @@ const REASON_BOXES: [Reason['ok'], string, string][] = [
   [false, 'fail', '이 조건이 맞지 않아요'],
 ]
 
-export function OpportunityRow({ item, personal, onToggle, defaultExpanded = false, judgement }: Props) {
+export function OpportunityRow({ item, personal, onToggle, defaultExpanded = false, judgement, view = 'card' }: Props) {
   const [expanded, setExpanded] = useState(defaultExpanded)
+  // The slim views leave out what the card shows; opening a row brings it all back.
+  const full = view === 'card' || expanded
+  const badges = view !== 'compact' || expanded
   const favorite = personal.favorites.includes(item.id)
   const read = personal.read.includes(item.id)
   const trust = sourceTrust(item)
   return (
-    <article className={`opportunity ${read ? 'is-read' : ''} ${expanded ? 'is-expanded' : ''}`}>
+    <article className={`opportunity view-${view} ${read ? 'is-read' : ''} ${expanded ? 'is-expanded' : ''}`}>
       <div className="opportunity-head">
         <span className="domain-icon"><DomainIcon domain={domainOf(item)} size={20} /></span>
         <div className="opportunity-main">
           <div className="title-line">
             <a href={item.source_url} target="_blank" rel="noopener noreferrer" onClick={() => onToggle('read', item.id)}>{item.title}</a>
           </div>
-          <div className="badge-line">
+          {badges && <div className="badge-line">
             {judgement && <span className={`badge verdict verdict-${judgement.verdict}`}>{VERDICT_LABELS[judgement.verdict]}</span>}
             {item.jurisdiction && <span className={`badge jurisdiction jurisdiction-${item.jurisdiction}`}>{JURISDICTION_LABELS[item.jurisdiction]}</span>}
             {isNew(item) && <span className="badge badge-new">NEW</span>}
             {isUpdated(item) && <span className="badge badge-updated">UPDATED</span>}
             <span className={`badge trust trust-${trust.kind}`} title={trust.description}>{trust.label}{trust.sourceCount > 1 && ` · 출처 ${trust.sourceCount}곳`}</span>
-          </div>
+          </div>}
         </div>
       </div>
-      <p className="opportunity-summary">{item.summary}</p>
-      <p className="opportunity-meta">{item.organizer} · <span className={`type-${item.primary_type}`}>{TYPE_LABELS[item.primary_type]}</span></p>
-      <div className="tags" aria-label="혜택 분류">
-        {[...item.field_tags, ...item.audience_tags].slice(0, 5).map(tag => <span className="badge tag" key={tag}>{tag}</span>)}
-      </div>
+      {full && <>
+        <p className="opportunity-summary">{item.summary}</p>
+        <p className="opportunity-meta">{item.organizer} · <span className={`type-${item.primary_type}`}>{TYPE_LABELS[item.primary_type]}</span></p>
+        <div className="tags" aria-label="혜택 분류">
+          {[...item.field_tags, ...item.audience_tags].slice(0, 5).map(tag => <span className="badge tag" key={tag}>{tag}</span>)}
+        </div>
+      </>}
       {expanded && (
         <div className="details">
           {judgement && (
