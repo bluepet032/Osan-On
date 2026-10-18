@@ -14,7 +14,11 @@ interface Props extends AssistantContext {
   onShowAll: (query: string) => void
   /** Pause before an answer, so it reads as a reply rather than an instant lookup. */
   thinkingMs?: number
+  /** False while the benefits are still loading; a question then waits for them. */
+  ready?: boolean
 }
+
+const WAIT_FOR_DATA_MS = 15000
 
 export interface AssistantHandle { open: () => void; close: () => void }
 
@@ -28,7 +32,7 @@ export function AssistantHost({ ref, ...props }: Omit<Props, 'open' | 'onClose'>
   return <AssistantChat {...props} open={open} onClose={() => setOpen(false)} />
 }
 
-export function AssistantChat({ open, onClose, items, profile, verdictOf, onShowAll, thinkingMs = 700 }: Props) {
+export function AssistantChat({ open, onClose, items, profile, verdictOf, onShowAll, thinkingMs = 700, ready = true }: Props) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [thinking, setThinking] = useState(false)
@@ -39,6 +43,9 @@ export function AssistantChat({ open, onClose, items, profile, verdictOf, onShow
   // Bumped by 새 대화, so an answer still being prepared for the old conversation is dropped.
   const round = useRef(0)
   const nextId = useRef(0)
+  // An answer is worked out after the pause, from the benefits as they are then, not as they were when asked.
+  const latest = useRef({ items, profile, verdictOf, ready })
+  useEffect(() => { latest.current = { items, profile, verdictOf, ready } })
 
   useEffect(() => {
     if (!open) return
@@ -63,8 +70,13 @@ export function AssistantChat({ open, onClose, items, profile, verdictOf, onShow
     setMenuOpen(false)
     setThinking(true)
     await new Promise(resolve => setTimeout(resolve, thinkingMs))
-    const reply = await askAssistant(text, { items, profile, verdictOf })
+    for (let waited = 0; !latest.current.ready && waited < WAIT_FOR_DATA_MS && round.current === current; waited += 100) {
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
     if (round.current !== current) return
+    const reply = latest.current.ready
+      ? await askAssistant(text, latest.current)
+      : { text: '혜택 정보를 아직 불러오지 못했어요. 잠시 후 다시 물어봐 주세요.', items: [], total: 0 }
     setMessages(list => [...list, { id: nextId.current++, role: 'bot', text: reply.text, reply }])
     setThinking(false)
   }

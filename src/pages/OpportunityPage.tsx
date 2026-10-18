@@ -116,8 +116,8 @@ export function OpportunityPage({ dataset, title, description }: Props) {
       </div>
       {/* Remounts when the account copy arrives, so the card shows what was saved there. */}
       {dataset === 'benefits' && <ProfileCard key={JSON.stringify(profile)} profile={profile} onChange={changeProfile} saveState={saveState} onRetry={retry} error={profileError}
-        matchCount={loading ? undefined : payload.items.filter(item => !hidden.has(item.id) && judgements.get(item.id)?.verdict === 'eligible').length} onAsk={() => chat.current?.open()} />}
-      <AssistantHost ref={chat} items={payload.items.filter(item => !hidden.has(item.id))} profile={profile}
+        matchCount={loading ? undefined : payload.items.filter(item => !hidden.has(item.id) && judgements.get(item.id)?.verdict === 'eligible').length} onAsk={loading ? undefined : () => chat.current?.open()} />}
+      <AssistantHost ref={chat} ready={!loading && !error} items={payload.items.filter(item => !hidden.has(item.id))} profile={profile}
         verdictOf={item => judgements.get(item.id)?.verdict} onShowAll={showAll} />
       <div className="match-tabs" role="group" aria-label="맞춤 판정">
         {MATCH_TABS.map(([match, label]) => <button key={match} className={`match-${match} ${filters.match === match ? 'active' : ''}`} aria-pressed={filters.match === match} onClick={() => update('match', match)}>{label} <span>{verdictCount(match)}</span></button>)}

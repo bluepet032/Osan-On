@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { askAssistant, questionTerms, type AssistantContext } from './assistant'
+import { matchesOpportunity } from './filtering'
 import type { Opportunity } from './types'
 
 const benefit = (id: string, title: string, jurisdiction: 'osan' | 'gyeonggi' | 'national', extra: Partial<Opportunity> = {}) => ({
@@ -35,6 +36,13 @@ describe('askAssistant', () => {
     const withMention = [...items, benefit('savings', '경기도 청년 노동자 통장', 'gyeonggi', { summary: '청년의 주거 안정과 자산 형성' })]
     const reply = await askAssistant('청년 월세', { ...context(), items: withMention })
     expect(reply.items.map(item => item.id)).toEqual(['osan-rent', 'national-rent'])
+  })
+
+  it('hands the list a search it understands, so "더 찾아보기" is never empty', async () => {
+    const reply = await askAssistant('아기 낳으면 받는 돈', context())
+    expect(reply.query).toBe('출산')
+    expect(items.filter(item => matchesOpportunity(item, { domain: 'all', type: 'all', quick: '', status: '', search: reply.query! })).map(item => item.id)).toEqual(['osan-birth'])
+    expect((await askAssistant('어르신 혜택', context())).query).toBe('노인')
   })
 
   it('understands everyday words for the same thing', async () => {

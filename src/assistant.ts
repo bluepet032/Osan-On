@@ -77,7 +77,10 @@ export function questionTerms(question: string): string[] {
     .filter(Boolean)
 }
 
-const alternativesOf = (term: string) => TOPICS.find(topic => topic.triggers.some(trigger => term.startsWith(trigger)))?.words ?? [term]
+const topicOf = (term: string) => TOPICS.find(topic => topic.triggers.some(trigger => term.startsWith(trigger)))
+const alternativesOf = (term: string) => topicOf(term)?.words ?? [term]
+// The list search knows no topics, so "목록에서 더 찾아보기" gets each topic's main word ("아기 낳으" → "출산").
+const listQuery = (terms: string[]) => [...new Set(terms.map(term => topicOf(term)?.words[0] ?? term))].join(' ')
 // The summary and tags, but not the department: "노인장애인과" says nothing about who a benefit is for.
 const bodies = new WeakMap<Opportunity, SearchIndex>()
 function bodyOf(item: Opportunity) {
@@ -131,5 +134,5 @@ export async function askAssistant(question: string, { items, profile, verdictOf
   if (!best) return reply(`‘${query}’ 관련 혜택을 찾지 못했어요. "월세", "출산", "장학금", "어르신"처럼 짧은 단어로 물어보시면 더 잘 찾아요.`)
   const total = (item: Opportunity) => scores.get(item)!.reduce((sum, score) => sum + score, 0)
   const found = ranked([...scores.keys()].filter(item => coverage(item) === best), verdictOf, total)
-  return reply(`‘${query}’ 관련 혜택을 ${found.length}개 찾았어요. 오산시 혜택과 내 조건에 맞을 가능성이 높은 것부터 보여 드릴게요.`, found, query)
+  return reply(`‘${query}’ 관련 혜택을 ${found.length}개 찾았어요. 오산시 혜택과 내 조건에 맞을 가능성이 높은 것부터 보여 드릴게요.`, found, listQuery(terms))
 }

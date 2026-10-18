@@ -65,6 +65,16 @@ describe('AssistantChat', () => {
     expect(screen.queryByRole('dialog')).toBeNull()
   })
 
+  it('waits for the benefits to load and answers from the latest ones', async () => {
+    const { rerender } = chat({ items: [], ready: false })
+    fireEvent.change(screen.getByLabelText('질문 입력'), { target: { value: '청년 월세' } })
+    fireEvent.click(screen.getByRole('button', { name: '보내기' }))
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 50)) })
+    expect(screen.queryByText(/찾지 못했어요/)).toBeNull()
+    rerender(<AssistantChat open onClose={() => {}} items={[item]} profile={{}} verdictOf={() => 'check'} onShowAll={() => {}} thinkingMs={0} ready />)
+    expect(await screen.findByRole('link', { name: /오산시 청년 월세 지원/ })).toBeInTheDocument()
+  })
+
   it('renders nothing while closed', () => {
     chat({ open: false })
     expect(screen.queryByRole('dialog')).toBeNull()
