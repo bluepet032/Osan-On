@@ -1,9 +1,9 @@
 import { useState, type FormEvent } from 'react'
-import { IconGenderFemale, IconGenderMale } from '@tabler/icons-react'
+import { IconGenderFemale, IconGenderMale, IconSparkles } from '@tabler/icons-react'
 import { hasBasics, HOUSEHOLD_OPTIONS, INCOME_OPTIONS, TRAIT_OPTIONS, type IncomeCode, type Profile } from '../eligibility'
 import type { SaveState } from '../profileContext'
 
-interface Props { profile: Profile; onChange: (profile: Profile) => void; saveState?: SaveState; onRetry?: () => void; error?: string; matchCount?: number }
+interface Props { profile: Profile; onChange: (profile: Profile) => void; saveState?: SaveState; onRetry?: () => void; error?: string; matchCount?: number; onAsk?: () => void }
 
 // The note follows what actually happened to the account copy, so a failed save never reads as saved.
 const STORAGE_NOTES: Record<SaveState, string> = {
@@ -21,7 +21,7 @@ const TRAIT_GROUPS: [string, string[]][] = [
 
 const toggle = (list: string[], code: string) => list.includes(code) ? list.filter(value => value !== code) : [...list, code]
 
-export function ProfileCard({ profile, onChange, saveState = 'local', onRetry, error = '', matchCount }: Props) {
+export function ProfileCard({ profile, onChange, saveState = 'local', onRetry, error = '', matchCount, onAsk }: Props) {
   const [editing, setEditing] = useState(!hasBasics(profile))
   const [details, setDetails] = useState(false)
   const [gender, setGender] = useState(profile.gender)
@@ -75,7 +75,10 @@ export function ProfileCard({ profile, onChange, saveState = 'local', onRetry, e
       <div className="profile-summary">
         <div className="profile-headline">
           <strong>{profile.gender === 'male' ? '남성' : '여성'} · 만 {profile.age}세</strong>
-          {matchCount !== undefined && <p>받을 가능성이 높은 혜택이 <em>{matchCount}개</em> 있어요</p>}
+          <div className="profile-count">
+            {matchCount !== undefined && <p>받을 가능성이 높은 혜택이 <em>{matchCount}개</em> 있어요</p>}
+            {onAsk && <button type="button" className="ask-ai-button" onClick={onAsk}><IconSparkles size={18} aria-hidden="true" />AI에게 질문하기</button>}
+          </div>
         </div>
         <button type="button" className="text-button" onClick={() => setEditing(true)}>수정</button>
         <button type="button" className="account-button" onClick={() => setDetails(value => !value)} aria-expanded={details}>더 정확하게</button>

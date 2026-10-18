@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { AssistantHost, type AssistantHandle } from '../components/AssistantChat'
 import { Filters } from '../components/Filters'
 import { OpportunityRow, type ListView } from '../components/OpportunityRow'
 import { ProfileCard } from '../components/ProfileCard'
@@ -32,6 +33,7 @@ export function OpportunityPage({ dataset, title, description }: Props) {
   const [loading, setLoading] = useState(true)
   const [reloadKey, setReloadKey] = useState(0)
   const [view, setView] = useState<ListView>(loadView)
+  const chat = useRef<AssistantHandle>(null)
   const changeView = (next: ListView) => { setView(next); writeStorage(VIEW_KEY, next) }
   const { profile, setProfile, saveState, retry, error: profileError } = useProfile()
   const [params, setParams] = useSearchParams()
@@ -64,6 +66,12 @@ export function OpportunityPage({ dataset, title, description }: Props) {
     setParams(copy, { replace: true })
   }
   const update = (key: string, next: string) => updateMany({ [key]: next })
+  // A chat answer's "목록에서 모두 보기": search for it across every verdict, then show the list.
+  const showAll = (query: string) => {
+    setParams({ q: query, match: 'all' }, { replace: true })
+    chat.current?.close()
+    requestAnimationFrame(() => document.querySelector('.result-toolbar')?.scrollIntoView({ behavior: 'smooth' }))
+  }
   // Clears search, tabs and detail filters but keeps the chosen 맞춤 판정 tab.
   const resetFilters = () => setParams(value('match') ? { match: value('match') } : {}, { replace: true })
   const filters = {
@@ -108,7 +116,9 @@ export function OpportunityPage({ dataset, title, description }: Props) {
       </div>
       {/* Remounts when the account copy arrives, so the card shows what was saved there. */}
       {dataset === 'benefits' && <ProfileCard key={JSON.stringify(profile)} profile={profile} onChange={changeProfile} saveState={saveState} onRetry={retry} error={profileError}
-        matchCount={loading ? undefined : payload.items.filter(item => !hidden.has(item.id) && judgements.get(item.id)?.verdict === 'eligible').length} />}
+        matchCount={loading ? undefined : payload.items.filter(item => !hidden.has(item.id) && judgements.get(item.id)?.verdict === 'eligible').length} onAsk={loading ? undefined : () => chat.current?.open()} />}
+      <AssistantHost ref={chat} ready={!loading && !error} items={payload.items.filter(item => !hidden.has(item.id))} profile={profile}
+        verdictOf={item => judgements.get(item.id)?.verdict} onShowAll={showAll} />
       <div className="match-tabs" role="group" aria-label="맞춤 판정">
         {MATCH_TABS.map(([match, label]) => <button key={match} className={`match-${match} ${filters.match === match ? 'active' : ''}`} aria-pressed={filters.match === match} onClick={() => update('match', match)}>{label} <span>{verdictCount(match)}</span></button>)}
       </div>
