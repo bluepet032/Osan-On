@@ -28,6 +28,13 @@ describe('ProfileCard', () => {
     expect(onRetry).toHaveBeenCalled()
   })
 
+  it('offers the AI assistant beside the likely-benefit count', () => {
+    const onAsk = vi.fn()
+    render(<ProfileCard profile={{ gender: 'male', age: 32 }} onChange={vi.fn()} matchCount={30} onAsk={onAsk} />)
+    fireEvent.click(screen.getByRole('button', { name: 'AI에게 질문하기' }))
+    expect(onAsk).toHaveBeenCalled()
+  })
+
   it('does not submit without both answers', () => {
     const onChange = vi.fn()
     render(<ProfileCard profile={{}} onChange={onChange} />)
