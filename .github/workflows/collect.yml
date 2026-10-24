@@ -2,8 +2,8 @@ name: Collect data and deploy
 
 on:
   schedule:
-    # Once a day at 03:11 KST (18:11 UTC). Use "Run workflow" for a manual refresh.
-    - cron: '11 18 * * *'
+    # Once a month: the 1st at 18:11 UTC (the 2nd at 03:11 KST). Use "Run workflow" for a manual refresh.
+    - cron: '11 18 1 * *'
   workflow_dispatch:
     inputs:
       schedule:
